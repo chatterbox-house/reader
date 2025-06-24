@@ -324,7 +324,23 @@
     flex-direction: column;
     gap: 0.5rem;
 }
+.japanese-words::before {
+    content: "Japanese";
+    display: block;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
 
+.english-words::before {
+    content: "English";
+    display: block;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
 .word-card {
     background-color: var(--accent);
     padding: 1rem;
@@ -466,6 +482,7 @@
             .bucket-container {
                 grid-template-columns: 1fr 1fr;
             }
+}
 .progress-container {
     margin: 1rem 0;
     text-align: center;
@@ -594,7 +611,17 @@
             },
             theme: localStorage.getItem('theme') || 'dark'
         };
-        
+        // Toast notification
+function showToast(message, type = '') {
+    elements.toast.textContent = message;
+    elements.toast.className = 'toast';
+    elements.toast.classList.add(type);
+    elements.toast.classList.add('show');
+    
+    setTimeout(() => {
+        elements.toast.classList.remove('show');
+    }, 3000);
+}
         // DOM Elements
         const elements = {
             views: {
@@ -625,8 +652,7 @@ addToVocabBtn: document.getElementById('add-to-vocab'),
             reviewQuestion: document.getElementById('review-question'),
             reviewOptions: document.getElementById('review-options'),
             reviewTyping: document.getElementById('review-typing'),
-            typingInput: document.getElementById('typing-input'),
-            submitAnswerBtn: document.getElementById('submit-answer'),
+
             exitReviewBtn: document.getElementById('exit-review'),
             progressFill: document.getElementById('progress-fill'),
             progressText: document.getElementById('progress-text'),
@@ -657,6 +683,7 @@ addToVocabBtn: document.getElementById('add-to-vocab'),
                     if (!db.objectStoreNames.contains(STORE_VOCAB)) {
                         const vocabStore = db.createObjectStore(STORE_VOCAB, { keyPath: 'id' });
                         vocabStore.createIndex('bucket', 'bucket', { unique: false });
+        vocabStore.createIndex('word', 'word', { unique: true }); // Add this line
                     }
                 };
                 
@@ -715,16 +742,30 @@ function addSentences(sentences) {
             });
         }
         
-        function addVocabWord(word) {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_VOCAB], 'readwrite');
-                const store = transaction.objectStore(STORE_VOCAB);
-                const request = store.add(word);
-                
-                request.onsuccess = () => resolve();
-                request.onerror = (event) => reject(event.target.error);
-            });
-        }
+function addVocabWord(word) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_VOCAB], 'readwrite');
+        const store = transaction.objectStore(STORE_VOCAB);
+        
+        // First check if word exists using the word index
+        const wordIndex = store.index('word');
+        const request = wordIndex.get(word.word);
+        
+        request.onsuccess = () => {
+            if (request.result) {
+                // Word already exists
+                reject(new Error('Word already exists in vocabulary'));
+            } else {
+                // Word doesn't exist, add it
+                const addRequest = store.add(word);
+                addRequest.onsuccess = () => resolve();
+                addRequest.onerror = (event) => reject(event.target.error);
+            }
+        };
+        
+        request.onerror = (event) => reject(event.target.error);
+    });
+}
         
         function getVocabByBucket(bucket) {
             return new Promise((resolve, reject) => {
@@ -738,16 +779,16 @@ function addSentences(sentences) {
             });
         }
         
-        function updateVocabWord(word) {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_VOCAB], 'readwrite');
-                const store = transaction.objectStore(STORE_VOCAB);
-                const request = store.put(word);
-                
-                request.onsuccess = () => resolve();
-                request.onerror = (event) => reject(event.target.error);
-            });
-        }
+function updateVocabWord(word) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_VOCAB], 'readwrite');
+        const store = transaction.objectStore(STORE_VOCAB);
+        const request = store.put(word);
+        
+        request.onsuccess = () => resolve();
+        request.onerror = (event) => reject(event.target.error);
+    });
+}
         
         function countVocabByBucket() {
             return new Promise((resolve, reject) => {
@@ -891,24 +932,25 @@ async function startReview(bucket) {
 
 function setupMatchingGame() {
     if (state.currentReviewIndex >= state.reviewWords.length) {
-        // Review completed
         showToast(`Review complete! ${state.reviewStats.correct} correct, ${state.reviewStats.incorrect} incorrect`, 'success');
         updateBucketCounts();
         showView('vocab-review-view');
         return;
     }
-    
+
     // Clear previous game
     document.getElementById('japanese-words').innerHTML = '';
     document.getElementById('english-words').innerHTML = '';
-    
-    // Get current word and some random ones
+
+    // Get current word
     const currentWord = state.reviewWords[state.currentReviewIndex];
-    const allWords = [...state.reviewWords];
+    
+    // Get all unique words (just in case)
+    const uniqueWords = [...new Map(state.reviewWords.map(item => [item.word, item])).values()];
     
     // Remove current word from the options
-    const otherWords = allWords.filter(w => w.id !== currentWord.id);
-    
+    const otherWords = uniqueWords.filter(w => w.id !== currentWord.id);
+
     // Select 3 random other words
     const randomWords = [];
     while (randomWords.length < 3 && otherWords.length > 0) {
@@ -916,56 +958,107 @@ function setupMatchingGame() {
         randomWords.push(otherWords[randomIndex]);
         otherWords.splice(randomIndex, 1);
     }
-    
+
     // Combine current word with random words
     const japaneseWords = [currentWord, ...randomWords];
     const englishWords = [currentWord, ...randomWords];
-    
+
     // Shuffle them
     shuffleArray(japaneseWords);
     shuffleArray(englishWords);
-    
-    // Display Japanese words on left
-    japaneseWords.forEach(word => {
-        const card = document.createElement('div');
-        card.className = 'word-card';
-        card.textContent = word.word;
-        card.dataset.id = word.id;
-        
-        card.addEventListener('click', function() {
-            selectCard(this, 'japanese');
+
+    // Display words based on difficulty level
+    if (state.reviewMode === 'medium') {
+        // MEDIUM: Japanese on LEFT, English on RIGHT, TTS only on Japanese
+        englishWords.forEach(word => {
+            const card = document.createElement('div');
+            card.className = 'word-card';
+            card.textContent = word.translation;
+            card.dataset.id = word.id;
+            
+            // No TTS for English cards in medium mode
+            card.addEventListener('click', function() {
+                selectCard(this, 'english');
+            });
+
+            document.getElementById('japanese-words').appendChild(card);
         });
-        
-        // Add TTS button
-        const ttsBtn = document.createElement('button');
-        ttsBtn.textContent = '🔊';
-        ttsBtn.style.marginLeft = '0.5rem';
-        ttsBtn.style.background = 'none';
-        ttsBtn.style.border = 'none';
-        ttsBtn.style.color = 'inherit';
-        ttsBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent card selection when clicking TTS
-            speakText(word.word);
+
+        japaneseWords.forEach(word => {
+            const card = document.createElement('div');
+            card.className = 'word-card';
+            card.textContent = word.word;
+            card.dataset.id = word.id;
+            
+            // TTS only on Japanese cards in medium mode
+            card.addEventListener('click', function() {
+                speakText(word.word);
+                selectCard(this, 'japanese');
+            });
+
+            document.getElementById('english-words').appendChild(card);
         });
-        
-        card.appendChild(ttsBtn);
-        document.getElementById('japanese-words').appendChild(card);
-    });
-    
-    // Display English words on right
-    englishWords.forEach(word => {
-        const card = document.createElement('div');
-        card.className = 'word-card';
-        card.textContent = word.translation;
-        card.dataset.id = word.id;
-        
-        card.addEventListener('click', function() {
-            selectCard(this, 'english');
+    } 
+    else if (state.reviewMode === 'hard') {
+        // HARD: Japanese on LEFT, English on RIGHT, NO TTS
+        englishWords.forEach(word => {
+            const card = document.createElement('div');
+            card.className = 'word-card';
+            card.textContent = word.translation;
+            card.dataset.id = word.id;
+            
+            card.addEventListener('click', function() {
+                selectCard(this, 'english');
+            });
+
+            document.getElementById('japanese-words').appendChild(card);
         });
-        
-        document.getElementById('english-words').appendChild(card);
-    });
-    
+
+        japaneseWords.forEach(word => {
+            const card = document.createElement('div');
+            card.className = 'word-card';
+            card.textContent = word.word;
+            card.dataset.id = word.id;
+            
+            // No TTS in hard mode
+            card.addEventListener('click', function() {
+                selectCard(this, 'japanese');
+            });
+
+            document.getElementById('english-words').appendChild(card);
+        });
+    } 
+    else {
+        // NEW/EASY: English on LEFT, Japanese on RIGHT, TTS on English
+        englishWords.forEach(word => {
+            const card = document.createElement('div');
+            card.className = 'word-card';
+            card.textContent = word.translation;
+            card.dataset.id = word.id;
+            
+            // TTS plays Japanese when clicking English in new/easy mode
+            card.addEventListener('click', function() {
+                speakText(word.word);
+                selectCard(this, 'english');
+            });
+
+            document.getElementById('japanese-words').appendChild(card);
+        });
+
+        japaneseWords.forEach(word => {
+            const card = document.createElement('div');
+            card.className = 'word-card';
+            card.textContent = word.word;
+            card.dataset.id = word.id;
+            
+            card.addEventListener('click', function() {
+                selectCard(this, 'japanese');
+            });
+
+            document.getElementById('english-words').appendChild(card);
+        });
+    }
+
     // Update progress
     const progressPercent = (state.currentReviewIndex / state.reviewWords.length) * 100;
     elements.progressFill.style.width = `${progressPercent}%`;
@@ -975,7 +1068,48 @@ function setupMatchingGame() {
     state.selectedJapaneseCard = null;
     state.selectedEnglishCard = null;
 }
+async function removeDuplicateWords() {
+    try {
+        const transaction = db.transaction([STORE_VOCAB], 'readwrite');
+        const store = transaction.objectStore(STORE_VOCAB);
+        const allWords = await new Promise((resolve, reject) => {
+            const request = store.getAll();
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = (event) => reject(event.target.error);
+        });
 
+        const uniqueWords = new Map();
+        const duplicates = [];
+
+        // Find duplicates
+        allWords.forEach(word => {
+            if (uniqueWords.has(word.word)) {
+                duplicates.push(word.id);
+            } else {
+                uniqueWords.set(word.word, word);
+            }
+        });
+
+        // Remove duplicates
+        if (duplicates.length > 0) {
+            await Promise.all(duplicates.map(id => {
+                return new Promise((resolve, reject) => {
+                    const deleteRequest = store.delete(id);
+                    deleteRequest.onsuccess = () => resolve();
+                    deleteRequest.onerror = (event) => reject(event.target.error);
+                });
+            }));
+            console.log(`Removed ${duplicates.length} duplicate words`);
+            showToast(`Removed ${duplicates.length} duplicate words`, 'success');
+        } else {
+            console.log('No duplicates found');
+            showToast('No duplicate words found', 'success');
+        }
+    } catch (error) {
+        console.error('Error removing duplicates:', error);
+        showToast('Error removing duplicates', 'error');
+    }
+}
 function selectCard(card, type) {
     // If card is already matched, ignore click
     if (card.classList.contains('correct') || card.classList.contains('incorrect')) {
@@ -1019,11 +1153,51 @@ function checkMatch() {
         state.reviewStats.correct++;
         showToast('Correct!', 'success');
         
-        // Move to next word after delay
-        setTimeout(() => {
-            state.currentReviewIndex++;
-            setupMatchingGame();
-        }, 1000);
+        // Find the word in our review words
+        const matchedWord = state.reviewWords.find(w => w.id === japaneseId);
+        
+        if (matchedWord) {
+            // Update word streak
+            matchedWord.streak = (matchedWord.streak || 0) + 1;
+            
+            // If streak reaches 3
+            if (matchedWord.streak >= 3) {
+                if (matchedWord.bucket === 'new') {
+                    matchedWord.bucket = 'easy';
+                    matchedWord.streak = 0;
+                } 
+                else if (matchedWord.bucket === 'easy') {
+                    matchedWord.bucket = 'medium';
+                    matchedWord.streak = 0;
+                }
+                else if (matchedWord.bucket === 'medium') {
+                    matchedWord.bucket = 'hard';
+                    matchedWord.streak = 0;
+                }
+                else if (matchedWord.bucket === 'hard') {
+                    // Remove from database instead of moving to another bucket
+                    const transaction = db.transaction([STORE_VOCAB], 'readwrite');
+                    const store = transaction.objectStore(STORE_VOCAB);
+                    store.delete(matchedWord.id);
+                    
+                    // Move to next word immediately
+                    setTimeout(() => {
+                        state.currentReviewIndex++;
+                        setupMatchingGame();
+                    }, 1000);
+                    return; // Exit early since we deleted the word
+                }
+            
+                // Update in database
+                updateVocabWord(matchedWord).then(() => {
+                    // Move to next word after delay
+                    setTimeout(() => {
+                        state.currentReviewIndex++;
+                        setupMatchingGame();
+                    }, 1000);
+                });
+            }
+        }
     } else {
         // Incorrect match
         state.selectedJapaneseCard.classList.remove('selected');
@@ -1036,74 +1210,54 @@ function checkMatch() {
         
         // Reset selections after delay
         setTimeout(() => {
-            state.selectedJapaneseCard.classList.remove('incorrect');
-            state.selectedEnglishCard.classList.remove('incorrect');
+            if (state.selectedJapaneseCard) state.selectedJapaneseCard.classList.remove('incorrect');
+            if (state.selectedEnglishCard) state.selectedEnglishCard.classList.remove('incorrect');
             state.selectedJapaneseCard = null;
             state.selectedEnglishCard = null;
         }, 1000);
     }
-}     
-        function checkAnswer(isCorrect, word) {
-            if (isCorrect) {
-                showToast('Correct!', 'success');
-                state.reviewStats.correct++;
-                
-                // Update word streak and bucket
-                word.streak++;
-                
-                // Progress to next bucket if streak is sufficient
-                if (word.streak >= 3) {
-                    if (word.bucket === 'new') word.bucket = 'easy';
-                    else if (word.bucket === 'easy') word.bucket = 'medium';
-                    else if (word.bucket === 'medium') word.bucket = 'hard';
-                    else if (word.bucket === 'hard') {
-                        word.bucket = 'retired';
-                        word.retiredDate = new Date().toISOString();
-                    }
-                    word.streak = 0; // Reset streak after moving
-                }
-            } else {
-                showToast('Incorrect. Try again!', 'error');
-                state.reviewStats.incorrect++;
-                
-                // Reset streak and potentially demote
-                word.streak = 0;
-                word.consecutiveMisses = (word.consecutiveMisses || 0) + 1;
-                
-                // Demote after 2 consecutive misses
-                if (word.consecutiveMisses >= 2) {
-                    if (word.bucket === 'easy') word.bucket = 'new';
-                    else if (word.bucket === 'medium') word.bucket = 'easy';
-                    else if (word.bucket === 'hard') word.bucket = 'medium';
-                    word.consecutiveMisses = 0;
-                }
-            }
-            
-            // Update word in database
-            updateVocabWord(word).then(() => {
-                state.currentReviewIndex++;
-                setTimeout(showNextReviewItem, 1000);
-            });
-        }
+}  // <-- THIS CLOSING BRACE WAS MISSING     
+function checkAnswer(isCorrect, word) {
+    if (isCorrect) {
+        showToast('Correct!', 'success');
+        state.reviewStats.correct++;
         
-        function handleTypingSubmit() {
-            const input = elements.typingInput.value.trim();
-            const word = state.reviewWords[state.currentReviewIndex];
-            const isCorrect = input === word.word;
-            
-            checkAnswer(isCorrect, word);
-        }
+        // Update word streak and bucket
+        word.streak++;
+        word.consecutiveMisses = 0; // Reset misses on correct answer
         
-        // Utility functions
-        function showToast(message, type = 'info') {
-            elements.toast.textContent = message;
-            elements.toast.className = 'toast ' + type;
-            elements.toast.classList.add('show');
-            
-            setTimeout(() => {
-                elements.toast.classList.remove('show');
-            }, 3000);
+        // Progress to next bucket if streak is sufficient
+        if (word.streak >= 3) {
+            if (word.bucket === 'new') word.bucket = 'easy';
+            else if (word.bucket === 'easy') word.bucket = 'medium';
+            else if (word.bucket === 'medium') word.bucket = 'hard';
+            word.streak = 0; // Reset streak after moving
         }
+    } else {
+        showToast('Incorrect. Try again!', 'error');
+        state.reviewStats.incorrect++;
+        
+        // Reset streak and potentially demote
+        word.streak = 0;
+        word.consecutiveMisses = (word.consecutiveMisses || 0) + 1;
+        
+        // Demote after 2 consecutive misses
+        if (word.consecutiveMisses >= 2) {
+            if (word.bucket === 'hard') word.bucket = 'medium';
+            else if (word.bucket === 'medium') word.bucket = 'easy';
+            else if (word.bucket === 'easy') word.bucket = 'new';
+            word.consecutiveMisses = 0;
+        }
+    }
+    
+    // Update word in database
+    updateVocabWord(word).then(() => {
+        state.currentReviewIndex++;
+        setTimeout(setupMatchingGame, 1000);
+    });
+}
+        
+
         
         function shuffleArray(array) {
             const newArray = [...array];
@@ -1247,7 +1401,8 @@ elements.addToVocabBtn.addEventListener('click', async () => {
         translation: translation,
         sentence_id: state.sentences[state.currentSentenceIndex].id,
         bucket: 'new',
-        streak: 0
+        streak: 0,
+        consecutiveMisses: 0
     };
     
     try {
@@ -1256,8 +1411,12 @@ elements.addToVocabBtn.addEventListener('click', async () => {
         elements.wordSelectionBox.style.display = 'none';
         updateBucketCounts();
     } catch (error) {
-        showToast('Error adding word', 'error');
-        console.error(error);
+        if (error.message === 'Word already exists in vocabulary') {
+            showToast(`"${word}" is already in your vocabulary!`, 'error');
+        } else {
+            showToast('Error adding word', 'error');
+            console.error(error);
+        }
     }
 });
             
@@ -1285,10 +1444,7 @@ elements.addToVocabBtn.addEventListener('click', async () => {
             });
             
             // Review mode
-            elements.submitAnswerBtn.addEventListener('click', handleTypingSubmit);
-            elements.typingInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') handleTypingSubmit();
-            });
+
             
             elements.exitReviewBtn.addEventListener('click', () => {
                 showView('vocab-review-view');
@@ -1302,6 +1458,7 @@ elements.addToVocabBtn.addEventListener('click', async () => {
         async function initApp() {
             try {
                 await openDatabase();
+await removeDuplicateWords();
                 state.sentences = await getAllSentences();
                 
                 if (state.sentences.length > 0) {
