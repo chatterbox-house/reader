@@ -450,7 +450,24 @@
             outline: none;
             border-color: var(--highlight);
         }
+.confirmation-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
 
+.confirmation-dialog.show {
+    opacity: 1;
+}
         .toast {
             position: fixed;
             bottom: 1rem;
@@ -603,6 +620,9 @@
                 </div>
                 
                 <button class="btn" id="start-review" disabled>Select a difficulty to start</button>
+<button class="btn" id="wipe-data-btn" style="background-color: var(--danger); margin-top: 1rem;">
+    Wipe All Data
+</button>
             </section>
             
 <section id="review-mode-view" class="view">
@@ -625,7 +645,16 @@
     <button class="btn" id="exit-review">Exit Review</button>
 </section>
         </main>
-        
+               <div class="confirmation-dialog" id="wipe-confirmation" style="display: none;">
+            <div class="dialog-content" style="background-color: var(--card-bg); padding: 1.5rem; border-radius: 12px; max-width: 400px; margin: 0 auto; text-align: center; box-shadow: var(--shadow);">
+                <h3 style="margin-bottom: 1rem; color: var(--danger);">Warning!</h3>
+                <p style="margin-bottom: 1.5rem;">This will delete ALL your saved sentences and vocabulary. This cannot be undone!</p>
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <button class="btn" id="confirm-wipe" style="background-color: var(--danger);">Yes, Delete Everything</button>
+                    <button class="btn" id="cancel-wipe" style="background-color: var(--accent);">Cancel</button>
+                </div>
+            </div>
+        </div> 
         <div class="toast" id="toast"></div>
     </div>
 
@@ -708,26 +737,26 @@ function openDatabase() {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open(DB_NAME, DB_VERSION);
         
-        request.onupgradeneeded = (event) => {
-            db = event.target.result;
-            
-            if (!db.objectStoreNames.contains(STORE_SENTENCES)) {
-                const sentencesStore = db.createObjectStore(STORE_SENTENCES, { keyPath: 'id' });
-                sentencesStore.createIndex('position', 'position', { unique: true });
-            }
-            
-            if (!db.objectStoreNames.contains(STORE_VOCAB)) {
-                const vocabStore = db.createObjectStore(STORE_VOCAB, { keyPath: 'id' });
-                vocabStore.createIndex('bucket', 'bucket', { unique: false });
-                vocabStore.createIndex('word', 'word', { unique: true });
-            } else {
-                // If store exists but index doesn't, create it
-                const vocabStore = event.target.transaction.objectStore(STORE_VOCAB);
-                if (!vocabStore.indexNames.contains('word')) {
-                    vocabStore.createIndex('word', 'word', { unique: true });
-                }
-            }
-        };
+request.onupgradeneeded = (event) => {
+    db = event.target.result;
+    
+    if (!db.objectStoreNames.contains(STORE_SENTENCES)) {
+        const sentencesStore = db.createObjectStore(STORE_SENTENCES, { keyPath: 'id' });
+        sentencesStore.createIndex('position', 'position', { unique: true });
+    }
+    
+    if (!db.objectStoreNames.contains(STORE_VOCAB)) {
+        const vocabStore = db.createObjectStore(STORE_VOCAB, { keyPath: 'id' });
+        vocabStore.createIndex('bucket', 'bucket', { unique: false });
+        vocabStore.createIndex('word', 'word', { unique: true }); // This creates the word index
+    } else {
+        // If store exists but index doesn't, create it
+        const vocabStore = event.target.transaction.objectStore(STORE_VOCAB);
+        if (!vocabStore.indexNames.contains('word')) {
+            vocabStore.createIndex('word', 'word', { unique: true });
+        }
+    }
+};
         
         request.onsuccess = (event) => {
             db = event.target.result;
@@ -739,7 +768,32 @@ function openDatabase() {
         };
     });
 }
+function wipeAllData() {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_SENTENCES, STORE_VOCAB], 'readwrite');
+        const sentencesStore = transaction.objectStore(STORE_SENTENCES);
+        const vocabStore = transaction.objectStore(STORE_VOCAB);
         
+        // Clear both stores
+        sentencesStore.clear();
+        vocabStore.clear();
+        
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = (event) => reject(event.target.error);
+    });
+}
+
+function showWipeConfirmation() {
+    const dialog = document.getElementById('wipe-confirmation');
+    dialog.style.display = 'flex';
+    setTimeout(() => dialog.classList.add('show'), 10);
+}
+
+function hideWipeConfirmation() {
+    const dialog = document.getElementById('wipe-confirmation');
+    dialog.classList.remove('show');
+    setTimeout(() => dialog.style.display = 'none', 300);
+}        
         // Database operations
 function addSentences(sentences) {
     return new Promise((resolve, reject) => {
@@ -789,7 +843,16 @@ function addVocabWord(word) {
         const transaction = db.transaction([STORE_VOCAB], 'readwrite');
         const store = transaction.objectStore(STORE_VOCAB);
         
-        // First check if word exists using the word index
+        // First check if the word index exists
+        if (!store.indexNames.contains('word')) {
+            // If index doesn't exist, just add the word without checking for duplicates
+            const addRequest = store.add(word);
+            addRequest.onsuccess = () => resolve();
+            addRequest.onerror = (event) => reject(event.target.error);
+            return;
+        }
+        
+        // If index exists, check for duplicates
         const wordIndex = store.index('word');
         const request = wordIndex.get(word.word);
         
@@ -1282,6 +1345,29 @@ function checkAnswer(isCorrect, word) {
         
         // Event listeners
         function setupEventListeners() {
+// Wipe data button
+document.getElementById('wipe-data-btn').addEventListener('click', showWipeConfirmation);
+
+// Confirmation dialog buttons
+document.getElementById('confirm-wipe').addEventListener('click', async () => {
+    hideWipeConfirmation();
+    try {
+        await wipeAllData();
+        state.sentences = [];
+        state.vocabWords = [];
+        await updateBucketCounts();
+        showToast('All data has been deleted', 'success');
+        // Switch back to text import view
+        document.querySelector('.nav-btn[data-view="text-import"]').classList.add('active');
+        document.querySelector('.nav-btn[data-view="vocab-review"]').classList.remove('active');
+        showView('text-import-view');
+    } catch (error) {
+        console.error('Error wiping data:', error);
+        showToast('Failed to delete data', 'error');
+    }
+});
+
+document.getElementById('cancel-wipe').addEventListener('click', hideWipeConfirmation);
             // Navigation
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
