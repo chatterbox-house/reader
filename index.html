@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1a1a2e">
+    <title>JapLearner - Japanese Learning Tool</title>
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkphcExlYXJuZXIiLAogICJzaG9ydF9uYW1lIjogIkphcExlYXJuZXIiLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzFhMWEyZSIsCiAgInRoZW1lX2NvbG9yIjogIiMxYTFhMmUiCn0=">
+    <style>
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #0f3460;
+            --highlight: #e94560;
+            --text: #f1f1f1;
+            --text-secondary: #b8b8b8;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --danger: #ef4444;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="light"] {
+            --primary: #f8f9fa;
+            --secondary: #e9ecef;
+            --accent: #dee2e6;
+            --highlight: #e94560;
+            --text: #212529;
+            --text-secondary: #495057;
+            --card-bg: rgba(255, 255, 255, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background-color: var(--primary);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease;
+        }
+
+        .app-container {
+            max-width: 100%;
+            min-height: 100vh;
+            padding: 0;
+            position: relative;
+        }
+
+        header {
+            background-color: var(--secondary);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--highlight);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn.active {
+            background-color: var(--accent);
+            color: var(--text);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+            font-size: 1.2rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+
+        .theme-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        main {
+            padding: 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .view {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .text-import-container {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            margin-bottom: 1rem;
+            color: var(--highlight);
+        }
+
+        .text-input {
+            width: 100%;
+            min-height: 150px;
+            background-color: var(--secondary);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            padding: 1rem;
+            color: var(--text);
+            font-size: 1rem;
+            resize: vertical;
+            margin-bottom: 1rem;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: var(--highlight);
+        }
+
+        .char-count {
+            text-align: right;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            background-color: var(--highlight);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            min-height: 56px;
+        }
+
+        .btn:disabled {
+            background-color: var(--text-secondary);
+            cursor: not-allowed;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .sentence-display {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            font-size: 1.8rem;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+            line-height: 1.6;
+        }
+
+        .sentence-controls {
+            position: sticky;
+            bottom: 0;
+            background-color: var(--secondary);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-btn {
+            background: var(--accent);
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text);
+            font-size: 1.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+            background-color: var(--highlight);
+        }
+
+        .translation-area {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .translation-area.active {
+            display: block;
+        }
+
+        .translation-input {
+            width: 100%;
+            min-height: 80px;
+            background-color: var(--secondary);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            padding: 1rem;
+            color: var(--text);
+            font-size: 1rem;
+            resize: vertical;
+            margin-bottom: 1rem;
+        }
+
+        .bucket-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .bucket-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .bucket-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .bucket-card.new { border-top: 4px solid #3b82f6; }
+        .bucket-card.easy { border-top: 4px solid var(--success); }
+        .bucket-card.medium { border-top: 4px solid var(--warning); }
+        .bucket-card.hard { border-top: 4px solid var(--danger); }
+        .bucket-card.retired { border-top: 4px solid var(--text-secondary); }
+
+        .bucket-count {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .bucket-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .review-container {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .review-question {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .review-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .option-btn {
+            background-color: var(--accent);
+            border: none;
+            border-radius: 12px;
+            padding: 1.2rem;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .option-btn:hover {
+            transform: translateY(-2px);
+            background-color: rgba(15, 52, 96, 0.8);
+        }
+
+        .review-typing {
+            margin-bottom: 2rem;
+        }
+
+        .typing-input {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.5rem;
+            text-align: center;
+            background-color: var(--secondary);
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            color: var(--text);
+            margin-bottom: 1rem;
+        }
+
+        .typing-input:focus {
+            outline: none;
+            border-color: var(--highlight);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: var(--secondary);
+            color: var(--text);
+            padding: 1rem 2rem;
+            border-radius: 30px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background-color: rgba(74, 222, 128, 0.2);
+            border: 1px solid var(--success);
+        }
+
+        .toast.error {
+            background-color: rgba(239, 68, 68, 0.2);
+            border: 1px solid var(--danger);
+        }
+
+        @media (max-width: 600px) {
+            .sentence-display {
+                font-size: 1.5rem;
+                padding: 1.5rem;
+            }
+            
+            .control-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+            
+            .review-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .bucket-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <div class="logo">JapLearner</div>
+            <div class="nav-tabs">
+                <button class="nav-btn active" data-view="text-import">Reader</button>
+                <button class="nav-btn" data-view="vocab-review">Vocabulary</button>
+            </div>
+            <button class="theme-toggle" id="theme-toggle">🌙</button>
+        </header>
+        
+        <main>
+            <section id="text-import-view" class="view active">
+                <div class="text-import-container">
+                    <h2>Import Japanese Text</h2>
+                    <p>Paste Japanese text below to start learning (max 5,000 characters)</p>
+                    <textarea class="text-input" id="text-input" placeholder="例: 猫が寝ている。犬が走っている。..."></textarea>
+                    <div class="char-count"><span id="char-count">0</span>/5000 characters</div>
+                    <button class="btn" id="process-text">
+                        <span>Process Text</span>
+                    </button>
+                </div>
+            </section>
+            
+            <section id="reading-view" class="view">
+                <div class="sentence-display" id="sentence-display">
+                    Select text to begin reading
+                </div>
+                
+                <div class="translation-area" id="translation-area">
+                    <textarea class="translation-input" id="translation-input" placeholder="Enter your translation..."></textarea>
+                    <button class="btn" id="save-translation">Save Translation</button>
+                </div>
+                
+                <div class="sentence-controls">
+                    <button class="control-btn" id="prev-sentence">←</button>
+                    <button class="control-btn" id="tts-button">🔊</button>
+                    <button class="control-btn" id="translation-toggle">訳</button>
+                    <button class="control-btn" id="next-sentence">→</button>
+                </div>
+            </section>
+            
+            <section id="vocab-review-view" class="view">
+                <h2>Vocabulary Review</h2>
+                <p>Select a difficulty level to start reviewing</p>
+                
+                <div class="bucket-container">
+                    <div class="bucket-card new" data-bucket="new">
+                        <div class="bucket-count" id="new-count">0</div>
+                        <div class="bucket-label">New Words</div>
+                    </div>
+                    <div class="bucket-card easy" data-bucket="easy">
+                        <div class="bucket-count" id="easy-count">0</div>
+                        <div class="bucket-label">Easy</div>
+                    </div>
+                    <div class="bucket-card medium" data-bucket="medium">
+                        <div class="bucket-count" id="medium-count">0</div>
+                        <div class="bucket-label">Medium</div>
+                    </div>
+                    <div class="bucket-card hard" data-bucket="hard">
+                        <div class="bucket-count" id="hard-count">0</div>
+                        <div class="bucket-label">Hard</div>
+                    </div>
+                </div>
+                
+                <button class="btn" id="start-review" disabled>Select a difficulty to start</button>
+            </section>
+            
+            <section id="review-mode-view" class="view">
+                <div class="review-container">
+                    <div class="review-question" id="review-question"></div>
+                    
+                    <div id="review-options" class="review-options" style="display: none;">
+                    </div>
+                    
+                    <div id="review-typing" class="review-typing" style="display: none;">
+                        <input type="text" class="typing-input" id="typing-input" placeholder="Type in Japanese...">
+                        <button class="btn" id="submit-answer">Submit Answer</button>
+                    </div>
+                    
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill" style="width: 0%; height: 8px; background-color: var(--highlight); border-radius: 4px;"></div>
+                        </div>
+                        <div class="progress-text" id="progress-text">0/0</div>
+                    </div>
+                </div>
+                
+                <button class="btn" id="exit-review">Exit Review</button>
+            </section>
+        </main>
+        
+        <div class="toast" id="toast"></div>
+    </div>
+
+    <script>
+        // App state
+        const state = {
+            currentView: 'text-import',
+            sentences: [],
+            currentSentenceIndex: 0,
+            vocabWords: [],
+            reviewMode: null,
+            reviewWords: [],
+            currentReviewIndex: 0,
+            reviewStats: {
+                correct: 0,
+                incorrect: 0
+            },
+            theme: localStorage.getItem('theme') || 'dark'
+        };
+        
+        // DOM Elements
+        const elements = {
+            views: {
+                textImport: document.getElementById('text-import-view'),
+                reading: document.getElementById('reading-view'),
+                vocabReview: document.getElementById('vocab-review-view'),
+                reviewMode: document.getElementById('review-mode-view')
+            },
+            textInput: document.getElementById('text-input'),
+            charCount: document.getElementById('char-count'),
+            processTextBtn: document.getElementById('process-text'),
+            sentenceDisplay: document.getElementById('sentence-display'),
+            prevSentenceBtn: document.getElementById('prev-sentence'),
+            nextSentenceBtn: document.getElementById('next-sentence'),
+            ttsButton: document.getElementById('tts-button'),
+            translationToggle: document.getElementById('translation-toggle'),
+            translationArea: document.getElementById('translation-area'),
+            translationInput: document.getElementById('translation-input'),
+            saveTranslationBtn: document.getElementById('save-translation'),
+            bucketCounts: {
+                new: document.getElementById('new-count'),
+                easy: document.getElementById('easy-count'),
+                medium: document.getElementById('medium-count'),
+                hard: document.getElementById('hard-count')
+            },
+            startReviewBtn: document.getElementById('start-review'),
+            reviewQuestion: document.getElementById('review-question'),
+            reviewOptions: document.getElementById('review-options'),
+            reviewTyping: document.getElementById('review-typing'),
+            typingInput: document.getElementById('typing-input'),
+            submitAnswerBtn: document.getElementById('submit-answer'),
+            exitReviewBtn: document.getElementById('exit-review'),
+            progressFill: document.getElementById('progress-fill'),
+            progressText: document.getElementById('progress-text'),
+            toast: document.getElementById('toast'),
+            themeToggle: document.getElementById('theme-toggle')
+        };
+        
+        // Initialize IndexedDB
+        const DB_NAME = 'JapaneseLearnerDB';
+        const DB_VERSION = 1;
+        const STORE_SENTENCES = 'sentences';
+        const STORE_VOCAB = 'vocabulary';
+        
+        let db;
+        
+        function openDatabase() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                
+                request.onupgradeneeded = (event) => {
+                    db = event.target.result;
+                    
+                    if (!db.objectStoreNames.contains(STORE_SENTENCES)) {
+                        const sentencesStore = db.createObjectStore(STORE_SENTENCES, { keyPath: 'id' });
+                        sentencesStore.createIndex('position', 'position', { unique: true });
+                    }
+                    
+                    if (!db.objectStoreNames.contains(STORE_VOCAB)) {
+                        const vocabStore = db.createObjectStore(STORE_VOCAB, { keyPath: 'id' });
+                        vocabStore.createIndex('bucket', 'bucket', { unique: false });
+                    }
+                };
+                
+                request.onsuccess = (event) => {
+                    db = event.target.result;
+                    resolve(db);
+                };
+                
+                request.onerror = (event) => {
+                    reject('Database error: ' + event.target.errorCode);
+                };
+            });
+        }
+        
+        // Database operations
+        function addSentences(sentences) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_SENTENCES], 'readwrite');
+                const store = transaction.objectStore(STORE_SENTENCES);
+                
+                sentences.forEach(sentence => {
+                    store.add(sentence);
+                });
+                
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = (event) => reject(event.target.error);
+            });
+        }
+        
+        function getAllSentences() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_SENTENCES], 'readonly');
+                const store = transaction.objectStore(STORE_SENTENCES);
+                // Use the position index to get in order
+                const index = store.index('position');
+                const request = index.getAll();
+                
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = (event) => reject(event.target.error);
+            });
+        }
+        
+        function updateSentence(sentence) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_SENTENCES], 'readwrite');
+                const store = transaction.objectStore(STORE_SENTENCES);
+                const request = store.put(sentence);
+                
+                request.onsuccess = () => resolve();
+                request.onerror = (event) => reject(event.target.error);
+            });
+        }
+        
+        function addVocabWord(word) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_VOCAB], 'readwrite');
+                const store = transaction.objectStore(STORE_VOCAB);
+                const request = store.add(word);
+                
+                request.onsuccess = () => resolve();
+                request.onerror = (event) => reject(event.target.error);
+            });
+        }
+        
+        function getVocabByBucket(bucket) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_VOCAB], 'readonly');
+                const store = transaction.objectStore(STORE_VOCAB);
+                const index = store.index('bucket');
+                const request = index.getAll(IDBKeyRange.only(bucket));
+                
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = (event) => reject(event.target.error);
+            });
+        }
+        
+        function updateVocabWord(word) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_VOCAB], 'readwrite');
+                const store = transaction.objectStore(STORE_VOCAB);
+                const request = store.put(word);
+                
+                request.onsuccess = () => resolve();
+                request.onerror = (event) => reject(event.target.error);
+            });
+        }
+        
+        function countVocabByBucket() {
+            return new Promise((resolve, reject) => {
+                const buckets = ['new', 'easy', 'medium', 'hard'];
+                const counts = {};
+                
+                const transaction = db.transaction([STORE_VOCAB], 'readonly');
+                const store = transaction.objectStore(STORE_VOCAB);
+                const index = store.index('bucket');
+                
+                let completed = 0;
+                
+                buckets.forEach(bucket => {
+                    const request = index.count(IDBKeyRange.only(bucket));
+                    
+                    request.onsuccess = () => {
+                        counts[bucket] = request.result;
+                        completed++;
+                        
+                        if (completed === buckets.length) {
+                            resolve(counts);
+                        }
+                    };
+                    
+                    request.onerror = (event) => reject(event.target.error);
+                });
+            });
+        }
+        
+        // Text processing - FIXED: Improved sentence splitting
+        function splitSentences(text) {
+            // Split by common Japanese sentence endings
+            const roughSentences = text.split(/(?<=[。！？\n])/);
+            const sentences = [];
+            
+            roughSentences.forEach(roughSentence => {
+                const trimmed = roughSentence.trim();
+                if (trimmed.length === 0) return;
+                
+                // Further split if multiple sentence endings in one segment
+                if (trimmed.includes('。') || trimmed.includes('！') || trimmed.includes('？')) {
+                    const subSentences = trimmed.split(/(?<=[。！？])/);
+                    subSentences.forEach(sub => {
+                        const subTrimmed = sub.trim();
+                        if (subTrimmed.length > 0) sentences.push(subTrimmed);
+                    });
+                } else {
+                    sentences.push(trimmed);
+                }
+            });
+            
+            return sentences;
+        }
+        
+        // TTS functionality
+        function speakText(text, rate = 1.0) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'ja-JP';
+                utterance.rate = rate;
+                
+                // Prefer Japanese voice if available
+                const voices = speechSynthesis.getVoices();
+                const japaneseVoice = voices.find(voice => 
+                    voice.lang === 'ja-JP' || voice.lang.startsWith('ja')
+                );
+                
+                if (japaneseVoice) {
+                    utterance.voice = japaneseVoice;
+                }
+                
+                speechSynthesis.cancel();
+                speechSynthesis.speak(utterance);
+            }
+        }
+        
+        // View management
+        function showView(viewId) {
+            // Hide all views
+            Object.values(elements.views).forEach(view => {
+                view.classList.remove('active');
+            });
+            
+            // Show requested view
+            const view = document.getElementById(viewId);
+            if (view) {
+                view.classList.add('active');
+                state.currentView = viewId;
+            }
+        }
+        
+        function updateBucketCounts() {
+            countVocabByBucket().then(counts => {
+                Object.entries(counts).forEach(([bucket, count]) => {
+                    if (elements.bucketCounts[bucket]) {
+                        elements.bucketCounts[bucket].textContent = count;
+                    }
+                });
+                
+                // Enable/disable review button based on word counts
+                const selectedBucket = state.reviewMode;
+                if (selectedBucket && counts[selectedBucket] > 0) {
+                    elements.startReviewBtn.disabled = false;
+                    elements.startReviewBtn.textContent = `Review ${selectedBucket} words`;
+                } else {
+                    elements.startReviewBtn.disabled = true;
+                    elements.startReviewBtn.textContent = 'Select a difficulty to start';
+                }
+            });
+        }
+        
+        function displaySentence() {
+            if (state.sentences.length === 0) {
+                elements.sentenceDisplay.textContent = 'No sentences available.';
+                return;
+            }
+            
+            const sentence = state.sentences[state.currentSentenceIndex];
+            elements.sentenceDisplay.textContent = sentence.original;
+            
+            // Load translation if available
+            if (sentence.user_translation) {
+                elements.translationInput.value = sentence.user_translation;
+            } else {
+                elements.translationInput.value = '';
+            }
+        }
+        
+        // Vocabulary review functions
+        async function startReview(bucket) {
+            state.reviewMode = bucket;
+            state.reviewWords = await getVocabByBucket(bucket);
+            
+            if (state.reviewWords.length === 0) {
+                showToast('No words to review in this category!', 'error');
+                return;
+            }
+            
+            // Shuffle words
+            state.reviewWords = shuffleArray(state.reviewWords);
+            state.currentReviewIndex = 0;
+            state.reviewStats = { correct: 0, incorrect: 0 };
+            
+            showView('review-mode-view');
+            showNextReviewItem();
+        }
+        
+        function showNextReviewItem() {
+            if (state.currentReviewIndex >= state.reviewWords.length) {
+                // Review completed
+                showToast(`Review complete! ${state.reviewStats.correct} correct, ${state.reviewStats.incorrect} incorrect`, 'success');
+                updateBucketCounts();
+                showView('vocab-review-view');
+                return;
+            }
+            
+            const word = state.reviewWords[state.currentReviewIndex];
+            elements.reviewQuestion.textContent = '';
+            elements.reviewOptions.style.display = 'none';
+            elements.reviewTyping.style.display = 'none';
+            elements.typingInput.value = '';
+            
+            // Update progress
+            const progressPercent = (state.currentReviewIndex / state.reviewWords.length) * 100;
+            elements.progressFill.style.width = `${progressPercent}%`;
+            elements.progressText.textContent = `${state.currentReviewIndex + 1}/${state.reviewWords.length}`;
+            
+            // Determine review mode and display accordingly
+            if (state.reviewMode === 'easy') {
+                // Easy mode: Play Japanese audio -> show English options
+                elements.reviewQuestion.textContent = 'Listen to the word:';
+                
+                // Play audio after a short delay
+                setTimeout(() => {
+                    speakText(word.word, 0.8);
+                }, 500);
+                
+                // Generate options (correct + 3 random)
+                const options = [word.translation];
+                const allWords = state.reviewWords.filter(w => w.id !== word.id);
+                
+                while (options.length < 4 && allWords.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * allWords.length);
+                    const randomTranslation = allWords[randomIndex].translation;
+                    
+                    if (!options.includes(randomTranslation)) {
+                        options.push(randomTranslation);
+                    }
+                    allWords.splice(randomIndex, 1);
+                }
+                
+                // Shuffle options
+                options.sort(() => Math.random() - 0.5);
+                
+                // Display options
+                elements.reviewOptions.innerHTML = '';
+                options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'option-btn';
+                    button.textContent = option;
+                    button.addEventListener('click', () => checkAnswer(option === word.translation, word));
+                    elements.reviewOptions.appendChild(button);
+                });
+                
+                elements.reviewOptions.style.display = 'grid';
+            } 
+            else if (state.reviewMode === 'medium') {
+                // Medium mode: Show English -> show Japanese options (50% auto-play)
+                elements.reviewQuestion.textContent = word.translation;
+                
+                // 50% chance to auto-play audio
+                if (Math.random() < 0.5) {
+                    speakText(word.word);
+                }
+                
+                // Generate options (correct + 3 random)
+                const options = [word.word];
+                const allWords = state.reviewWords.filter(w => w.id !== word.id);
+                
+                while (options.length < 4 && allWords.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * allWords.length);
+                    const randomWord = allWords[randomIndex].word;
+                    
+                    if (!options.includes(randomWord)) {
+                        options.push(randomWord);
+                    }
+                    allWords.splice(randomIndex, 1);
+                }
+                
+                // Shuffle options
+                options.sort(() => Math.random() - 0.5);
+                
+                // Display options
+                elements.reviewOptions.innerHTML = '';
+                options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'option-btn';
+                    button.textContent = option;
+                    button.addEventListener('click', () => checkAnswer(option === word.word, word));
+                    elements.reviewOptions.appendChild(button);
+                });
+                
+                elements.reviewOptions.style.display = 'grid';
+            } 
+            else if (state.reviewMode === 'hard') {
+                // Hard mode: Show English -> type Japanese
+                elements.reviewQuestion.textContent = word.translation;
+                elements.reviewTyping.style.display = 'block';
+            }
+        }
+        
+        function checkAnswer(isCorrect, word) {
+            if (isCorrect) {
+                showToast('Correct!', 'success');
+                state.reviewStats.correct++;
+                
+                // Update word streak and bucket
+                word.streak++;
+                
+                // Progress to next bucket if streak is sufficient
+                if (word.streak >= 3) {
+                    if (word.bucket === 'new') word.bucket = 'easy';
+                    else if (word.bucket === 'easy') word.bucket = 'medium';
+                    else if (word.bucket === 'medium') word.bucket = 'hard';
+                    else if (word.bucket === 'hard') {
+                        word.bucket = 'retired';
+                        word.retiredDate = new Date().toISOString();
+                    }
+                    word.streak = 0; // Reset streak after moving
+                }
+            } else {
+                showToast('Incorrect. Try again!', 'error');
+                state.reviewStats.incorrect++;
+                
+                // Reset streak and potentially demote
+                word.streak = 0;
+                word.consecutiveMisses = (word.consecutiveMisses || 0) + 1;
+                
+                // Demote after 2 consecutive misses
+                if (word.consecutiveMisses >= 2) {
+                    if (word.bucket === 'easy') word.bucket = 'new';
+                    else if (word.bucket === 'medium') word.bucket = 'easy';
+                    else if (word.bucket === 'hard') word.bucket = 'medium';
+                    word.consecutiveMisses = 0;
+                }
+            }
+            
+            // Update word in database
+            updateVocabWord(word).then(() => {
+                state.currentReviewIndex++;
+                setTimeout(showNextReviewItem, 1000);
+            });
+        }
+        
+        function handleTypingSubmit() {
+            const input = elements.typingInput.value.trim();
+            const word = state.reviewWords[state.currentReviewIndex];
+            const isCorrect = input === word.word;
+            
+            checkAnswer(isCorrect, word);
+        }
+        
+        // Utility functions
+        function showToast(message, type = 'info') {
+            elements.toast.textContent = message;
+            elements.toast.className = 'toast ' + type;
+            elements.toast.classList.add('show');
+            
+            setTimeout(() => {
+                elements.toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+        
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+        
+        function toggleTheme() {
+            state.theme = state.theme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', state.theme);
+            document.documentElement.setAttribute('data-theme', state.theme);
+            elements.themeToggle.textContent = state.theme === 'dark' ? '🌙' : '☀️';
+        }
+        
+        // Event listeners
+        function setupEventListeners() {
+            // Navigation
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    showView(btn.dataset.view + '-view');
+                });
+            });
+            
+            // Text import
+            elements.textInput.addEventListener('input', () => {
+                const text = elements.textInput.value;
+                elements.charCount.textContent = text.length;
+            });
+            
+            elements.processTextBtn.addEventListener('click', async () => {
+                const text = elements.textInput.value.trim();
+                if (text.length === 0) {
+                    showToast('Please enter some text', 'error');
+                    return;
+                }
+                
+                if (text.length > 5000) {
+                    showToast('Text exceeds 5000 characters', 'error');
+                    return;
+                }
+                
+                // Split text into sentences
+                const sentences = splitSentences(text);
+                
+                if (sentences.length === 0) {
+                    showToast('No sentences found in text', 'error');
+                    return;
+                }
+                
+                // Create sentence objects
+                const sentenceObjects = sentences.map((sentence, index) => ({
+                    id: generateUUID(),
+                    original: sentence,
+                    user_translation: '',
+                    position: index
+                }));
+                
+                try {
+                    await addSentences(sentenceObjects);
+                    state.sentences = await getAllSentences();
+                    state.currentSentenceIndex = 0;
+                    
+                    // Update UI
+                    showView('reading-view');
+                    displaySentence();
+                    showToast(`Processed ${sentences.length} sentences!`, 'success');
+                } catch (error) {
+                    console.error('Error saving sentences:', error);
+                    showToast('Error processing text', 'error');
+                }
+            });
+            
+            // Reading view controls
+            elements.prevSentenceBtn.addEventListener('click', () => {
+                if (state.currentSentenceIndex > 0) {
+                    state.currentSentenceIndex--;
+                    displaySentence();
+                }
+            });
+            
+            elements.nextSentenceBtn.addEventListener('click', () => {
+                if (state.currentSentenceIndex < state.sentences.length - 1) {
+                    state.currentSentenceIndex++;
+                    displaySentence();
+                }
+            });
+            
+            elements.ttsButton.addEventListener('click', () => {
+                if (state.sentences.length > 0) {
+                    const sentence = state.sentences[state.currentSentenceIndex].original;
+                    speakText(sentence);
+                }
+            });
+            
+            elements.translationToggle.addEventListener('click', () => {
+                elements.translationArea.classList.toggle('active');
+            });
+            
+            elements.saveTranslationBtn.addEventListener('click', async () => {
+                if (state.sentences.length === 0) return;
+                
+                const sentence = state.sentences[state.currentSentenceIndex];
+                sentence.user_translation = elements.translationInput.value;
+                
+                try {
+                    await updateSentence(sentence);
+                    showToast('Translation saved!', 'success');
+                } catch (error) {
+                    console.error('Error saving translation:', error);
+                    showToast('Error saving translation', 'error');
+                }
+            });
+            
+            // Word selection
+            elements.sentenceDisplay.addEventListener('mouseup', () => {
+                const selection = window.getSelection().toString().trim();
+                if (selection.length > 0) {
+                    // Show "Add to Review" option
+                    const add = confirm(`Add "${selection}" to vocabulary review?`);
+                    if (add) {
+                        const translation = prompt(`Enter translation for "${selection}":`);
+                        if (translation) {
+                            const newWord = {
+                                id: generateUUID(),
+                                word: selection,
+                                translation: translation,
+                                sentence_id: state.sentences[state.currentSentenceIndex].id,
+                                bucket: 'new',
+                                streak: 0
+                            };
+                            
+                            addVocabWord(newWord).then(() => {
+                                showToast(`"${selection}" added to vocabulary!`, 'success');
+                                updateBucketCounts();
+                            });
+                        }
+                    }
+                }
+            });
+            
+            // Vocabulary review
+            document.querySelectorAll('.bucket-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('.bucket-card').forEach(c => {
+                        c.style.opacity = '1';
+                        c.style.transform = 'scale(1)';
+                    });
+                    
+                    card.style.opacity = '0.9';
+                    card.style.transform = 'scale(0.98)';
+                    state.reviewMode = card.dataset.bucket;
+                    
+                    elements.startReviewBtn.disabled = false;
+                    elements.startReviewBtn.textContent = `Review ${card.dataset.bucket} words`;
+                });
+            });
+            
+            elements.startReviewBtn.addEventListener('click', () => {
+                if (state.reviewMode) {
+                    startReview(state.reviewMode);
+                }
+            });
+            
+            // Review mode
+            elements.submitAnswerBtn.addEventListener('click', handleTypingSubmit);
+            elements.typingInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleTypingSubmit();
+            });
+            
+            elements.exitReviewBtn.addEventListener('click', () => {
+                showView('vocab-review-view');
+            });
+            
+            // Theme toggle
+            elements.themeToggle.addEventListener('click', toggleTheme);
+        }
+        
+        // Initialize the app
+        async function initApp() {
+            try {
+                await openDatabase();
+                state.sentences = await getAllSentences();
+                
+                if (state.sentences.length > 0) {
+                    document.querySelector('.nav-btn[data-view="text-import"]').classList.remove('active');
+                    document.querySelector('.nav-btn[data-view="vocab-review"]').classList.add('active');
+                    showView('vocab-review-view');
+                }
+                
+                await updateBucketCounts();
+                setupEventListeners();
+                
+                // Apply theme
+                document.documentElement.setAttribute('data-theme', state.theme);
+                elements.themeToggle.textContent = state.theme === 'dark' ? '🌙' : '☀️';
+                
+                // Pre-warm TTS
+                if ('speechSynthesis' in window) {
+                    // Load voices
+                    speechSynthesis.getVoices();
+                }
+                
+                // Service worker registration for PWA
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('sw.js').catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+                }
+                
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showToast('Failed to initialize app', 'error');
+            }
+        }
+        
+        // Start the app
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
