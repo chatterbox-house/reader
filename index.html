@@ -246,7 +246,25 @@
             transform: scale(0.95);
             background-color: var(--highlight);
         }
+.lang-selector {
+    background-color: var(--secondary);
+    color: var(--text);
+    border: 1px solid var(--accent);
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    margin-left: 0.5rem;
+    font-size: 0.9rem;
+}
 
+.translation-display {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 1rem;
+    margin: 1rem 0;
+    box-shadow: var(--shadow);
+    font-size: 1.2rem;
+    display: none;
+}
 .word-selection-box {
     background-color: var(--card-bg);
     border-radius: 12px;
@@ -536,13 +554,20 @@
                 <div class="sentence-display" id="sentence-display">
                     Select text to begin reading
                 </div>
+                <div class="translation-display" id="translation-display"></div>
                 
-                
-                <div class="sentence-controls">
-                    <button class="control-btn" id="prev-sentence">←</button>
-                    <button class="control-btn" id="tts-button">🔊</button>
-                    <button class="control-btn" id="next-sentence">→</button>
-                </div>
+               <div class="sentence-controls">
+    <button class="control-btn" id="prev-sentence">←</button>
+    <button class="control-btn" id="translate-btn">翻訳</button>
+    <button class="control-btn" id="tts-button">🔊</button>
+    <button class="control-btn" id="next-sentence">→</button>
+</div>
+<select id="translation-lang" class="lang-selector">
+    <option value="en">English</option>
+    <option value="es">Spanish</option>
+    <option value="fr">French</option>
+    <option value="de">German</option>
+</select>
             </section>
             
             <section id="vocab-review-view" class="view">
@@ -622,32 +647,34 @@ function showToast(message, type = '') {
         elements.toast.classList.remove('show');
     }, 3000);
 }
-        // DOM Elements
-        const elements = {
-            views: {
-                textImport: document.getElementById('text-import-view'),
-                reading: document.getElementById('reading-view'),
-                vocabReview: document.getElementById('vocab-review-view'),
-                reviewMode: document.getElementById('review-mode-view')
-            },
-            textInput: document.getElementById('text-input'),
-            charCount: document.getElementById('char-count'),
-            processTextBtn: document.getElementById('process-text'),
-            sentenceDisplay: document.getElementById('sentence-display'),
-            prevSentenceBtn: document.getElementById('prev-sentence'),
-            nextSentenceBtn: document.getElementById('next-sentence'),
-            ttsButton: document.getElementById('tts-button'),
-wordSelectionBox: document.getElementById('word-selection-box'),
-selectedWord: document.getElementById('selected-word'),
-vocabTranslation: document.getElementById('vocab-translation'),
-addToVocabBtn: document.getElementById('add-to-vocab'),
-
-            bucketCounts: {
-                new: document.getElementById('new-count'),
-                easy: document.getElementById('easy-count'),
-                medium: document.getElementById('medium-count'),
-                hard: document.getElementById('hard-count')
-            },
+// DOM Elements
+const elements = {
+    views: {
+        textImport: document.getElementById('text-import-view'),
+        reading: document.getElementById('reading-view'),
+        vocabReview: document.getElementById('vocab-review-view'),
+        reviewMode: document.getElementById('review-mode-view')
+    },
+    textInput: document.getElementById('text-input'),
+    charCount: document.getElementById('char-count'),
+    processTextBtn: document.getElementById('process-text'),
+    sentenceDisplay: document.getElementById('sentence-display'),
+    prevSentenceBtn: document.getElementById('prev-sentence'),
+    nextSentenceBtn: document.getElementById('next-sentence'),
+    ttsButton: document.getElementById('tts-button'),
+    wordSelectionBox: document.getElementById('word-selection-box'),
+    selectedWord: document.getElementById('selected-word'),
+    vocabTranslation: document.getElementById('vocab-translation'),
+    addToVocabBtn: document.getElementById('add-to-vocab'),
+    translationDisplay: document.getElementById('translation-display'),
+    translateBtn: document.getElementById('translate-btn'),
+    translationLang: document.getElementById('translation-lang'), // <-- This comma was missing
+    bucketCounts: {
+        new: document.getElementById('new-count'),
+        easy: document.getElementById('easy-count'),
+        medium: document.getElementById('medium-count'),
+        hard: document.getElementById('hard-count')
+    },
             startReviewBtn: document.getElementById('start-review'),
             reviewQuestion: document.getElementById('review-question'),
             reviewOptions: document.getElementById('review-options'),
@@ -848,7 +875,33 @@ function updateVocabWord(word) {
             
             return sentences;
         }
-        
+        async function translateSentence(sentence) {
+    try {
+        // First check if we have a user translation saved
+        const currentSentence = state.sentences[state.currentSentenceIndex];
+        if (currentSentence.user_translation) {
+            return currentSentence.user_translation;
+        }
+
+        // Use MyMemory API
+        const targetLang = elements.translationLang.value;
+        const response = await fetch(
+            `https://api.mymemory.translated.net/get?q=${encodeURIComponent(sentence)}&langpair=ja|${targetLang}`
+        );
+
+        if (!response.ok) throw new Error('Translation failed');
+
+        const data = await response.json();
+        if (data.responseData && data.responseData.translatedText) {
+            return data.responseData.translatedText;
+        } else {
+            throw new Error('No translation found');
+        }
+    } catch (error) {
+        console.error('Translation error:', error);
+        return "Translation unavailable";
+    }
+}
         // TTS functionality
         function speakText(text, rate = 1.0) {
             if ('speechSynthesis' in window) {
@@ -909,12 +962,26 @@ function updateVocabWord(word) {
 function displaySentence() {
     if (state.sentences.length === 0) {
         elements.sentenceDisplay.textContent = 'No sentences available.';
+        if (elements.translationDisplay) {
+            elements.translationDisplay.style.display = 'none';
+        }
         return;
     }
     
     const sentence = state.sentences[state.currentSentenceIndex];
     elements.sentenceDisplay.textContent = sentence.original;
     elements.wordSelectionBox.style.display = 'none';
+    
+    // Initialize translation display if it exists
+    if (elements.translationDisplay) {
+        elements.translationDisplay.style.display = 'none';
+        
+        // If we have a cached translation, show it immediately
+        if (sentence.cached_translation) {
+            elements.translationDisplay.textContent = sentence.cached_translation;
+            elements.translationDisplay.style.display = 'block';
+        }
+    }
 }
         
         // Vocabulary review functions
@@ -1266,7 +1333,34 @@ function checkAnswer(isCorrect, word) {
                     displaySentence();
                 }
             });
-            
+elements.translateBtn.addEventListener('click', async () => {
+    if (state.sentences.length === 0 || !elements.translationDisplay) return;
+    
+    const sentence = state.sentences[state.currentSentenceIndex].original;
+    elements.translationDisplay.style.display = 'block';
+    elements.translationDisplay.textContent = "Translating...";
+    
+    const translation = await translateSentence(sentence);
+    elements.translationDisplay.textContent = translation;
+    
+    // Store the translation in cache
+    state.sentences[state.currentSentenceIndex].cached_translation = translation;
+    
+    // Pre-translate next few sentences in background
+    if (state.currentSentenceIndex < state.sentences.length - 1) {
+        const nextSentences = state.sentences.slice(
+            state.currentSentenceIndex + 1,
+            Math.min(state.currentSentenceIndex + 4, state.sentences.length)
+        );
+        
+        nextSentences.forEach(async (sentenceObj, index) => {
+            if (!sentenceObj.user_translation) {
+                const translation = await translateSentence(sentenceObj.original);
+                state.sentences[state.currentSentenceIndex + 1 + index].cached_translation = translation;
+            }
+        });
+    }
+});
             elements.nextSentenceBtn.addEventListener('click', () => {
                 if (state.currentSentenceIndex < state.sentences.length - 1) {
                     state.currentSentenceIndex++;
