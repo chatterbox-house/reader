@@ -325,7 +325,7 @@
     gap: 0.5rem;
 }
 .japanese-words::before {
-    content: "Japanese";
+    content: attr(data-label);
     display: block;
     text-align: center;
     font-size: 0.8rem;
@@ -334,7 +334,7 @@
 }
 
 .english-words::before {
-    content: "English";
+    content: attr(data-label);
     display: block;
     text-align: center;
     font-size: 0.8rem;
@@ -668,35 +668,41 @@ addToVocabBtn: document.getElementById('add-to-vocab'),
         
         let db;
         
-        function openDatabase() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, DB_VERSION);
-                
-                request.onupgradeneeded = (event) => {
-                    db = event.target.result;
-                    
-                    if (!db.objectStoreNames.contains(STORE_SENTENCES)) {
-                        const sentencesStore = db.createObjectStore(STORE_SENTENCES, { keyPath: 'id' });
-                        sentencesStore.createIndex('position', 'position', { unique: true });
-                    }
-                    
-                    if (!db.objectStoreNames.contains(STORE_VOCAB)) {
-                        const vocabStore = db.createObjectStore(STORE_VOCAB, { keyPath: 'id' });
-                        vocabStore.createIndex('bucket', 'bucket', { unique: false });
-        vocabStore.createIndex('word', 'word', { unique: true }); // Add this line
-                    }
-                };
-                
-                request.onsuccess = (event) => {
-                    db = event.target.result;
-                    resolve(db);
-                };
-                
-                request.onerror = (event) => {
-                    reject('Database error: ' + event.target.errorCode);
-                };
-            });
-        }
+function openDatabase() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        
+        request.onupgradeneeded = (event) => {
+            db = event.target.result;
+            
+            if (!db.objectStoreNames.contains(STORE_SENTENCES)) {
+                const sentencesStore = db.createObjectStore(STORE_SENTENCES, { keyPath: 'id' });
+                sentencesStore.createIndex('position', 'position', { unique: true });
+            }
+            
+            if (!db.objectStoreNames.contains(STORE_VOCAB)) {
+                const vocabStore = db.createObjectStore(STORE_VOCAB, { keyPath: 'id' });
+                vocabStore.createIndex('bucket', 'bucket', { unique: false });
+                vocabStore.createIndex('word', 'word', { unique: true });
+            } else {
+                // If store exists but index doesn't, create it
+                const vocabStore = event.target.transaction.objectStore(STORE_VOCAB);
+                if (!vocabStore.indexNames.contains('word')) {
+                    vocabStore.createIndex('word', 'word', { unique: true });
+                }
+            }
+        };
+        
+        request.onsuccess = (event) => {
+            db = event.target.result;
+            resolve(db);
+        };
+        
+        request.onerror = (event) => {
+            reject('Database error: ' + event.target.errorCode);
+        };
+    });
+}
         
         // Database operations
 function addSentences(sentences) {
@@ -927,240 +933,165 @@ async function startReview(bucket) {
     state.reviewStats = { correct: 0, incorrect: 0 };
     
     showView('review-mode-view');
-    setupMatchingGame();
+  setupMatchingGame();
 }
 
-function setupMatchingGame() {
-    if (state.currentReviewIndex >= state.reviewWords.length) {
-        showToast(`Review complete! ${state.reviewStats.correct} correct, ${state.reviewStats.incorrect} incorrect`, 'success');
-        updateBucketCounts();
-        showView('vocab-review-view');
-        return;
-    }
+    function setupMatchingGame() {
+        // Clear previous cards
+        document.getElementById('japanese-words').innerHTML = '';
+        document.getElementById('english-words').innerHTML = '';
 
-    // Clear previous game
-    document.getElementById('japanese-words').innerHTML = '';
-    document.getElementById('english-words').innerHTML = '';
+        // Only shuffle once at start
+        if (!state.currentRoundWords) {
+            state.currentRoundWords = shuffleArray([...state.reviewWords]).slice(0, 5);
+        }
+        
+        const wordsToShow = state.currentRoundWords;
 
-    // Get current word
-    const currentWord = state.reviewWords[state.currentReviewIndex];
-    
-    // Get all unique words (just in case)
-    const uniqueWords = [...new Map(state.reviewWords.map(item => [item.word, item])).values()];
-    
-    // Remove current word from the options
-    const otherWords = uniqueWords.filter(w => w.id !== currentWord.id);
-
-    // Select 3 random other words
-    const randomWords = [];
-    while (randomWords.length < 3 && otherWords.length > 0) {
-        const randomIndex = Math.floor(Math.random() * otherWords.length);
-        randomWords.push(otherWords[randomIndex]);
-        otherWords.splice(randomIndex, 1);
-    }
-
-    // Combine current word with random words
-    const japaneseWords = [currentWord, ...randomWords];
-    const englishWords = [currentWord, ...randomWords];
-
-    // Shuffle them
-    shuffleArray(japaneseWords);
-    shuffleArray(englishWords);
-
-    // Display words based on difficulty level
-    if (state.reviewMode === 'medium') {
-        // MEDIUM: Japanese on LEFT, English on RIGHT, TTS only on Japanese
-        englishWords.forEach(word => {
-            const card = document.createElement('div');
-            card.className = 'word-card';
-            card.textContent = word.translation;
-            card.dataset.id = word.id;
-            
-            // No TTS for English cards in medium mode
-            card.addEventListener('click', function() {
-                selectCard(this, 'english');
-            });
-
-            document.getElementById('japanese-words').appendChild(card);
-        });
-
-        japaneseWords.forEach(word => {
-            const card = document.createElement('div');
-            card.className = 'word-card';
-            card.textContent = word.word;
-            card.dataset.id = word.id;
-            
-            // TTS only on Japanese cards in medium mode
-            card.addEventListener('click', function() {
-                speakText(word.word);
-                selectCard(this, 'japanese');
-            });
-
-            document.getElementById('english-words').appendChild(card);
-        });
-    } 
-    else if (state.reviewMode === 'hard') {
-        // HARD: Japanese on LEFT, English on RIGHT, NO TTS
-        englishWords.forEach(word => {
-            const card = document.createElement('div');
-            card.className = 'word-card';
-            card.textContent = word.translation;
-            card.dataset.id = word.id;
-            
-            card.addEventListener('click', function() {
-                selectCard(this, 'english');
-            });
-
-            document.getElementById('japanese-words').appendChild(card);
-        });
-
-        japaneseWords.forEach(word => {
-            const card = document.createElement('div');
-            card.className = 'word-card';
-            card.textContent = word.word;
-            card.dataset.id = word.id;
-            
-            // No TTS in hard mode
-            card.addEventListener('click', function() {
-                selectCard(this, 'japanese');
-            });
-
-            document.getElementById('english-words').appendChild(card);
-        });
-    } 
-    else {
-        // NEW/EASY: English on LEFT, Japanese on RIGHT, TTS on English
-        englishWords.forEach(word => {
-            const card = document.createElement('div');
-            card.className = 'word-card';
-            card.textContent = word.translation;
-            card.dataset.id = word.id;
-            
-            // TTS plays Japanese when clicking English in new/easy mode
-            card.addEventListener('click', function() {
-                speakText(word.word);
-                selectCard(this, 'english');
-            });
-
-            document.getElementById('japanese-words').appendChild(card);
-        });
-
-        japaneseWords.forEach(word => {
-            const card = document.createElement('div');
-            card.className = 'word-card';
-            card.textContent = word.word;
-            card.dataset.id = word.id;
-            
-            card.addEventListener('click', function() {
-                selectCard(this, 'japanese');
-            });
-
-            document.getElementById('english-words').appendChild(card);
-        });
-    }
-
-    // Update progress
-    const progressPercent = (state.currentReviewIndex / state.reviewWords.length) * 100;
-    elements.progressFill.style.width = `${progressPercent}%`;
-    elements.progressText.textContent = `${state.currentReviewIndex + 1}/${state.reviewWords.length}`;
-    
-    // Reset selected cards
-    state.selectedJapaneseCard = null;
-    state.selectedEnglishCard = null;
-}
-async function removeDuplicateWords() {
-    try {
-        const transaction = db.transaction([STORE_VOCAB], 'readwrite');
-        const store = transaction.objectStore(STORE_VOCAB);
-        const allWords = await new Promise((resolve, reject) => {
-            const request = store.getAll();
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = (event) => reject(event.target.error);
-        });
-
-        const uniqueWords = new Map();
-        const duplicates = [];
-
-        // Find duplicates
-        allWords.forEach(word => {
-            if (uniqueWords.has(word.word)) {
-                duplicates.push(word.id);
-            } else {
-                uniqueWords.set(word.word, word);
-            }
-        });
-
-        // Remove duplicates
-        if (duplicates.length > 0) {
-            await Promise.all(duplicates.map(id => {
-                return new Promise((resolve, reject) => {
-                    const deleteRequest = store.delete(id);
-                    deleteRequest.onsuccess = () => resolve();
-                    deleteRequest.onerror = (event) => reject(event.target.error);
-                });
-            }));
-            console.log(`Removed ${duplicates.length} duplicate words`);
-            showToast(`Removed ${duplicates.length} duplicate words`, 'success');
+        // Set column labels based on mode
+        if (state.reviewMode === 'new' || state.reviewMode === 'easy') {
+            document.getElementById('japanese-words').dataset.label = "English";
+            document.getElementById('english-words').dataset.label = "Japanese";
         } else {
-            console.log('No duplicates found');
-            showToast('No duplicate words found', 'success');
+            document.getElementById('japanese-words').dataset.label = "Japanese";
+            document.getElementById('english-words').dataset.label = "English";
         }
-    } catch (error) {
-        console.error('Error removing duplicates:', error);
-        showToast('Error removing duplicates', 'error');
+
+        // Create cards in fixed order (don't reshuffle)
+        const leftColumn = state.reviewMode === 'new' || state.reviewMode === 'easy' 
+            ? wordsToShow.map(word => ({ ...word, type: 'english', text: word.translation }))
+            : wordsToShow.map(word => ({ ...word, type: 'japanese', text: word.word }));
+
+        const rightColumn = state.reviewMode === 'new' || state.reviewMode === 'easy'
+            ? shuffleArray([...wordsToShow]).map(word => ({ ...word, type: 'japanese', text: word.word }))
+            : shuffleArray([...wordsToShow]).map(word => ({ ...word, type: 'english', text: word.translation }));
+
+        // Create left column cards
+        leftColumn.forEach(word => {
+            const card = document.createElement('div');
+            card.className = 'word-card';
+            card.dataset.id = word.id;
+            card.textContent = word.text;
+            card.addEventListener('click', function() {
+                // Play TTS for Japanese words in medium/hard mode, or for English words in new/easy mode
+                if ((word.type === 'japanese' && (state.reviewMode === 'medium' || state.reviewMode === 'hard')) ||
+                    (word.type === 'english' && (state.reviewMode === 'new' || state.reviewMode === 'easy'))) {
+                    // Find the matching Japanese word to play its TTS
+                    const matchingWord = wordsToShow.find(w => w.id === word.id);
+                    if (matchingWord) {
+                        speakText(matchingWord.word);
+                    }
+                }
+                selectCard(this, word.type);
+            });
+            document.getElementById('japanese-words').appendChild(card);
+        });
+
+        // Create right column cards
+        rightColumn.forEach(word => {
+            const card = document.createElement('div');
+            card.className = 'word-card';
+            card.dataset.id = word.id;
+            card.textContent = word.text;
+            card.addEventListener('click', function() {
+                // Play TTS for Japanese words in medium/hard mode, or for English words in new/easy mode
+                if ((word.type === 'japanese' && (state.reviewMode === 'medium' || state.reviewMode === 'hard')) ||
+                    (word.type === 'english' && (state.reviewMode === 'new' || state.reviewMode === 'easy'))) {
+                    // Find the matching Japanese word to play its TTS
+                    const matchingWord = wordsToShow.find(w => w.id === word.id);
+                    if (matchingWord) {
+                        speakText(matchingWord.word);
+                    }
+                }
+                selectCard(this, word.type);
+            });
+            document.getElementById('english-words').appendChild(card);
+        });
+
+        // Update progress
+        const matchedCount = document.querySelectorAll('.word-card.correct').length / 2;
+        elements.progressText.textContent = `Matched: ${matchedCount}/${wordsToShow.length}`;
     }
-}
-function selectCard(card, type) {
-    // If card is already matched, ignore click
-    if (card.classList.contains('correct') || card.classList.contains('incorrect')) {
+
+// Track selected cards
+let selectedJapaneseCard = null;
+let selectedEnglishCard = null;
+
+function selectCard(cardElement, cardType) {
+    // If card is already matched, ignore clicks
+    if (cardElement.classList.contains('correct')) {
         return;
     }
-    
-    // Select the card
-    if (type === 'japanese') {
-        // Deselect previous selection
-        if (state.selectedJapaneseCard) {
-            state.selectedJapaneseCard.classList.remove('selected');
-        }
-        state.selectedJapaneseCard = card;
-    } else {
-        // Deselect previous selection
-        if (state.selectedEnglishCard) {
-            state.selectedEnglishCard.classList.remove('selected');
-        }
-        state.selectedEnglishCard = card;
+
+    // Reset incorrect state if present
+    if (cardElement.classList.contains('incorrect')) {
+        cardElement.classList.remove('incorrect');
     }
-    
-    card.classList.add('selected');
-    
-    // Check if both are selected
-    if (state.selectedJapaneseCard && state.selectedEnglishCard) {
-        checkMatch();
+
+    // Select the card based on its type
+    if (cardType === 'japanese') {
+        // Deselect previous selection if exists
+        if (selectedJapaneseCard) {
+            selectedJapaneseCard.classList.remove('selected');
+        }
+        selectedJapaneseCard = cardElement;
+    } else {
+        // Deselect previous selection if exists
+        if (selectedEnglishCard) {
+            selectedEnglishCard.classList.remove('selected');
+        }
+        selectedEnglishCard = cardElement;
+    }
+
+    // Highlight the selected card
+    cardElement.classList.add('selected');
+
+    // If both a Japanese and English card are selected, check for a match
+    if (selectedJapaneseCard && selectedEnglishCard) {
+        checkMatch(selectedJapaneseCard, selectedEnglishCard);
     }
 }
-
-function checkMatch() {
-    const japaneseId = state.selectedJapaneseCard.dataset.id;
-    const englishId = state.selectedEnglishCard.dataset.id;
+function checkMatch(japaneseCard, englishCard) {
+    const japaneseId = japaneseCard.dataset.id;
+    const englishId = englishCard.dataset.id;
     
     if (japaneseId === englishId) {
         // Correct match
-        state.selectedJapaneseCard.classList.remove('selected');
-        state.selectedJapaneseCard.classList.add('correct');
-        state.selectedEnglishCard.classList.remove('selected');
-        state.selectedEnglishCard.classList.add('correct');
+        japaneseCard.classList.remove('selected');
+        japaneseCard.classList.add('correct');
+        englishCard.classList.remove('selected');
+        englishCard.classList.add('correct');
         
         state.reviewStats.correct++;
         showToast('Correct!', 'success');
         
-        // Find the word in our review words
-        const matchedWord = state.reviewWords.find(w => w.id === japaneseId);
+        // Clear selections
+        selectedJapaneseCard = null;
+        selectedEnglishCard = null;
         
+        // Check if all words are matched
+        const allCards = document.querySelectorAll('.word-card');
+        const matchedCards = document.querySelectorAll('.word-card.correct');
+        
+        if (matchedCards.length === allCards.length) {
+            // All words matched!
+            state.currentRoundWords = null;
+            showToast('Round completed!', 'success');
+            setTimeout(() => {
+                state.currentReviewIndex++;
+                setupMatchingGame();
+            }, 2000);
+        } else {
+            // Update progress
+            const matchedCount = matchedCards.length / 2;
+            elements.progressText.textContent = `Matched: ${matchedCount}/${state.currentRoundWords.length}`;
+        }
+        
+        // Find the word and update its bucket
+        const matchedWord = state.reviewWords.find(w => w.id === japaneseId);
         if (matchedWord) {
-            // Update word streak
             matchedWord.streak = (matchedWord.streak || 0) + 1;
             
-            // If streak reaches 3
             if (matchedWord.streak >= 3) {
                 if (matchedWord.bucket === 'new') {
                     matchedWord.bucket = 'easy';
@@ -1175,48 +1106,33 @@ function checkMatch() {
                     matchedWord.streak = 0;
                 }
                 else if (matchedWord.bucket === 'hard') {
-                    // Remove from database instead of moving to another bucket
                     const transaction = db.transaction([STORE_VOCAB], 'readwrite');
                     const store = transaction.objectStore(STORE_VOCAB);
                     store.delete(matchedWord.id);
-                    
-                    // Move to next word immediately
-                    setTimeout(() => {
-                        state.currentReviewIndex++;
-                        setupMatchingGame();
-                    }, 1000);
-                    return; // Exit early since we deleted the word
+                    return;
                 }
             
-                // Update in database
-                updateVocabWord(matchedWord).then(() => {
-                    // Move to next word after delay
-                    setTimeout(() => {
-                        state.currentReviewIndex++;
-                        setupMatchingGame();
-                    }, 1000);
-                });
+                updateVocabWord(matchedWord);
             }
         }
     } else {
         // Incorrect match
-        state.selectedJapaneseCard.classList.remove('selected');
-        state.selectedJapaneseCard.classList.add('incorrect');
-        state.selectedEnglishCard.classList.remove('selected');
-        state.selectedEnglishCard.classList.add('incorrect');
+        japaneseCard.classList.remove('selected');
+        japaneseCard.classList.add('incorrect');
+        englishCard.classList.remove('selected');
+        englishCard.classList.add('incorrect');
         
         state.reviewStats.incorrect++;
         showToast('Try again!', 'error');
         
-        // Reset selections after delay
         setTimeout(() => {
-            if (state.selectedJapaneseCard) state.selectedJapaneseCard.classList.remove('incorrect');
-            if (state.selectedEnglishCard) state.selectedEnglishCard.classList.remove('incorrect');
-            state.selectedJapaneseCard = null;
-            state.selectedEnglishCard = null;
+            japaneseCard.classList.remove('incorrect');
+            englishCard.classList.remove('incorrect');
+            selectedJapaneseCard = null;
+            selectedEnglishCard = null;
         }, 1000);
     }
-}  // <-- THIS CLOSING BRACE WAS MISSING     
+}    
 function checkAnswer(isCorrect, word) {
     if (isCorrect) {
         showToast('Correct!', 'success');
@@ -1453,7 +1369,58 @@ elements.addToVocabBtn.addEventListener('click', async () => {
             // Theme toggle
             elements.themeToggle.addEventListener('click', toggleTheme);
         }
+async function removeDuplicateWords() {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_VOCAB], 'readwrite');
+        const store = transaction.objectStore(STORE_VOCAB);
         
+        // First check if the index exists
+        if (!store.indexNames.contains('word')) {
+            console.log('Word index does not exist, skipping duplicate removal');
+            resolve(0);
+            return;
+        }
+        
+        const wordIndex = store.index('word');
+        const uniqueWords = new Set();
+        const duplicates = [];
+        
+        // Open cursor to go through all words
+        const request = store.openCursor();
+        
+        request.onsuccess = (event) => {
+            const cursor = event.target.result;
+            if (cursor) {
+                const word = cursor.value.word;
+                if (uniqueWords.has(word)) {
+                    duplicates.push(cursor.value.id);
+                } else {
+                    uniqueWords.add(word);
+                }
+                cursor.continue();
+            } else {
+                // Cursor has completed
+                if (duplicates.length > 0) {
+                    let deletedCount = 0;
+                    duplicates.forEach(id => {
+                        const deleteRequest = store.delete(id);
+                        deleteRequest.onsuccess = () => {
+                            deletedCount++;
+                            if (deletedCount === duplicates.length) {
+                                resolve(deletedCount);
+                            }
+                        };
+                        deleteRequest.onerror = (event) => reject(event.target.error);
+                    });
+                } else {
+                    resolve(0);
+                }
+            }
+        };
+        
+        request.onerror = (event) => reject(event.target.error);
+    });
+} 
         // Initialize the app
         async function initApp() {
             try {
