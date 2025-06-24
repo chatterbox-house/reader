@@ -733,38 +733,51 @@ const elements = {
         
         let db;
         
-function openDatabase() {
+async function openDatabase() {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open(DB_NAME, DB_VERSION);
         
-request.onupgradeneeded = (event) => {
-    db = event.target.result;
-    
-    if (!db.objectStoreNames.contains(STORE_SENTENCES)) {
-        const sentencesStore = db.createObjectStore(STORE_SENTENCES, { keyPath: 'id' });
-        sentencesStore.createIndex('position', 'position', { unique: true });
-    }
-    
-    if (!db.objectStoreNames.contains(STORE_VOCAB)) {
-        const vocabStore = db.createObjectStore(STORE_VOCAB, { keyPath: 'id' });
-        vocabStore.createIndex('bucket', 'bucket', { unique: false });
-        vocabStore.createIndex('word', 'word', { unique: true }); // This creates the word index
-    } else {
-        // If store exists but index doesn't, create it
-        const vocabStore = event.target.transaction.objectStore(STORE_VOCAB);
-        if (!vocabStore.indexNames.contains('word')) {
-            vocabStore.createIndex('word', 'word', { unique: true });
-        }
-    }
-};
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            console.log('Database upgrade needed');
+            
+            try {
+                if (!db.objectStoreNames.contains(STORE_SENTENCES)) {
+                    const sentencesStore = db.createObjectStore(STORE_SENTENCES, { keyPath: 'id' });
+                    sentencesStore.createIndex('position', 'position', { unique: true });
+                }
+                
+                if (!db.objectStoreNames.contains(STORE_VOCAB)) {
+                    const vocabStore = db.createObjectStore(STORE_VOCAB, { keyPath: 'id' });
+                    vocabStore.createIndex('bucket', 'bucket', { unique: false });
+                    vocabStore.createIndex('word', 'word', { unique: true });
+                } else {
+                    // If store exists but index doesn't, create it
+                    const vocabStore = event.target.transaction.objectStore(STORE_VOCAB);
+                    if (!vocabStore.indexNames.contains('word')) {
+                        vocabStore.createIndex('word', 'word', { unique: true });
+                    }
+                }
+            } catch (e) {
+                console.error('Upgrade error:', e);
+                reject(e);
+            }
+        };
         
         request.onsuccess = (event) => {
-            db = event.target.result;
+            const db = event.target.result;
+            console.log('Database opened successfully');
             resolve(db);
         };
         
         request.onerror = (event) => {
-            reject('Database error: ' + event.target.errorCode);
+            console.error('Database error:', event.target.error);
+            reject(event.target.error);
+        };
+        
+        request.onblocked = (event) => {
+            console.error('Database blocked:', event);
+            reject(new Error('Database is blocked by another connection'));
         };
     });
 }
@@ -1616,43 +1629,75 @@ async function removeDuplicateWords() {
     });
 } 
         // Initialize the app
-        async function initApp() {
+async function initApp() {
+    try {
+        console.log('Initializing app...');
+        db = await openDatabase();
+        console.log('Database opened, removing duplicates...');
+        
+        try {
+            const duplicatesRemoved = await removeDuplicateWords();
+            console.log(`Removed ${duplicatesRemoved} duplicate words`);
+        } catch (e) {
+            console.warn('Could not remove duplicates:', e);
+        }
+        
+        console.log('Loading sentences...');
+        state.sentences = await getAllSentences();
+        
+        if (state.sentences.length > 0) {
+            document.querySelector('.nav-btn[data-view="text-import"]').classList.remove('active');
+            document.querySelector('.nav-btn[data-view="vocab-review"]').classList.add('active');
+            showView('vocab-review-view');
+        }
+        
+        console.log('Updating bucket counts...');
+        await updateBucketCounts();
+        setupEventListeners();
+        
+        // Apply theme
+        document.documentElement.setAttribute('data-theme', state.theme);
+        elements.themeToggle.textContent = state.theme === 'dark' ? '🌙' : '☀️';
+        
+        // Pre-warm TTS
+        if ('speechSynthesis' in window) {
+            // Load voices
+            speechSynthesis.getVoices();
+        }
+        
+        // Service worker registration for PWA
+        if ('serviceWorker' in navigator) {
             try {
-                await openDatabase();
-await removeDuplicateWords();
-                state.sentences = await getAllSentences();
-                
-                if (state.sentences.length > 0) {
-                    document.querySelector('.nav-btn[data-view="text-import"]').classList.remove('active');
-                    document.querySelector('.nav-btn[data-view="vocab-review"]').classList.add('active');
-                    showView('vocab-review-view');
-                }
-                
-                await updateBucketCounts();
-                setupEventListeners();
-                
-                // Apply theme
-                document.documentElement.setAttribute('data-theme', state.theme);
-                elements.themeToggle.textContent = state.theme === 'dark' ? '🌙' : '☀️';
-                
-                // Pre-warm TTS
-                if ('speechSynthesis' in window) {
-                    // Load voices
-                    speechSynthesis.getVoices();
-                }
-                
-                // Service worker registration for PWA
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.register('sw.js').catch(error => {
-                        console.log('Service Worker registration failed:', error);
-                    });
-                }
-                
+                const registration = await navigator.serviceWorker.register('sw.js');
+                console.log('ServiceWorker registration successful with scope:', registration.scope);
             } catch (error) {
-                console.error('Initialization error:', error);
-                showToast('Failed to initialize app', 'error');
+                console.log('Service Worker registration failed:', error);
             }
         }
+        
+        console.log('App initialized successfully');
+        
+    } catch (error) {
+        console.error('Initialization error:', error);
+        showToast('Failed to initialize app', 'error');
+        
+        // Try to recover by deleting and recreating the database
+        try {
+            console.log('Attempting to recover by deleting database...');
+            await new Promise((resolve, reject) => {
+                const req = indexedDB.deleteDatabase(DB_NAME);
+                req.onsuccess = resolve;
+                req.onerror = reject;
+                req.onblocked = () => reject(new Error('Database is blocked'));
+            });
+            
+            // Reload the page to try again
+            window.location.reload();
+        } catch (recoveryError) {
+            console.error('Recovery failed:', recoveryError);
+        }
+    }
+}
         
         // Start the app
         window.addEventListener('DOMContentLoaded', initApp);
