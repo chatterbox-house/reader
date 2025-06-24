@@ -210,7 +210,11 @@
             box-shadow: var(--shadow);
             line-height: 1.6;
         }
-
+<div class="word-selection-box" id="word-selection-box" style="display: none;">
+    <div class="selected-word" id="selected-word"></div>
+    <input type="text" class="translation-input" id="vocab-translation" placeholder="Enter translation...">
+    <button class="btn" id="add-to-vocab">Add to Vocabulary</button>
+</div>
         .sentence-controls {
             position: sticky;
             bottom: 0;
@@ -243,30 +247,33 @@
             background-color: var(--highlight);
         }
 
-        .translation-area {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            display: none;
-        }
+.word-selection-box {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+}
 
-        .translation-area.active {
-            display: block;
-        }
+.selected-word {
+    font-size: 1.5rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background-color: var(--secondary);
+    border-radius: 8px;
+}
 
-        .translation-input {
-            width: 100%;
-            min-height: 80px;
-            background-color: var(--secondary);
-            border: 1px solid var(--accent);
-            border-radius: 8px;
-            padding: 1rem;
-            color: var(--text);
-            font-size: 1rem;
-            resize: vertical;
-            margin-bottom: 1rem;
-        }
+.word-selection-box input {
+    width: 100%;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: var(--secondary);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 1rem;
+}
 
         .bucket-container {
             display: grid;
@@ -305,7 +312,46 @@
             font-size: 0.9rem;
             color: var(--text-secondary);
         }
+.matching-game {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
 
+.japanese-words, .english-words {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.word-card {
+    background-color: var(--accent);
+    padding: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.word-card:hover {
+    transform: translateY(-2px);
+    background-color: rgba(15, 52, 96, 0.8);
+}
+
+.word-card.selected {
+    background-color: var(--highlight);
+}
+
+.word-card.correct {
+    background-color: var(--success);
+    opacity: 0.7;
+}
+
+.word-card.incorrect {
+    background-color: var(--danger);
+    opacity: 0.7;
+}
         .review-container {
             background-color: var(--card-bg);
             border-radius: 12px;
@@ -420,7 +466,24 @@
             .bucket-container {
                 grid-template-columns: 1fr 1fr;
             }
-        }
+.progress-container {
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.progress-bar {
+    background-color: var(--secondary);
+    border-radius: 4px;
+    height: 8px;
+    margin-bottom: 0.5rem;
+    overflow: hidden;
+}
+
+.progress-text {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+      
     </style>
 </head>
 <body>
@@ -448,19 +511,19 @@
             </section>
             
             <section id="reading-view" class="view">
+<div class="word-selection-box" id="word-selection-box" style="display: none;">
+    <div class="selected-word" id="selected-word"></div>
+    <input type="text" class="translation-input" id="vocab-translation" placeholder="Enter translation...">
+    <button class="btn" id="add-to-vocab">Add to Vocabulary</button>
+</div>
                 <div class="sentence-display" id="sentence-display">
                     Select text to begin reading
                 </div>
                 
-                <div class="translation-area" id="translation-area">
-                    <textarea class="translation-input" id="translation-input" placeholder="Enter your translation..."></textarea>
-                    <button class="btn" id="save-translation">Save Translation</button>
-                </div>
                 
                 <div class="sentence-controls">
                     <button class="control-btn" id="prev-sentence">←</button>
                     <button class="control-btn" id="tts-button">🔊</button>
-                    <button class="control-btn" id="translation-toggle">訳</button>
                     <button class="control-btn" id="next-sentence">→</button>
                 </div>
             </section>
@@ -491,28 +554,25 @@
                 <button class="btn" id="start-review" disabled>Select a difficulty to start</button>
             </section>
             
-            <section id="review-mode-view" class="view">
-                <div class="review-container">
-                    <div class="review-question" id="review-question"></div>
-                    
-                    <div id="review-options" class="review-options" style="display: none;">
-                    </div>
-                    
-                    <div id="review-typing" class="review-typing" style="display: none;">
-                        <input type="text" class="typing-input" id="typing-input" placeholder="Type in Japanese...">
-                        <button class="btn" id="submit-answer">Submit Answer</button>
-                    </div>
-                    
-                    <div class="progress-container">
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="progress-fill" style="width: 0%; height: 8px; background-color: var(--highlight); border-radius: 4px;"></div>
-                        </div>
-                        <div class="progress-text" id="progress-text">0/0</div>
-                    </div>
-                </div>
-                
-                <button class="btn" id="exit-review">Exit Review</button>
-            </section>
+<section id="review-mode-view" class="view">
+    <div class="review-container">
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill" style="width: 0%; height: 8px; background-color: var(--highlight); border-radius: 4px;"></div>
+            </div>
+            <div class="progress-text" id="progress-text">0/0</div>
+        </div>
+        
+        <div class="review-question" id="review-question"></div>
+        
+        <div class="matching-game">
+            <div class="japanese-words" id="japanese-words"></div>
+            <div class="english-words" id="english-words"></div>
+        </div>
+    </div>
+    
+    <button class="btn" id="exit-review">Exit Review</button>
+</section>
         </main>
         
         <div class="toast" id="toast"></div>
@@ -550,10 +610,11 @@
             prevSentenceBtn: document.getElementById('prev-sentence'),
             nextSentenceBtn: document.getElementById('next-sentence'),
             ttsButton: document.getElementById('tts-button'),
-            translationToggle: document.getElementById('translation-toggle'),
-            translationArea: document.getElementById('translation-area'),
-            translationInput: document.getElementById('translation-input'),
-            saveTranslationBtn: document.getElementById('save-translation'),
+wordSelectionBox: document.getElementById('word-selection-box'),
+selectedWord: document.getElementById('selected-word'),
+vocabTranslation: document.getElementById('vocab-translation'),
+addToVocabBtn: document.getElementById('add-to-vocab'),
+
             bucketCounts: {
                 new: document.getElementById('new-count'),
                 easy: document.getElementById('easy-count'),
@@ -611,19 +672,24 @@
         }
         
         // Database operations
-        function addSentences(sentences) {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_SENTENCES], 'readwrite');
-                const store = transaction.objectStore(STORE_SENTENCES);
-                
-                sentences.forEach(sentence => {
-                    store.add(sentence);
-                });
-                
-                transaction.oncomplete = () => resolve();
-                transaction.onerror = (event) => reject(event.target.error);
+function addSentences(sentences) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_SENTENCES], 'readwrite');
+        const store = transaction.objectStore(STORE_SENTENCES);
+        
+        // First clear existing sentences
+        store.clear().onsuccess = () => {
+            // Then add new sentences with unique positions
+            sentences.forEach((sentence, index) => {
+                sentence.position = index; // Ensure unique position
+                store.add(sentence);
             });
-        }
+            
+            transaction.oncomplete = () => resolve();
+            transaction.onerror = (event) => reject(event.target.error);
+        };
+    });
+}
         
         function getAllSentences() {
             return new Promise((resolve, reject) => {
@@ -793,146 +859,190 @@
             });
         }
         
-        function displaySentence() {
-            if (state.sentences.length === 0) {
-                elements.sentenceDisplay.textContent = 'No sentences available.';
-                return;
-            }
-            
-            const sentence = state.sentences[state.currentSentenceIndex];
-            elements.sentenceDisplay.textContent = sentence.original;
-            
-            // Load translation if available
-            if (sentence.user_translation) {
-                elements.translationInput.value = sentence.user_translation;
-            } else {
-                elements.translationInput.value = '';
-            }
-        }
+function displaySentence() {
+    if (state.sentences.length === 0) {
+        elements.sentenceDisplay.textContent = 'No sentences available.';
+        return;
+    }
+    
+    const sentence = state.sentences[state.currentSentenceIndex];
+    elements.sentenceDisplay.textContent = sentence.original;
+    elements.wordSelectionBox.style.display = 'none';
+}
         
         // Vocabulary review functions
-        async function startReview(bucket) {
-            state.reviewMode = bucket;
-            state.reviewWords = await getVocabByBucket(bucket);
-            
-            if (state.reviewWords.length === 0) {
-                showToast('No words to review in this category!', 'error');
-                return;
-            }
-            
-            // Shuffle words
-            state.reviewWords = shuffleArray(state.reviewWords);
-            state.currentReviewIndex = 0;
-            state.reviewStats = { correct: 0, incorrect: 0 };
-            
-            showView('review-mode-view');
-            showNextReviewItem();
-        }
+async function startReview(bucket) {
+    state.reviewMode = bucket;
+    state.reviewWords = await getVocabByBucket(bucket);
+    
+    if (state.reviewWords.length === 0) {
+        showToast('No words to review in this category!', 'error');
+        return;
+    }
+    
+    // Shuffle words
+    state.reviewWords = shuffleArray(state.reviewWords);
+    state.currentReviewIndex = 0;
+    state.reviewStats = { correct: 0, incorrect: 0 };
+    
+    showView('review-mode-view');
+    setupMatchingGame();
+}
+
+function setupMatchingGame() {
+    if (state.currentReviewIndex >= state.reviewWords.length) {
+        // Review completed
+        showToast(`Review complete! ${state.reviewStats.correct} correct, ${state.reviewStats.incorrect} incorrect`, 'success');
+        updateBucketCounts();
+        showView('vocab-review-view');
+        return;
+    }
+    
+    // Clear previous game
+    document.getElementById('japanese-words').innerHTML = '';
+    document.getElementById('english-words').innerHTML = '';
+    
+    // Get current word and some random ones
+    const currentWord = state.reviewWords[state.currentReviewIndex];
+    const allWords = [...state.reviewWords];
+    
+    // Remove current word from the options
+    const otherWords = allWords.filter(w => w.id !== currentWord.id);
+    
+    // Select 3 random other words
+    const randomWords = [];
+    while (randomWords.length < 3 && otherWords.length > 0) {
+        const randomIndex = Math.floor(Math.random() * otherWords.length);
+        randomWords.push(otherWords[randomIndex]);
+        otherWords.splice(randomIndex, 1);
+    }
+    
+    // Combine current word with random words
+    const japaneseWords = [currentWord, ...randomWords];
+    const englishWords = [currentWord, ...randomWords];
+    
+    // Shuffle them
+    shuffleArray(japaneseWords);
+    shuffleArray(englishWords);
+    
+    // Display Japanese words on left
+    japaneseWords.forEach(word => {
+        const card = document.createElement('div');
+        card.className = 'word-card';
+        card.textContent = word.word;
+        card.dataset.id = word.id;
         
-        function showNextReviewItem() {
-            if (state.currentReviewIndex >= state.reviewWords.length) {
-                // Review completed
-                showToast(`Review complete! ${state.reviewStats.correct} correct, ${state.reviewStats.incorrect} incorrect`, 'success');
-                updateBucketCounts();
-                showView('vocab-review-view');
-                return;
-            }
-            
-            const word = state.reviewWords[state.currentReviewIndex];
-            elements.reviewQuestion.textContent = '';
-            elements.reviewOptions.style.display = 'none';
-            elements.reviewTyping.style.display = 'none';
-            elements.typingInput.value = '';
-            
-            // Update progress
-            const progressPercent = (state.currentReviewIndex / state.reviewWords.length) * 100;
-            elements.progressFill.style.width = `${progressPercent}%`;
-            elements.progressText.textContent = `${state.currentReviewIndex + 1}/${state.reviewWords.length}`;
-            
-            // Determine review mode and display accordingly
-            if (state.reviewMode === 'easy') {
-                // Easy mode: Play Japanese audio -> show English options
-                elements.reviewQuestion.textContent = 'Listen to the word:';
-                
-                // Play audio after a short delay
-                setTimeout(() => {
-                    speakText(word.word, 0.8);
-                }, 500);
-                
-                // Generate options (correct + 3 random)
-                const options = [word.translation];
-                const allWords = state.reviewWords.filter(w => w.id !== word.id);
-                
-                while (options.length < 4 && allWords.length > 0) {
-                    const randomIndex = Math.floor(Math.random() * allWords.length);
-                    const randomTranslation = allWords[randomIndex].translation;
-                    
-                    if (!options.includes(randomTranslation)) {
-                        options.push(randomTranslation);
-                    }
-                    allWords.splice(randomIndex, 1);
-                }
-                
-                // Shuffle options
-                options.sort(() => Math.random() - 0.5);
-                
-                // Display options
-                elements.reviewOptions.innerHTML = '';
-                options.forEach(option => {
-                    const button = document.createElement('button');
-                    button.className = 'option-btn';
-                    button.textContent = option;
-                    button.addEventListener('click', () => checkAnswer(option === word.translation, word));
-                    elements.reviewOptions.appendChild(button);
-                });
-                
-                elements.reviewOptions.style.display = 'grid';
-            } 
-            else if (state.reviewMode === 'medium') {
-                // Medium mode: Show English -> show Japanese options (50% auto-play)
-                elements.reviewQuestion.textContent = word.translation;
-                
-                // 50% chance to auto-play audio
-                if (Math.random() < 0.5) {
-                    speakText(word.word);
-                }
-                
-                // Generate options (correct + 3 random)
-                const options = [word.word];
-                const allWords = state.reviewWords.filter(w => w.id !== word.id);
-                
-                while (options.length < 4 && allWords.length > 0) {
-                    const randomIndex = Math.floor(Math.random() * allWords.length);
-                    const randomWord = allWords[randomIndex].word;
-                    
-                    if (!options.includes(randomWord)) {
-                        options.push(randomWord);
-                    }
-                    allWords.splice(randomIndex, 1);
-                }
-                
-                // Shuffle options
-                options.sort(() => Math.random() - 0.5);
-                
-                // Display options
-                elements.reviewOptions.innerHTML = '';
-                options.forEach(option => {
-                    const button = document.createElement('button');
-                    button.className = 'option-btn';
-                    button.textContent = option;
-                    button.addEventListener('click', () => checkAnswer(option === word.word, word));
-                    elements.reviewOptions.appendChild(button);
-                });
-                
-                elements.reviewOptions.style.display = 'grid';
-            } 
-            else if (state.reviewMode === 'hard') {
-                // Hard mode: Show English -> type Japanese
-                elements.reviewQuestion.textContent = word.translation;
-                elements.reviewTyping.style.display = 'block';
-            }
-        }
+        card.addEventListener('click', function() {
+            selectCard(this, 'japanese');
+        });
         
+        // Add TTS button
+        const ttsBtn = document.createElement('button');
+        ttsBtn.textContent = '🔊';
+        ttsBtn.style.marginLeft = '0.5rem';
+        ttsBtn.style.background = 'none';
+        ttsBtn.style.border = 'none';
+        ttsBtn.style.color = 'inherit';
+        ttsBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent card selection when clicking TTS
+            speakText(word.word);
+        });
+        
+        card.appendChild(ttsBtn);
+        document.getElementById('japanese-words').appendChild(card);
+    });
+    
+    // Display English words on right
+    englishWords.forEach(word => {
+        const card = document.createElement('div');
+        card.className = 'word-card';
+        card.textContent = word.translation;
+        card.dataset.id = word.id;
+        
+        card.addEventListener('click', function() {
+            selectCard(this, 'english');
+        });
+        
+        document.getElementById('english-words').appendChild(card);
+    });
+    
+    // Update progress
+    const progressPercent = (state.currentReviewIndex / state.reviewWords.length) * 100;
+    elements.progressFill.style.width = `${progressPercent}%`;
+    elements.progressText.textContent = `${state.currentReviewIndex + 1}/${state.reviewWords.length}`;
+    
+    // Reset selected cards
+    state.selectedJapaneseCard = null;
+    state.selectedEnglishCard = null;
+}
+
+function selectCard(card, type) {
+    // If card is already matched, ignore click
+    if (card.classList.contains('correct') || card.classList.contains('incorrect')) {
+        return;
+    }
+    
+    // Select the card
+    if (type === 'japanese') {
+        // Deselect previous selection
+        if (state.selectedJapaneseCard) {
+            state.selectedJapaneseCard.classList.remove('selected');
+        }
+        state.selectedJapaneseCard = card;
+    } else {
+        // Deselect previous selection
+        if (state.selectedEnglishCard) {
+            state.selectedEnglishCard.classList.remove('selected');
+        }
+        state.selectedEnglishCard = card;
+    }
+    
+    card.classList.add('selected');
+    
+    // Check if both are selected
+    if (state.selectedJapaneseCard && state.selectedEnglishCard) {
+        checkMatch();
+    }
+}
+
+function checkMatch() {
+    const japaneseId = state.selectedJapaneseCard.dataset.id;
+    const englishId = state.selectedEnglishCard.dataset.id;
+    
+    if (japaneseId === englishId) {
+        // Correct match
+        state.selectedJapaneseCard.classList.remove('selected');
+        state.selectedJapaneseCard.classList.add('correct');
+        state.selectedEnglishCard.classList.remove('selected');
+        state.selectedEnglishCard.classList.add('correct');
+        
+        state.reviewStats.correct++;
+        showToast('Correct!', 'success');
+        
+        // Move to next word after delay
+        setTimeout(() => {
+            state.currentReviewIndex++;
+            setupMatchingGame();
+        }, 1000);
+    } else {
+        // Incorrect match
+        state.selectedJapaneseCard.classList.remove('selected');
+        state.selectedJapaneseCard.classList.add('incorrect');
+        state.selectedEnglishCard.classList.remove('selected');
+        state.selectedEnglishCard.classList.add('incorrect');
+        
+        state.reviewStats.incorrect++;
+        showToast('Try again!', 'error');
+        
+        // Reset selections after delay
+        setTimeout(() => {
+            state.selectedJapaneseCard.classList.remove('incorrect');
+            state.selectedEnglishCard.classList.remove('incorrect');
+            state.selectedJapaneseCard = null;
+            state.selectedEnglishCard = null;
+        }, 1000);
+    }
+}     
         function checkAnswer(isCorrect, word) {
             if (isCorrect) {
                 showToast('Correct!', 'success');
@@ -1101,51 +1211,55 @@
                 }
             });
             
-            elements.translationToggle.addEventListener('click', () => {
-                elements.translationArea.classList.toggle('active');
-            });
+
             
-            elements.saveTranslationBtn.addEventListener('click', async () => {
-                if (state.sentences.length === 0) return;
-                
-                const sentence = state.sentences[state.currentSentenceIndex];
-                sentence.user_translation = elements.translationInput.value;
-                
-                try {
-                    await updateSentence(sentence);
-                    showToast('Translation saved!', 'success');
-                } catch (error) {
-                    console.error('Error saving translation:', error);
-                    showToast('Error saving translation', 'error');
-                }
-            });
-            
-            // Word selection
-            elements.sentenceDisplay.addEventListener('mouseup', () => {
-                const selection = window.getSelection().toString().trim();
-                if (selection.length > 0) {
-                    // Show "Add to Review" option
-                    const add = confirm(`Add "${selection}" to vocabulary review?`);
-                    if (add) {
-                        const translation = prompt(`Enter translation for "${selection}":`);
-                        if (translation) {
-                            const newWord = {
-                                id: generateUUID(),
-                                word: selection,
-                                translation: translation,
-                                sentence_id: state.sentences[state.currentSentenceIndex].id,
-                                bucket: 'new',
-                                streak: 0
-                            };
-                            
-                            addVocabWord(newWord).then(() => {
-                                showToast(`"${selection}" added to vocabulary!`, 'success');
-                                updateBucketCounts();
-                            });
-                        }
-                    }
-                }
-            });
+// Word selection
+elements.sentenceDisplay.addEventListener('mouseup', handleTextSelection);
+elements.sentenceDisplay.addEventListener('touchend', handleTextSelection);
+
+function handleTextSelection() {
+    const selection = window.getSelection().toString().trim();
+    if (selection.length > 0) {
+        elements.selectedWord.textContent = selection;
+        elements.vocabTranslation.value = '';
+        elements.wordSelectionBox.style.display = 'block';
+        
+        // Scroll to the selection box if on mobile
+        if (window.innerWidth <= 600) {
+            elements.wordSelectionBox.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+}
+
+// Add to vocab handler
+elements.addToVocabBtn.addEventListener('click', async () => {
+    const word = elements.selectedWord.textContent;
+    const translation = elements.vocabTranslation.value.trim();
+    
+    if (!translation) {
+        showToast('Please enter a translation', 'error');
+        return;
+    }
+    
+    const newWord = {
+        id: generateUUID(),
+        word: word,
+        translation: translation,
+        sentence_id: state.sentences[state.currentSentenceIndex].id,
+        bucket: 'new',
+        streak: 0
+    };
+    
+    try {
+        await addVocabWord(newWord);
+        showToast(`"${word}" added to vocabulary!`, 'success');
+        elements.wordSelectionBox.style.display = 'none';
+        updateBucketCounts();
+    } catch (error) {
+        showToast('Error adding word', 'error');
+        console.error(error);
+    }
+});
             
             // Vocabulary review
             document.querySelectorAll('.bucket-card').forEach(card => {
