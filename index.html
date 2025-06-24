@@ -501,6 +501,12 @@
                 grid-template-columns: 1fr 1fr;
             }
 }
+.sentence-counter {
+    text-align: center;
+    margin-bottom: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
 .progress-container {
     margin: 1rem 0;
     text-align: center;
@@ -554,6 +560,9 @@
                 <div class="sentence-display" id="sentence-display">
                     Select text to begin reading
                 </div>
+<div class="sentence-counter" id="sentence-counter">
+    Sentence 0/0
+</div>
                 <div class="translation-display" id="translation-display"></div>
                 
                <div class="sentence-controls">
@@ -965,6 +974,8 @@ function displaySentence() {
         if (elements.translationDisplay) {
             elements.translationDisplay.style.display = 'none';
         }
+        // Update counter to show 0/0
+        document.getElementById('sentence-counter').textContent = 'Sentence 0/0';
         return;
     }
     
@@ -972,11 +983,14 @@ function displaySentence() {
     elements.sentenceDisplay.textContent = sentence.original;
     elements.wordSelectionBox.style.display = 'none';
     
-    // Initialize translation display if it exists
+    // Update the sentence counter
+    document.getElementById('sentence-counter').textContent = 
+        `Sentence ${state.currentSentenceIndex + 1}/${state.sentences.length}`;
+    
+    // Rest of your existing code...
     if (elements.translationDisplay) {
         elements.translationDisplay.style.display = 'none';
         
-        // If we have a cached translation, show it immediately
         if (sentence.cached_translation) {
             elements.translationDisplay.textContent = sentence.cached_translation;
             elements.translationDisplay.style.display = 'block';
@@ -1311,20 +1325,20 @@ function checkAnswer(isCorrect, word) {
                     position: index
                 }));
                 
-                try {
-                    await addSentences(sentenceObjects);
-                    state.sentences = await getAllSentences();
-                    state.currentSentenceIndex = 0;
-                    
-                    // Update UI
-                    showView('reading-view');
-                    displaySentence();
-                    showToast(`Processed ${sentences.length} sentences!`, 'success');
-                } catch (error) {
-                    console.error('Error saving sentences:', error);
-                    showToast('Error processing text', 'error');
-                }
-            });
+    try {
+        await addSentences(sentenceObjects);
+        state.sentences = await getAllSentences();
+        state.currentSentenceIndex = 0;
+        
+        // Update UI
+        showView('reading-view');
+        displaySentence(); // This will now show the counter
+        showToast(`Processed ${sentences.length} sentences!`, 'success');
+    } catch (error) {
+        console.error('Error saving sentences:', error);
+        showToast('Error processing text', 'error');
+    }
+});
             
             // Reading view controls
             elements.prevSentenceBtn.addEventListener('click', () => {
