@@ -801,6 +801,27 @@
         width: 100%;
         margin-top: 0.5rem;
     }
+.dictionary-entries {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 0.5rem;
+    background-color: var(--secondary);
+    border-radius: 8px;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.dictionary-entry {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    background-color: var(--card-bg);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.dictionary-entry:hover {
+    background-color: var(--accent);
+}
 }
     </style>
 </head>
@@ -890,11 +911,18 @@
             </section>
             
             <section id="reading-view" class="view">
-                <div class="word-selection-box" id="word-selection-box">
-                    <div class="selected-word" id="selected-word"></div>
-                    <input type="text" class="translation-input" id="vocab-translation" placeholder="Enter translation..." aria-label="Word translation input" autofocus>
-                    <button class="btn" id="add-to-vocab" aria-label="Add to vocabulary">Add to Vocabulary</button>
-                </div>
+<div class="word-selection-box" id="word-selection-box">
+    <div class="selected-word" id="selected-word"></div>
+    <input type="text" class="translation-input" id="vocab-translation" placeholder="Enter translation..." aria-label="Word translation input" autofocus>
+    <button class="btn" id="lookup-word" style="background-color: var(--accent); margin-bottom: 0.5rem;">
+        Lookup in Dictionary
+    </button>
+    <div class="dictionary-results" id="dictionary-results" style="display: none;">
+        <h3 style="margin-bottom: 0.5rem; color: var(--highlight);">Dictionary Results</h3>
+        <div class="dictionary-entries" id="dictionary-entries"></div>
+    </div>
+    <button class="btn" id="add-to-vocab" aria-label="Add to vocabulary">Add to Vocabulary</button>
+</div>
                 <div class="sentence-display" id="sentence-display" aria-label="Current sentence">
                     Select text to begin reading
                 </div>
@@ -1642,16 +1670,21 @@ async function cacheTranslation(text, sourceLang, targetLang, translatedText) {
 }
 
 function toggleTranslationMode(showTranslate) {
+    const importContainer = document.getElementById('text-import-container');
+    const translateContainer = document.getElementById('translate-container');
+    
+    if (!importContainer || !translateContainer) return;
+    
     if (showTranslate) {
-        document.getElementById('text-import-container').style.display = 'none';
-        document.getElementById('translate-container').style.display = 'block';
-        document.querySelector('.mode-toggle-btn[data-mode="import"]').classList.remove('active');
-        document.querySelector('.mode-toggle-btn[data-mode="translate"]').classList.add('active');
+        importContainer.style.display = 'none';
+        translateContainer.style.display = 'block';
+        document.querySelector('.mode-toggle-btn[data-mode="import"]')?.classList.remove('active');
+        document.querySelector('.mode-toggle-btn[data-mode="translate"]')?.classList.add('active');
     } else {
-        document.getElementById('text-import-container').style.display = 'block';
-        document.getElementById('translate-container').style.display = 'none';
-        document.querySelector('.mode-toggle-btn[data-mode="import"]').classList.add('active');
-        document.querySelector('.mode-toggle-btn[data-mode="translate"]').classList.remove('active');
+        importContainer.style.display = 'block';
+        translateContainer.style.display = 'none';
+        document.querySelector('.mode-toggle-btn[data-mode="import"]')?.classList.add('active');
+        document.querySelector('.mode-toggle-btn[data-mode="translate"]')?.classList.remove('active');
     }
 }
 
@@ -2444,7 +2477,72 @@ function setupEventListeners() {
             }
         }
     }
+// Dictionary lookup
+document.getElementById('lookup-word').addEventListener('click', async () => {
+    const word = document.getElementById('selected-word').textContent;
+    if (!word) {
+        showToast('No word selected', 'error');
+        return;
+    }
 
+    try {
+        document.getElementById('lookup-word').innerHTML = 'Searching...';
+        
+        // Try using a different CORS proxy or direct API call
+        const apiUrl = `https://jisho.org/api/v1/search/words?keyword=${encodeURIComponent(word)}`;
+        
+        // First try direct fetch (might work if deployed)
+        let response;
+        try {
+            response = await fetch(apiUrl);
+            if (!response.ok) throw new Error('Direct API failed');
+        } catch (directError) {
+            // If direct fails, try with a CORS proxy
+            const proxyUrl = 'https://api.allorigins.win/raw?url='; // Alternative proxy
+            response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
+            if (!response.ok) throw new Error('API request failed');
+        }
+
+        const data = await response.json();
+
+        const entriesContainer = document.getElementById('dictionary-entries');
+        entriesContainer.innerHTML = '';
+
+        if (data.data && data.data.length > 0) {
+            data.data.slice(0, 5).forEach(entry => {
+                const entryDiv = document.createElement('div');
+                entryDiv.className = 'dictionary-entry';
+                
+                // Get the best display form of the word
+                const japaneseDisplay = entry.japanese[0]?.word || entry.japanese[0]?.reading || word;
+                
+                // Get the first English definition or fallback
+                const englishDefinition = entry.senses[0]?.english_definitions?.join(', ') || 'No definition found';
+                
+                entryDiv.innerHTML = `
+                    <strong>${japaneseDisplay}</strong><br>
+                    ${englishDefinition}
+                `;
+                
+                entryDiv.addEventListener('click', () => {
+                    document.getElementById('vocab-translation').value = 
+                        entry.senses[0]?.english_definitions[0] || englishDefinition.split(',')[0];
+                    document.getElementById('dictionary-results').style.display = 'none';
+                });
+                
+                entriesContainer.appendChild(entryDiv);
+            });
+            document.getElementById('dictionary-results').style.display = 'block';
+        } else {
+            showToast('No dictionary results found', 'error');
+        }
+    } catch (error) {
+        console.error('Dictionary error:', error);
+        showToast('Dictionary lookup failed. Try again later.', 'error');
+    } finally {
+        document.getElementById('lookup-word').innerHTML = 'Lookup in Dictionary';
+    }
+});
     // Add to vocab handler
     elements.addToVocabBtn.addEventListener('click', async () => {
         const word = elements.selectedWord.textContent;
