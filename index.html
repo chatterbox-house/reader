@@ -19,6 +19,9 @@
             --danger: #ef4444;
             --card-bg: rgba(255, 255, 255, 0.05);
             --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --font-size: 16px;
+            --line-height: 1.6;
+            --font-family: 'Segoe UI', system-ui, sans-serif;
         }
 
         [data-theme="light"] {
@@ -31,11 +34,29 @@
             --card-bg: rgba(255, 255, 255, 0.8);
         }
 
+        [data-theme="high-contrast"] {
+            --primary: #000;
+            --secondary: #222;
+            --accent: #444;
+            --highlight: #ff0;
+            --text: #fff;
+            --text-secondary: #ccc;
+            --card-bg: #111;
+        }
+
+        [data-font="serif"] {
+            --font-family: Georgia, serif;
+        }
+
+        [data-font="sans-serif"] {
+            --font-family: Arial, sans-serif;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: var(--font-family);
         }
 
         body {
@@ -44,6 +65,8 @@
             min-height: 100vh;
             overflow-x: hidden;
             transition: background-color 0.3s ease;
+            font-size: var(--font-size);
+            line-height: var(--line-height);
         }
 
         .app-container {
@@ -109,6 +132,174 @@
 
         .theme-toggle:hover {
             background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .settings-btn {
+            background: none;
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+            font-size: 1.2rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+            margin-left: 0.5rem;
+        }
+
+        .settings-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100vh;
+            background-color: var(--secondary);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            padding: 1.5rem;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .settings-panel.open {
+            right: 0;
+        }
+
+        .settings-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .settings-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .settings-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--highlight);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .settings-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .settings-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .settings-select, .settings-range {
+            width: 100%;
+            padding: 0.5rem;
+            background-color: var(--accent);
+            border: 1px solid var(--highlight);
+            border-radius: 8px;
+            color: var(--text);
+            margin-bottom: 1rem;
+        }
+
+        .settings-range {
+            -webkit-appearance: none;
+            height: 8px;
+            background: var(--accent);
+            outline: none;
+            padding: 0;
+        }
+
+        .settings-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--highlight);
+            cursor: pointer;
+        }
+
+        .settings-range::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--highlight);
+            cursor: pointer;
+        }
+
+        .settings-toggle {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+            margin-right: 0.5rem;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--accent);
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--highlight);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        .toggle-label {
+            font-size: 0.9rem;
         }
 
         main {
@@ -196,37 +387,39 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
-.translation-result {
-    background-color: var(--card-bg);
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-top: 1rem;
-    box-shadow: var(--shadow);
-    display: none;
-}
 
-.mode-toggle {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
+        .translation-result {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            box-shadow: var(--shadow);
+            display: none;
+        }
 
-.mode-toggle-btn {
-    background-color: var(--accent);
-    color: var(--text);
-    border: none;
-    padding: 0.8rem 1.5rem;
-    border-radius: 30px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
+        .mode-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
 
-.mode-toggle-btn.active {
-    background-color: var(--highlight);
-    color: white;
-}
+        .mode-toggle-btn {
+            background-color: var(--accent);
+            color: var(--text);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .mode-toggle-btn.active {
+            background-color: var(--highlight);
+            color: white;
+        }
+
         .sentence-display {
             background-color: var(--card-bg);
             border-radius: 12px;
@@ -239,9 +432,11 @@
             justify-content: center;
             margin-bottom: 1rem;
             box-shadow: var(--shadow);
-            line-height: 1.6;
+            line-height: var(--line-height);
             user-select: text;
+            position: relative;
         }
+
 
         .word-selection-box {
             background-color: var(--card-bg);
@@ -362,7 +557,6 @@
             color: var(--text-secondary);
         }
 
-        /* Updated matching game styles */
         .matching-game-container {
             display: flex;
             flex-direction: column;
@@ -632,7 +826,6 @@
             cursor: pointer;
         }
 
-        /* New styles for enhancements */
         .loading-spinner {
             border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
@@ -738,6 +931,167 @@
             color: #6c757d;
         }
 
+        .progress-stats {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-weight: bold;
+        }
+
+        .streak-display {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .streak-count {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--highlight);
+        }
+
+        .streak-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .tts-speed-control {
+            position: fixed;
+            bottom: 6rem;
+            right: 1rem;
+            background-color: var(--highlight);
+            color: white;
+            border-radius: 30px;
+            padding: 0.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .tts-speed-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0.3rem 0.6rem;
+            border-radius: 50%;
+        }
+
+        .tts-speed-btn.active {
+            background-color: white;
+            color: var(--highlight);
+        }
+
+        .tts-speed-label {
+            font-size: 0.8rem;
+        }
+
+        .jump-to-sentence {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .jump-input {
+            flex: 1;
+            padding: 0.5rem;
+            background-color: var(--secondary);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            color: var(--text);
+        }
+
+        .jump-btn {
+            padding: 0.5rem 1rem;
+            background-color: var(--accent);
+            border: none;
+            border-radius: 8px;
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        .cloze-word {
+            color: transparent;
+            text-shadow: 0 0 8px var(--text);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .cloze-word:hover {
+            color: var(--text);
+            text-shadow: none;
+        }
+
+        .cloze-word::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--highlight);
+        }
+
+        .tooltip {
+            position: absolute;
+            background-color: var(--secondary);
+            color: var(--text);
+            padding: 0.5rem;
+            border-radius: 6px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            font-size: 0.9rem;
+            max-width: 200px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .tooltip.show {
+            opacity: 1;
+        }
+
+    
+
+        .translation-toggle {
+            position: fixed;
+            bottom: 16rem;
+            right: 1rem;
+            background-color: var(--highlight);
+            color: white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+        }
+
 @media (max-width: 600px) {
     .sentence-display {
         font-size: 1.5rem;
@@ -801,27 +1155,48 @@
         width: 100%;
         margin-top: 0.5rem;
     }
-.dictionary-entries {
-    max-height: 200px;
-    overflow-y: auto;
-    margin-top: 0.5rem;
-    background-color: var(--secondary);
-    border-radius: 8px;
-    padding: 0.5rem;
-    font-size: 0.9rem;
-}
+    .dictionary-entries {
+        max-height: 200px;
+        overflow-y: auto;
+        margin-top: 0.5rem;
+        background-color: var(--secondary);
+        border-radius: 8px;
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
 
-.dictionary-entry {
-    padding: 0.5rem;
-    margin-bottom: 0.5rem;
-    background-color: var(--card-bg);
-    border-radius: 6px;
-    cursor: pointer;
-}
+    .dictionary-entry {
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+        background-color: var(--card-bg);
+        border-radius: 6px;
+        cursor: pointer;
+    }
 
-.dictionary-entry:hover {
-    background-color: var(--accent);
-}
+    .dictionary-entry:hover {
+        background-color: var(--accent);
+    }
+
+    .settings-panel {
+        width: 100%;
+        right: -100%;
+    }
+
+    .settings-panel.open {
+        right: 0;
+    }
+
+    .tts-speed-control, .translation-toggle {
+        bottom: auto;
+        top: 1rem;
+        right: 1rem;
+    }
+
+
+
+    .translation-toggle {
+        top: 11rem;
+    }
 }
     </style>
 </head>
@@ -833,8 +1208,85 @@
                 <button class="nav-btn active" data-view="text-import" aria-label="Text Reader">Reader</button>
                 <button class="nav-btn" data-view="vocab-review" aria-label="Vocabulary Review">Vocabulary</button>
             </div>
-            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">🌙</button>
+            <div>
+                <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">🌙</button>
+                <button class="settings-btn" id="settings-btn" aria-label="Settings">⚙️</button>
+            </div>
         </header>
+        
+        <div class="settings-overlay" id="settings-overlay"></div>
+        <div class="settings-panel" id="settings-panel">
+            <div class="settings-title">
+                <span>Settings</span>
+                <button class="settings-btn" id="close-settings" aria-label="Close settings">✕</button>
+            </div>
+            
+            <div class="settings-group">
+                <h3>Reading Settings</h3>
+
+                
+                <div class="settings-toggle">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="cloze-toggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label">Cloze Deletion Mode</span>
+                </div>
+                
+                <div class="settings-toggle">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="auto-translate-toggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label">Auto-show Translations</span>
+                </div>
+            </div>
+            
+            <div class="settings-group">
+                <h3>Appearance</h3>
+                <label class="settings-label">Font Family</label>
+                <select class="settings-select" id="font-select">
+                    <option value="system">System UI</option>
+                    <option value="serif">Serif</option>
+                    <option value="sans-serif">Sans-serif</option>
+                </select>
+                
+                <label class="settings-label">Font Size</label>
+                <input type="range" class="settings-range" id="font-size-range" min="12" max="24" step="1" value="16">
+                
+                <label class="settings-label">Line Height</label>
+                <input type="range" class="settings-range" id="line-height-range" min="1.2" max="2.5" step="0.1" value="1.6">
+                
+                <label class="settings-label">Theme</label>
+                <select class="settings-select" id="theme-select">
+                    <option value="dark">Dark</option>
+                    <option value="light">Light</option>
+                    <option value="high-contrast">High Contrast</option>
+                </select>
+            </div>
+            
+            <div class="settings-group">
+                <h3>Progress</h3>
+                <div class="streak-display">
+                    <span class="streak-count" id="streak-count">0</span>
+                    <span class="streak-label">Day Streak</span>
+                </div>
+                
+                <div class="stat-item">
+                    <span class="stat-label">Words Learned:</span>
+                    <span class="stat-value" id="words-learned-count">0</span>
+                </div>
+                
+                <div class="stat-item">
+                    <span class="stat-label">Time Spent:</span>
+                    <span class="stat-value" id="time-spent-count">0 min</span>
+                </div>
+                
+                <button class="btn" id="view-progress-btn" style="width: 100%; margin-top: 1rem;">
+                    View Detailed Progress
+                </button>
+            </div>
+        </div>
         
         <div class="offline-warning" id="offline-warning">You are offline - some features may not work</div>
         
@@ -911,18 +1363,24 @@
             </section>
             
             <section id="reading-view" class="view">
-<div class="word-selection-box" id="word-selection-box">
-    <div class="selected-word" id="selected-word"></div>
-    <input type="text" class="translation-input" id="vocab-translation" placeholder="Enter translation..." aria-label="Word translation input" autofocus>
-    <button class="btn" id="lookup-word" style="background-color: var(--accent); margin-bottom: 0.5rem;">
-        Lookup in Dictionary
-    </button>
-    <div class="dictionary-results" id="dictionary-results" style="display: none;">
-        <h3 style="margin-bottom: 0.5rem; color: var(--highlight);">Dictionary Results</h3>
-        <div class="dictionary-entries" id="dictionary-entries"></div>
-    </div>
-    <button class="btn" id="add-to-vocab" aria-label="Add to vocabulary">Add to Vocabulary</button>
-</div>
+                <div class="word-selection-box" id="word-selection-box">
+                    <div class="selected-word" id="selected-word"></div>
+                    <input type="text" class="translation-input" id="vocab-translation" placeholder="Enter translation..." aria-label="Word translation input" autofocus>
+                    <button class="btn" id="lookup-word" style="background-color: var(--accent); margin-bottom: 0.5rem;">
+                        Lookup in Dictionary
+                    </button>
+                    <div class="dictionary-results" id="dictionary-results" style="display: none;">
+                        <h3 style="margin-bottom: 0.5rem; color: var(--highlight);">Dictionary Results</h3>
+                        <div class="dictionary-entries" id="dictionary-entries"></div>
+                    </div>
+                    <button class="btn" id="add-to-vocab" aria-label="Add to vocabulary">Add to Vocabulary</button>
+                </div>
+                
+                <div class="jump-to-sentence">
+                    <input type="number" class="jump-input" id="jump-input" placeholder="Jump to sentence..." min="1">
+                    <button class="jump-btn" id="jump-btn">Go</button>
+                </div>
+                
                 <div class="sentence-display" id="sentence-display" aria-label="Current sentence">
                     Select text to begin reading
                 </div>
@@ -975,6 +1433,22 @@
                 <button class="btn" id="manage-vocab-btn" style="background-color: var(--accent); margin-top: 1rem;" aria-label="Manage vocabulary">
                     Manage Vocabulary
                 </button>
+                
+                <div class="progress-stats">
+                    <h3>Today's Progress</h3>
+                    <div class="streak-display">
+                        <span class="streak-count" id="daily-streak">0</span>
+                        <span class="streak-label">Day Streak</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Words Learned:</span>
+                        <span class="stat-value" id="daily-words-learned">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Time Spent:</span>
+                        <span class="stat-value" id="daily-time-spent">0 min</span>
+                    </div>
+                </div>
             </section>
             
             <section id="review-mode-view" class="view">
@@ -1074,6 +1548,19 @@
         
         <div class="toast" id="toast"></div>
         <div class="sound-toggle" id="sound-toggle" aria-label="Toggle sound">🔊</div>
+        
+        <!-- New floating controls -->
+        <div class="tts-speed-control" id="tts-speed-control">
+            <button class="tts-speed-btn" data-speed="0.5">0.5x</button>
+            <button class="tts-speed-btn active" data-speed="1.0">1.0x</button>
+            <button class="tts-speed-btn" data-speed="1.5">1.5x</button>
+            <span class="tts-speed-label">TTS Speed</span>
+        </div>
+        
+
+        <div class="translation-toggle" id="floating-translation-toggle" title="Toggle Translation">T</div>
+        
+        <div class="tooltip" id="word-tooltip"></div>
     </div>
 
     <script>
@@ -1102,7 +1589,26 @@ const state = {
     debounceTimer: null,
     uiLanguage: localStorage.getItem('uiLanguage') || 'en',
     newWordsToday: parseInt(localStorage.getItem('newWordsToday')) || 0,
-    lastWordAddedDate: localStorage.getItem('lastWordAddedDate') || ''
+    lastWordAddedDate: localStorage.getItem('lastWordAddedDate') || '',
+
+    currentTtsSpeed: parseFloat(localStorage.getItem('ttsSpeed')) || 1.0,
+    currentFont: localStorage.getItem('font') || 'system',
+    currentFontSize: parseInt(localStorage.getItem('fontSize')) || 16,
+    currentLineHeight: parseFloat(localStorage.getItem('lineHeight')) || 1.6,
+    autoTranslate: localStorage.getItem('autoTranslate') === 'true',
+    clozeMode: localStorage.getItem('clozeMode') === 'true',
+    readingStats: JSON.parse(localStorage.getItem('readingStats')) || {
+        streak: 0,
+        lastActiveDate: '',
+        wordsLearned: 0,
+        timeSpent: 0,
+        dailyWords: 0,
+        dailyTime: 0
+    },
+    currentSessionStart: null,
+    selectedCards: [],
+    currentTtsUtterance: null,
+    wordLookupCache: {}
 };
 
 // Initialize audio context and sounds
@@ -1267,8 +1773,188 @@ const elements = {
     voiceInputBtn: document.createElement('button'),
     offlineWarning: document.getElementById('offline-warning'),
     howToUseToggle: document.getElementById('how-to-use-toggle'),
-    howToUseContent: document.getElementById('how-to-use-content')
+    howToUseContent: document.getElementById('how-to-use-content'),
+    settingsBtn: document.getElementById('settings-btn'),
+    settingsPanel: document.getElementById('settings-panel'),
+    settingsOverlay: document.getElementById('settings-overlay'),
+    closeSettings: document.getElementById('close-settings'),
+
+    clozeToggle: document.getElementById('cloze-toggle'),
+    autoTranslateToggle: document.getElementById('auto-translate-toggle'),
+    fontSelect: document.getElementById('font-select'),
+    fontSizeRange: document.getElementById('font-size-range'),
+    lineHeightRange: document.getElementById('line-height-range'),
+    themeSelect: document.getElementById('theme-select'),
+    streakCount: document.getElementById('streak-count'),
+    wordsLearnedCount: document.getElementById('words-learned-count'),
+    timeSpentCount: document.getElementById('time-spent-count'),
+    viewProgressBtn: document.getElementById('view-progress-btn'),
+
+    floatingTranslationToggle: document.getElementById('floating-translation-toggle'),
+    ttsSpeedControl: document.getElementById('tts-speed-control'),
+    jumpInput: document.getElementById('jump-input'),
+    jumpBtn: document.getElementById('jump-btn'),
+    wordTooltip: document.getElementById('word-tooltip'),
+    dailyStreak: document.getElementById('daily-streak'),
+    dailyWordsLearned: document.getElementById('daily-words-learned'),
+    dailyTimeSpent: document.getElementById('daily-time-spent')
 };
+
+// Initialize settings panel
+function initSettingsPanel() {
+    // Set initial values
+
+    elements.clozeToggle.checked = state.clozeMode;
+    elements.autoTranslateToggle.checked = state.autoTranslate;
+    elements.fontSelect.value = state.currentFont;
+    elements.fontSizeRange.value = state.currentFontSize;
+    elements.lineHeightRange.value = state.currentLineHeight;
+    elements.themeSelect.value = state.theme;
+    
+    // Update stats display
+    updateStatsDisplay();
+    
+    // Set up event listeners
+    elements.settingsBtn.addEventListener('click', () => {
+        elements.settingsPanel.classList.add('open');
+        elements.settingsOverlay.classList.add('open');
+    });
+    
+    elements.closeSettings.addEventListener('click', () => {
+        elements.settingsPanel.classList.remove('open');
+        elements.settingsOverlay.classList.remove('open');
+    });
+    
+    elements.settingsOverlay.addEventListener('click', () => {
+        elements.settingsPanel.classList.remove('open');
+        elements.settingsOverlay.classList.remove('open');
+    });
+    
+
+    
+    elements.clozeToggle.addEventListener('change', (e) => {
+        state.clozeMode = e.target.checked;
+        localStorage.setItem('clozeMode', state.clozeMode);
+        if (state.currentView === 'reading-view') {
+            displaySentence();
+        }
+    });
+    
+    elements.autoTranslateToggle.addEventListener('change', (e) => {
+        state.autoTranslate = e.target.checked;
+        localStorage.setItem('autoTranslate', state.autoTranslate);
+        if (state.autoTranslate && state.currentView === 'reading-view' && state.sentences.length > 0) {
+            translateCurrentSentence();
+        }
+    });
+    
+    elements.fontSelect.addEventListener('change', (e) => {
+        state.currentFont = e.target.value;
+        localStorage.setItem('font', state.currentFont);
+        document.documentElement.setAttribute('data-font', state.currentFont);
+    });
+    
+    elements.fontSizeRange.addEventListener('input', (e) => {
+        state.currentFontSize = e.target.value;
+        localStorage.setItem('fontSize', state.currentFontSize);
+        document.documentElement.style.setProperty('--font-size', `${state.currentFontSize}px`);
+    });
+    
+    elements.lineHeightRange.addEventListener('input', (e) => {
+        state.currentLineHeight = e.target.value;
+        localStorage.setItem('lineHeight', state.currentLineHeight);
+        document.documentElement.style.setProperty('--line-height', state.currentLineHeight);
+    });
+    
+    elements.themeSelect.addEventListener('change', (e) => {
+        state.theme = e.target.value;
+        localStorage.setItem('theme', state.theme);
+        document.documentElement.setAttribute('data-theme', state.theme);
+        elements.themeToggle.textContent = state.theme === 'dark' ? '🌙' : '☀️';
+    });
+    
+
+    elements.floatingTranslationToggle.addEventListener('click', () => {
+        if (state.currentView === 'reading-view' && state.sentences.length > 0) {
+            const translationDisplay = document.getElementById('translation-display');
+            if (translationDisplay.style.display === 'none' || !translationDisplay.style.display) {
+                translateCurrentSentence();
+            } else {
+                translationDisplay.style.display = 'none';
+            }
+        }
+    });
+    
+    // TTS speed controls
+    document.querySelectorAll('.tts-speed-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tts-speed-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            state.currentTtsSpeed = parseFloat(btn.dataset.speed);
+            localStorage.setItem('ttsSpeed', state.currentTtsSpeed);
+        });
+    });
+    
+    // Jump to sentence
+    elements.jumpBtn.addEventListener('click', () => {
+        const sentenceNum = parseInt(elements.jumpInput.value);
+        if (sentenceNum > 0 && sentenceNum <= state.sentences.length) {
+            state.currentSentenceIndex = sentenceNum - 1;
+            displaySentence();
+        }
+    });
+    
+    elements.jumpInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            elements.jumpBtn.click();
+        }
+    });
+}
+
+// Update stats display
+function updateStatsDisplay() {
+    // Update streak
+    const today = new Date().toDateString();
+    if (state.readingStats.lastActiveDate !== today) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        if (state.readingStats.lastActiveDate === yesterday.toDateString()) {
+            state.readingStats.streak++;
+        } else if (state.readingStats.lastActiveDate !== today) {
+            state.readingStats.streak = 0;
+        }
+        state.readingStats.lastActiveDate = today;
+        state.readingStats.dailyWords = 0;
+        state.readingStats.dailyTime = 0;
+        localStorage.setItem('readingStats', JSON.stringify(state.readingStats));
+    }
+    
+    elements.streakCount.textContent = state.readingStats.streak;
+    elements.wordsLearnedCount.textContent = state.readingStats.wordsLearned;
+    elements.timeSpentCount.textContent = `${Math.floor(state.readingStats.timeSpent / 60)} min`;
+    elements.dailyStreak.textContent = state.readingStats.streak;
+    elements.dailyWordsLearned.textContent = state.readingStats.dailyWords;
+    elements.dailyTimeSpent.textContent = `${Math.floor(state.readingStats.dailyTime / 60)} min`;
+}
+
+// Track reading time
+function startReadingSession() {
+    if (!state.currentSessionStart) {
+        state.currentSessionStart = new Date();
+    }
+}
+
+function endReadingSession() {
+    if (state.currentSessionStart) {
+        const now = new Date();
+        const timeSpent = (now - state.currentSessionStart) / 1000; // in seconds
+        state.readingStats.timeSpent += timeSpent;
+        state.readingStats.dailyTime += timeSpent;
+        state.currentSessionStart = null;
+        localStorage.setItem('readingStats', JSON.stringify(state.readingStats));
+        updateStatsDisplay();
+    }
+}
 
 // Set up voice input button
 elements.voiceInputBtn.innerHTML = '🎤';
@@ -1508,6 +2194,12 @@ function addVocabWord(word) {
                 localStorage.setItem('newWordsToday', state.newWordsToday.toString());
                 localStorage.setItem('lastWordAddedDate', state.lastWordAddedDate);
                 
+                // Update reading stats
+                state.readingStats.wordsLearned++;
+                state.readingStats.dailyWords++;
+                localStorage.setItem('readingStats', JSON.stringify(state.readingStats));
+                updateStatsDisplay();
+                
                 const addRequest = store.add(word);
                 addRequest.onsuccess = () => resolve();
                 addRequest.onerror = (event) => reject(event.target.error);
@@ -1596,6 +2288,19 @@ function detectLanguage(text) {
     // Simple heuristic to detect Japanese text
     const japaneseChars = /[\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\uFF00-\uFFEF\u4E00-\u9FAF]/;
     return japaneseChars.test(text) ? 'ja' : 'en';
+}
+
+
+function applyClozeDeletion(text) {
+    // Randomly hide some words for recall practice
+    const words = text.split(/([^\w\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\uFF00-\uFFEF\u4E00-\u9FAF]+)/);
+    const clozeText = words.map(word => {
+        if (word.trim().length > 1 && Math.random() > 0.7) { // 30% chance to hide
+            return `<span class="cloze-word">${word}</span>`;
+        }
+        return word;
+    }).join('');
+    return clozeText;
 }
 
 async function translateToJapanese(text, sourceLang) {
@@ -1728,11 +2433,17 @@ async function translateSentence(sentence) {
 }
 
 // TTS functionality
-function speakText(text, rate = 1.0) {
+function speakText(text, rate = null) {
     if ('speechSynthesis' in window) {
+        // Cancel any ongoing speech
+        window.speechSynthesis.cancel();
+        
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'ja-JP';
-        utterance.rate = rate;
+        utterance.rate = rate || state.currentTtsSpeed;
+        
+        // Store the current utterance
+        state.currentTtsUtterance = utterance;
         
         // Lazy-load voices
         if (speechSynthesis.getVoices().length === 0) {
@@ -1763,6 +2474,18 @@ function speakText(text, rate = 1.0) {
     }
 }
 
+function pauseTTS() {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.pause();
+    }
+}
+
+function resumeTTS() {
+    if ('speechSynthesis' in window && window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+    }
+}
+
 // View management
 function showView(viewId) {
     Object.values(elements.views).forEach(view => {
@@ -1773,6 +2496,13 @@ function showView(viewId) {
     if (view) {
         view.classList.add('active');
         state.currentView = viewId;
+        
+        // Start/end reading session tracking
+        if (viewId === 'reading-view') {
+            startReadingSession();
+        } else {
+            endReadingSession();
+        }
     }
 }
 
@@ -1816,14 +2546,143 @@ function displaySentence() {
     document.getElementById('sentence-counter').textContent = 
         `Sentence ${state.currentSentenceIndex + 1}/${state.sentences.length}`;
     
+    // Update jump input
+    elements.jumpInput.value = state.currentSentenceIndex + 1;
+    
     if (elements.translationDisplay) {
         elements.translationDisplay.style.display = 'none';
         
         if (sentence.cached_translation) {
             elements.translationDisplay.textContent = sentence.cached_translation;
-            elements.translationDisplay.style.display = 'block';
+            if (state.autoTranslate) {
+                elements.translationDisplay.style.display = 'block';
+            }
         }
     }
+    
+    // Pre-load next and previous sentences
+    preloadAdjacentSentences();
+    
+    // Add click handlers for word lookup
+    addWordClickHandlers();
+}
+function preloadAdjacentSentences() {
+    // Pre-load next sentence translation if not already loaded
+    if (state.currentSentenceIndex < state.sentences.length - 1) {
+        const nextSentence = state.sentences[state.currentSentenceIndex + 1];
+        if (!nextSentence.cached_translation && !nextSentence.user_translation) {
+            translateSentence(nextSentence.original).then(translation => {
+                state.sentences[state.currentSentenceIndex + 1].cached_translation = translation;
+            });
+        }
+    }
+    
+    // Pre-load previous sentence translation if not already loaded
+    if (state.currentSentenceIndex > 0) {
+        const prevSentence = state.sentences[state.currentSentenceIndex - 1];
+        if (!prevSentence.cached_translation && !prevSentence.user_translation) {
+            translateSentence(prevSentence.original).then(translation => {
+                state.sentences[state.currentSentenceIndex - 1].cached_translation = translation;
+            });
+        }
+    }
+}
+
+
+
+function showWordTooltip(word, x, y) {
+    // Check cache first
+    if (state.wordLookupCache[word]) {
+        displayTooltip(state.wordLookupCache[word], x, y);
+        return;
+    }
+    
+    // Try to find the word in vocabulary
+    const transaction = db.transaction([STORE_VOCAB], 'readonly');
+    const store = transaction.objectStore(STORE_VOCAB);
+    const index = store.index('word');
+    const request = index.get(word);
+    
+    request.onsuccess = () => {
+        if (request.result) {
+            const translation = request.result.translation;
+            state.wordLookupCache[word] = translation;
+            displayTooltip(translation, x, y);
+        } else {
+            // If not found in vocabulary, try dictionary API
+            lookupWordInDictionary(word).then(translation => {
+                if (translation) {
+                    state.wordLookupCache[word] = translation;
+                    displayTooltip(translation, x, y);
+                } else {
+                    displayTooltip('No translation found', x, y);
+                }
+            });
+        }
+    };
+}
+
+function displayTooltip(text, x, y) {
+    elements.wordTooltip.textContent = text;
+    elements.wordTooltip.style.left = `${x}px`;
+    elements.wordTooltip.style.top = `${y}px`;
+    elements.wordTooltip.classList.add('show');
+    
+    setTimeout(() => {
+        elements.wordTooltip.classList.remove('show');
+    }, 2000);
+}
+
+async function lookupWordInDictionary(word) {
+    try {
+        const apiUrl = `https://jisho.org/api/v1/search/words?keyword=${encodeURIComponent(word)}`;
+        
+        let response;
+        try {
+            response = await fetch(apiUrl);
+            if (!response.ok) throw new Error('Direct API failed');
+        } catch (directError) {
+            const proxyUrl = 'https://api.allorigins.win/raw?url=';
+            response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
+            if (!response.ok) throw new Error('API request failed');
+        }
+
+        const data = await response.json();
+        if (data.data && data.data.length > 0) {
+            return data.data[0].senses[0]?.english_definitions?.join(', ') || 'No definition found';
+        }
+        return null;
+    } catch (error) {
+        console.error('Dictionary lookup error:', error);
+        return null;
+    }
+}
+
+function translateCurrentSentence() {
+    if (state.sentences.length === 0 || !elements.translationDisplay) return;
+    
+    const sentence = state.sentences[state.currentSentenceIndex].original;
+    elements.translationDisplay.style.display = 'block';
+    elements.translationDisplay.textContent = "Translating...";
+    
+    translateSentence(sentence).then(translation => {
+        elements.translationDisplay.textContent = translation;
+        state.sentences[state.currentSentenceIndex].cached_translation = translation;
+        
+        // Add copy button
+        if (!document.getElementById('copy-translation-btn')) {
+            const copyBtn = document.createElement('button');
+            copyBtn.id = 'copy-translation-btn';
+            copyBtn.className = 'copy-translation';
+            copyBtn.textContent = 'Copy';
+            copyBtn.setAttribute('aria-label', 'Copy translation');
+            copyBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(translation);
+                showToast('Translation copied!', 'success');
+            });
+            elements.translationDisplay.appendChild(copyBtn);
+        }
+    });
 }
 
 // Vocabulary review functions
@@ -2168,6 +3027,9 @@ async function checkClipboard() {
 }
 
 function setupEventListeners() {
+    // Initialize settings panel
+    initSettingsPanel();
+    
     // How to use toggle
     elements.howToUseToggle.addEventListener('click', () => {
         elements.howToUseContent.classList.toggle('show');
@@ -2399,51 +3261,7 @@ function setupEventListeners() {
         }
     });
 
-    elements.translateBtn.addEventListener('click', async () => {
-        if (state.sentences.length === 0 || !elements.translationDisplay) return;
-        
-        const sentence = state.sentences[state.currentSentenceIndex].original;
-        elements.translationDisplay.style.display = 'block';
-        elements.translationDisplay.textContent = "Translating...";
-        
-        try {
-            elements.translateBtn.innerHTML = 'Translating<span class="loading-spinner"></span>';
-            const translation = await translateSentence(sentence);
-            elements.translationDisplay.textContent = translation;
-            
-            // Add copy button
-            if (!document.getElementById('copy-translation-btn')) {
-                const copyBtn = document.createElement('button');
-                copyBtn.id = 'copy-translation-btn';
-                copyBtn.className = 'copy-translation';
-                copyBtn.textContent = 'Copy';
-                copyBtn.setAttribute('aria-label', 'Copy translation');
-                copyBtn.addEventListener('click', () => {
-                    navigator.clipboard.writeText(translation);
-                    showToast('Translation copied!', 'success');
-                });
-                elements.translationDisplay.appendChild(copyBtn);
-            }
-            
-            state.sentences[state.currentSentenceIndex].cached_translation = translation;
-            
-            if (state.currentSentenceIndex < state.sentences.length - 1) {
-                const nextSentences = state.sentences.slice(
-                    state.currentSentenceIndex + 1,
-                    Math.min(state.currentSentenceIndex + 4, state.sentences.length)
-                );
-                
-                nextSentences.forEach(async (sentenceObj, index) => {
-                    if (!sentenceObj.user_translation) {
-                        const translation = await translateSentence(sentenceObj.original);
-                        state.sentences[state.currentSentenceIndex + 1 + index].cached_translation = translation;
-                    }
-                });
-            }
-        } finally {
-            elements.translateBtn.innerHTML = '翻訳';
-        }
-    });
+    elements.translateBtn.addEventListener('click', translateCurrentSentence);
 
     elements.nextSentenceBtn.addEventListener('click', () => {
         if (state.currentSentenceIndex < state.sentences.length - 1) {
@@ -2477,72 +3295,74 @@ function setupEventListeners() {
             }
         }
     }
-// Dictionary lookup
-document.getElementById('lookup-word').addEventListener('click', async () => {
-    const word = document.getElementById('selected-word').textContent;
-    if (!word) {
-        showToast('No word selected', 'error');
-        return;
-    }
 
-    try {
-        document.getElementById('lookup-word').innerHTML = 'Searching...';
-        
-        // Try using a different CORS proxy or direct API call
-        const apiUrl = `https://jisho.org/api/v1/search/words?keyword=${encodeURIComponent(word)}`;
-        
-        // First try direct fetch (might work if deployed)
-        let response;
+    // Dictionary lookup
+    document.getElementById('lookup-word').addEventListener('click', async () => {
+        const word = document.getElementById('selected-word').textContent;
+        if (!word) {
+            showToast('No word selected', 'error');
+            return;
+        }
+
         try {
-            response = await fetch(apiUrl);
-            if (!response.ok) throw new Error('Direct API failed');
-        } catch (directError) {
-            // If direct fails, try with a CORS proxy
-            const proxyUrl = 'https://api.allorigins.win/raw?url='; // Alternative proxy
-            response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
-            if (!response.ok) throw new Error('API request failed');
-        }
+            document.getElementById('lookup-word').innerHTML = 'Searching...';
+            
+            // Try using a different CORS proxy or direct API call
+            const apiUrl = `https://jisho.org/api/v1/search/words?keyword=${encodeURIComponent(word)}`;
+            
+            // First try direct fetch (might work if deployed)
+            let response;
+            try {
+                response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('Direct API failed');
+            } catch (directError) {
+                // If direct fails, try with a CORS proxy
+                const proxyUrl = 'https://api.allorigins.win/raw?url='; // Alternative proxy
+                response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
+                if (!response.ok) throw new Error('API request failed');
+            }
 
-        const data = await response.json();
+            const data = await response.json();
 
-        const entriesContainer = document.getElementById('dictionary-entries');
-        entriesContainer.innerHTML = '';
+            const entriesContainer = document.getElementById('dictionary-entries');
+            entriesContainer.innerHTML = '';
 
-        if (data.data && data.data.length > 0) {
-            data.data.slice(0, 5).forEach(entry => {
-                const entryDiv = document.createElement('div');
-                entryDiv.className = 'dictionary-entry';
-                
-                // Get the best display form of the word
-                const japaneseDisplay = entry.japanese[0]?.word || entry.japanese[0]?.reading || word;
-                
-                // Get the first English definition or fallback
-                const englishDefinition = entry.senses[0]?.english_definitions?.join(', ') || 'No definition found';
-                
-                entryDiv.innerHTML = `
-                    <strong>${japaneseDisplay}</strong><br>
-                    ${englishDefinition}
-                `;
-                
-                entryDiv.addEventListener('click', () => {
-                    document.getElementById('vocab-translation').value = 
-                        entry.senses[0]?.english_definitions[0] || englishDefinition.split(',')[0];
-                    document.getElementById('dictionary-results').style.display = 'none';
+            if (data.data && data.data.length > 0) {
+                data.data.slice(0, 5).forEach(entry => {
+                    const entryDiv = document.createElement('div');
+                    entryDiv.className = 'dictionary-entry';
+                    
+                    // Get the best display form of the word
+                    const japaneseDisplay = entry.japanese[0]?.word || entry.japanese[0]?.reading || word;
+                    
+                    // Get the first English definition or fallback
+                    const englishDefinition = entry.senses[0]?.english_definitions?.join(', ') || 'No definition found';
+                    
+                    entryDiv.innerHTML = `
+                        <strong>${japaneseDisplay}</strong><br>
+                        ${englishDefinition}
+                    `;
+                    
+                    entryDiv.addEventListener('click', () => {
+                        document.getElementById('vocab-translation').value = 
+                            entry.senses[0]?.english_definitions[0] || englishDefinition.split(',')[0];
+                        document.getElementById('dictionary-results').style.display = 'none';
+                    });
+                    
+                    entriesContainer.appendChild(entryDiv);
                 });
-                
-                entriesContainer.appendChild(entryDiv);
-            });
-            document.getElementById('dictionary-results').style.display = 'block';
-        } else {
-            showToast('No dictionary results found', 'error');
+                document.getElementById('dictionary-results').style.display = 'block';
+            } else {
+                showToast('No dictionary results found', 'error');
+            }
+        } catch (error) {
+            console.error('Dictionary error:', error);
+            showToast('Dictionary lookup failed. Try again later.', 'error');
+        } finally {
+            document.getElementById('lookup-word').innerHTML = 'Lookup in Dictionary';
         }
-    } catch (error) {
-        console.error('Dictionary error:', error);
-        showToast('Dictionary lookup failed. Try again later.', 'error');
-    } finally {
-        document.getElementById('lookup-word').innerHTML = 'Lookup in Dictionary';
-    }
-});
+    });
+
     // Add to vocab handler
     elements.addToVocabBtn.addEventListener('click', async () => {
         const word = elements.selectedWord.textContent;
@@ -2640,34 +3460,46 @@ document.getElementById('lookup-word').addEventListener('click', async () => {
     // Sound toggle
     elements.soundToggle.addEventListener('click', toggleSounds);
 
-    // Keyboard shortcuts
-    document.addEventListener('keydown', (e) => {
-        if (state.currentView === 'reading-view') {
-            if (e.key === 'ArrowLeft') {
-                elements.prevSentenceBtn.click();
-            } else if (e.key === 'ArrowRight') {
-                elements.nextSentenceBtn.click();
-            } else if (e.key === ' ') {
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    if (state.currentView === 'reading-view') {
+        if (e.key === 'ArrowLeft') {
+            elements.prevSentenceBtn.click();
+        } else if (e.key === 'ArrowRight') {
+            elements.nextSentenceBtn.click();
+        } else if (e.key === ' ') {
+            if (state.currentTtsUtterance && window.speechSynthesis.speaking) {
+                if (window.speechSynthesis.paused) {
+                    resumeTTS();
+                } else {
+                    pauseTTS();
+                }
+            } else {
                 elements.ttsButton.click();
-                e.preventDefault(); // Prevent scrolling
             }
+            e.preventDefault(); // Prevent scrolling
+        } else if (e.key === 't' || e.key === 'T') {
+            elements.floatingTranslationToggle.click();
+        } else if (e.key === 'f' || e.key === 'F') {
+            // This was missing its closing brace
         }
-        
-        if (state.currentView === 'review-mode-view' && state.reviewMode === 'hard') {
-            if (e.key === 'Enter') {
-                elements.knewItBtn.click();
-            } else if (e.key === 'Escape') {
-                elements.didntKnowBtn.click();
-            } else if (e.key === ' ') {
-                elements.skipBtn.click();
-                e.preventDefault();
-            }
+    } // This closes the outer if statement
+    
+    if (state.currentView === 'review-mode-view' && state.reviewMode === 'hard') {
+        if (e.key === 'Enter') {
+            elements.knewItBtn.click();
+        } else if (e.key === 'Escape') {
+            elements.didntKnowBtn.click();
+        } else if (e.key === ' ') {
+            elements.skipBtn.click();
+            e.preventDefault();
         }
-        
-        if (document.activeElement === elements.vocabTranslation && e.key === 'Enter') {
-            elements.addToVocabBtn.click();
-        }
-    });
+    }
+    
+    if (document.activeElement === elements.vocabTranslation && e.key === 'Enter') {
+        elements.addToVocabBtn.click();
+    }
+});
 
     // Online/offline detection
     window.addEventListener('online', () => {
@@ -2697,9 +3529,17 @@ async function initApp() {
         await updateBucketCounts();
         setupEventListeners();
         
-        // Apply theme
+        // Apply theme and settings
         document.documentElement.setAttribute('data-theme', state.theme);
+        document.documentElement.setAttribute('data-font', state.currentFont);
+        document.documentElement.style.setProperty('--font-size', `${state.currentFontSize}px`);
+        document.documentElement.style.setProperty('--line-height', state.currentLineHeight);
         elements.themeToggle.textContent = state.theme === 'dark' ? '🌙' : '☀️';
+        elements.themeSelect.value = state.theme;
+        elements.fontSelect.value = state.currentFont;
+        elements.fontSizeRange.value = state.currentFontSize;
+        elements.lineHeightRange.value = state.currentLineHeight;
+
         
         // Initialize audio
         initAudio();
