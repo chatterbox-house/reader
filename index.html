@@ -826,17 +826,17 @@
             cursor: pointer;
         }
 
-        .loading-spinner {
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top: 3px solid var(--highlight);
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            margin-left: 10px;
-            vertical-align: middle;
-        }
+.loading-spinner {
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 3px solid var(--highlight);
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    margin-left: 10px;
+    vertical-align: middle;
+}
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
@@ -971,40 +971,53 @@
             color: var(--text-secondary);
         }
 
-        .tts-speed-control {
-            position: fixed;
-            bottom: 6rem;
-            right: 1rem;
-            background-color: var(--highlight);
-            color: white;
-            border-radius: 30px;
-            padding: 0.5rem 1rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
-            z-index: 100;
-            box-shadow: var(--shadow);
-        }
+.tts-speed-control {
+    position: fixed;
+    bottom: 5rem;
+    right: 1rem;
+    background-color: var(--accent);
+    color: white;
+    border-radius: 20px;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    z-index: 100;
+    font-size: 0.9rem;
+    box-shadow: var(--shadow);
+}
 
-        .tts-speed-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1rem;
-            cursor: pointer;
-            padding: 0.3rem 0.6rem;
-            border-radius: 50%;
-        }
+.tts-speed-btn {
+    padding: 0.3rem 0.6rem;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+}
 
-        .tts-speed-btn.active {
-            background-color: white;
-            color: var(--highlight);
-        }
+.tts-speed-btn.active {
+    background-color: var(--highlight);
+    color: white;
+}
 
-        .tts-speed-label {
-            font-size: 0.8rem;
-        }
+@media (max-width: 600px) {
+    .tts-speed-control {
+        display: none !important;
+    }
+}
+
+@media (min-width: 601px) {
+    .tts-speed-control {
+        transform: scale(1);
+        padding: 0.5rem;
+        gap: 0.5rem;
+    }
+    
+    .tts-speed-label {
+        display: inline;
+    }
+}
 
         .jump-to-sentence {
             display: flex;
@@ -1075,86 +1088,82 @@
 
     
 
-        .translation-toggle {
-            position: fixed;
-            bottom: 16rem;
-            right: 1rem;
-            background-color: var(--highlight);
-            color: white;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-            box-shadow: var(--shadow);
-            cursor: pointer;
-        }
 
 @media (max-width: 600px) {
     .sentence-display {
-        font-size: 1.5rem;
-        padding: 1.5rem;
+        font-size: 1.3rem;
+        padding: 1rem;
+        min-height: 150px;
     }
     
     .control-btn {
-        width: 50px;
-        height: 50px;
-        font-size: 1.2rem;
+        width: 45px;
+        height: 45px;
+        font-size: 1rem;
     }
     
     .bucket-container {
         grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
     }
-
+    
+    .bucket-card {
+        padding: 0.5rem;
+    }
+    
+    .bucket-count {
+        font-size: 1.5rem;
+    }
+    
     .matching-game-columns {
         flex-direction: row;
         gap: 0.5rem;
     }
-
+    
     .matching-column {
         max-height: 60vh;
         overflow-y: auto;
     }
-
+    
     .word-card {
         padding: 1rem;
         min-height: 70px;
         font-size: 1.1rem;
     }
-
+    
     .paste-indicator {
         top: auto;
         bottom: 1rem;
         right: 1rem;
     }
+    
     .text-import-container .btn {
         width: 100%;
         margin: 0.5rem 0;
     }
-
+    
     .mode-toggle {
         flex-direction: column;
         gap: 0.5rem;
         margin-bottom: 1rem;
     }
-
+    
     .mode-toggle-btn {
         width: 100%;
         margin: 0;
     }
-
+    
     #process-text, #clear-text, #show-history-btn {
         width: 100%;
         margin-top: 0.5rem;
         margin-bottom: 0.5rem;
     }
-
+    
     #translate-to-japanese {
         width: 100%;
         margin-top: 0.5rem;
     }
+    
     .dictionary-entries {
         max-height: 200px;
         overflow-y: auto;
@@ -1164,7 +1173,7 @@
         padding: 0.5rem;
         font-size: 0.9rem;
     }
-
+    
     .dictionary-entry {
         padding: 0.5rem;
         margin-bottom: 0.5rem;
@@ -1172,30 +1181,82 @@
         border-radius: 6px;
         cursor: pointer;
     }
-
+    
     .dictionary-entry:hover {
         background-color: var(--accent);
     }
-
+    
     .settings-panel {
         width: 100%;
         right: -100%;
     }
-
+    
     .settings-panel.open {
         right: 0;
     }
-
-    .tts-speed-control, .translation-toggle {
-        bottom: auto;
-        top: 1rem;
-        right: 1rem;
+    
+    /* Fix floating buttons so they don't cover content */
+    .tts-speed-control {
+        top: 5rem !important;
+        right: 1rem !important;
+        flex-direction: row;
+        padding: 0.3rem !important;
+        transform: scale(0.8) !important;
+        transform-origin: top right !important;
+        background-color: var(--accent) !important;
     }
-
-
-
+    
+    .tts-speed-control .tts-speed-btn {
+        font-size: 0.8rem !important;
+        padding: 0.2rem 0.4rem !important;
+    }
+    
+    .tts-speed-label {
+        display: none; /* Hide label on mobile */
+    }
+    
     .translation-toggle {
-        top: 11rem;
+        top: 9rem !important;
+        right: 1rem !important;
+    }
+    
+    .sound-toggle {
+        bottom: 6rem !important;
+        right: 1rem !important;
+    }
+    
+    /* Make header more compact */
+    header {
+        padding: 0.5rem;
+    }
+    
+    .nav-tabs {
+        gap: 0.2rem;
+    }
+    
+    .nav-btn {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.8rem;
+    }
+    
+    /* Give space at bottom for controls */
+    main {
+        padding-bottom: 80px;
+    }
+    
+    /* Adjust review mode for mobile */
+    .review-question {
+        font-size: 1.5rem;
+        min-height: 80px;
+    }
+    
+    .hard-mode-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .hard-mode-btn {
+        width: 100%;
     }
 }
     </style>
@@ -1550,15 +1611,15 @@
         <div class="sound-toggle" id="sound-toggle" aria-label="Toggle sound">🔊</div>
         
         <!-- New floating controls -->
-        <div class="tts-speed-control" id="tts-speed-control">
-            <button class="tts-speed-btn" data-speed="0.5">0.5x</button>
-            <button class="tts-speed-btn active" data-speed="1.0">1.0x</button>
-            <button class="tts-speed-btn" data-speed="1.5">1.5x</button>
-            <span class="tts-speed-label">TTS Speed</span>
-        </div>
+<div class="tts-speed-control" id="tts-speed-control">
+    <span class="tts-speed-label">Speed:</span>
+    <button class="tts-speed-btn" data-speed="0.5">0.5x</button>
+    <button class="tts-speed-btn active" data-speed="1.0">1.0x</button>
+    <button class="tts-speed-btn" data-speed="1.5">1.5x</button>
+</div>
         
 
-        <div class="translation-toggle" id="floating-translation-toggle" title="Toggle Translation">T</div>
+
         
         <div class="tooltip" id="word-tooltip"></div>
     </div>
@@ -1789,9 +1850,7 @@ const elements = {
     wordsLearnedCount: document.getElementById('words-learned-count'),
     timeSpentCount: document.getElementById('time-spent-count'),
     viewProgressBtn: document.getElementById('view-progress-btn'),
-
-    floatingTranslationToggle: document.getElementById('floating-translation-toggle'),
-    ttsSpeedControl: document.getElementById('tts-speed-control'),
+ttsSpeedControl: document.getElementById('tts-speed-control'),
     jumpInput: document.getElementById('jump-input'),
     jumpBtn: document.getElementById('jump-btn'),
     wordTooltip: document.getElementById('word-tooltip'),
@@ -1874,16 +1933,7 @@ function initSettingsPanel() {
     });
     
 
-    elements.floatingTranslationToggle.addEventListener('click', () => {
-        if (state.currentView === 'reading-view' && state.sentences.length > 0) {
-            const translationDisplay = document.getElementById('translation-display');
-            if (translationDisplay.style.display === 'none' || !translationDisplay.style.display) {
-                translateCurrentSentence();
-            } else {
-                translationDisplay.style.display = 'none';
-            }
-        }
-    });
+
     
     // TTS speed controls
     document.querySelectorAll('.tts-speed-btn').forEach(btn => {
@@ -2290,7 +2340,6 @@ function detectLanguage(text) {
     return japaneseChars.test(text) ? 'ja' : 'en';
 }
 
-
 function applyClozeDeletion(text) {
     // Randomly hide some words for recall practice
     const words = text.split(/([^\w\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\uFF00-\uFFEF\u4E00-\u9FAF]+)/);
@@ -2375,7 +2424,7 @@ async function cacheTranslation(text, sourceLang, targetLang, translatedText) {
 }
 
 function toggleTranslationMode(showTranslate) {
-    const importContainer = document.getElementById('text-import-container');
+    const importContainer = document.querySelector('.text-import-container');
     const translateContainer = document.getElementById('translate-container');
     
     if (!importContainer || !translateContainer) return;
@@ -2383,13 +2432,13 @@ function toggleTranslationMode(showTranslate) {
     if (showTranslate) {
         importContainer.style.display = 'none';
         translateContainer.style.display = 'block';
-        document.querySelector('.mode-toggle-btn[data-mode="import"]')?.classList.remove('active');
-        document.querySelector('.mode-toggle-btn[data-mode="translate"]')?.classList.add('active');
+        document.querySelector('.mode-toggle-btn[data-mode="import"]').classList.remove('active');
+        document.querySelector('.mode-toggle-btn[data-mode="translate"]').classList.add('active');
     } else {
         importContainer.style.display = 'block';
         translateContainer.style.display = 'none';
-        document.querySelector('.mode-toggle-btn[data-mode="import"]')?.classList.add('active');
-        document.querySelector('.mode-toggle-btn[data-mode="translate"]')?.classList.remove('active');
+        document.querySelector('.mode-toggle-btn[data-mode="import"]').classList.add('active');
+        document.querySelector('.mode-toggle-btn[data-mode="translate"]').classList.remove('active');
     }
 }
 
@@ -2435,17 +2484,14 @@ async function translateSentence(sentence) {
 // TTS functionality
 function speakText(text, rate = null) {
     if ('speechSynthesis' in window) {
-        // Cancel any ongoing speech
         window.speechSynthesis.cancel();
         
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'ja-JP';
         utterance.rate = rate || state.currentTtsSpeed;
         
-        // Store the current utterance
         state.currentTtsUtterance = utterance;
         
-        // Lazy-load voices
         if (speechSynthesis.getVoices().length === 0) {
             speechSynthesis.onvoiceschanged = () => {
                 const voices = speechSynthesis.getVoices();
@@ -2459,6 +2505,8 @@ function speakText(text, rate = null) {
                 
                 speechSynthesis.speak(utterance);
             };
+            // Force voices to load
+            speechSynthesis.getVoices();
         } else {
             const voices = speechSynthesis.getVoices();
             const japaneseVoice = voices.find(voice => 
@@ -3224,33 +3272,38 @@ function setupEventListeners() {
     });
 
     // Translate to Japanese button event listener
-    document.getElementById('translate-to-japanese').addEventListener('click', async () => {
-        const text = document.getElementById('translate-input').value.trim();
-        if (text.length === 0) {
-            showToast('Please enter some text to translate', 'error');
-            return;
-        }
+document.getElementById('translate-to-japanese').addEventListener('click', async () => {
+    const text = document.getElementById('translate-input').value.trim();
+    if (text.length === 0) {
+        showToast('Please enter some text to translate', 'error');
+        return;
+    }
 
-        if (text.length > 5000) {
-            showToast('Text exceeds 5000 characters', 'error');
-            return;
-        }
-
-        try {
-            document.getElementById('translate-to-japanese').innerHTML = '<span>Translating...</span><span class="loading-spinner"></span>';
-            const targetLang = 'en'; // Assuming English source
-            const translatedText = await translateToJapanese(text, targetLang);
-            state.translatedText = translatedText;
-            document.getElementById('text-input').value = state.translatedText;
-            document.getElementById('char-count').textContent = state.translatedText.length;
-            showToast('Translation complete!', 'success');
-        } catch (error) {
-            console.error('Translation error:', error);
-            showToast('Translation failed. Please try again.', 'error');
-        } finally {
-            document.getElementById('translate-to-japanese').innerHTML = '<span>Translate to Japanese</span>';
-        }
-    });
+    try {
+        const button = document.getElementById('translate-to-japanese');
+        button.innerHTML = '<span>Translating...</span><span class="loading-spinner"></span>';
+        button.disabled = true;
+        
+        // Detect source language from input
+        const sourceLang = detectLanguage(text) || 'en'; // default to English if detection fails
+        const translatedText = await translateToJapanese(text, sourceLang);
+        
+        // Put the translated text in the Japanese input field
+        document.getElementById('text-input').value = translatedText;
+        document.getElementById('char-count').textContent = translatedText.length;
+        
+        // Switch back to Japanese input view
+        toggleTranslationMode(false);
+        showToast('Translation complete!', 'success');
+    } catch (error) {
+        console.error('Translation error:', error);
+        showToast('Translation failed. Please try again.', 'error');
+    } finally {
+        const button = document.getElementById('translate-to-japanese');
+        button.innerHTML = '<span>Translate to Japanese</span>';
+        button.disabled = false;
+    }
+});
 
     // Reading view controls
     elements.prevSentenceBtn.addEventListener('click', () => {
@@ -3573,22 +3626,37 @@ async function initApp() {
         
         // Try to recover by deleting and recreating the database
         try {
+            // Close any existing database connection
+            if (db) {
+                db.close();
+            }
+            
             await new Promise((resolve, reject) => {
                 const req = indexedDB.deleteDatabase(DB_NAME);
-                req.onsuccess = resolve;
-                req.onerror = reject;
-                req.onblocked = () => reject(new Error('Database is blocked'));
+                req.onsuccess = () => {
+                    console.log('Database deleted successfully');
+                    resolve();
+                };
+                req.onerror = (event) => {
+                    console.error('Error deleting database:', event.target.error);
+                    reject(event.target.error);
+                };
+                req.onblocked = () => {
+                    console.warn('Database deletion blocked - refreshing page');
+                    window.location.reload();
+                };
             });
             
             window.location.reload();
         } catch (recoveryError) {
             console.error('Recovery failed:', recoveryError);
+            showToast('Failed to initialize app. Please refresh the page.', 'error');
         }
     }
 }
 
 // Start the app
 window.addEventListener('DOMContentLoaded', initApp);
-    </script>
+</script>
 </body>
 </html>
