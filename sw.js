@@ -1,21 +1,26 @@
 // sw.js - Basic Service Worker
 const CACHE_NAME = 'jap-learner-v1';
-const ASSETS_TO_CACHE = [
+const urlsToCache = [
   '/',
   '/index.html',
-  // Add other assets you want to cache
+  '/styles.css',
+  '/app.js'
 ];
 
-self.addEventListener('install', (event) => {
+self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(ASSETS_TO_CACHE))
+      .then(cache => {
+        return cache.addAll(urlsToCache);
+      })
   );
 });
 
-self.addEventListener('fetch', (event) => {
+self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
-      .then((response) => response || fetch(event.request))
+      .then(response => {
+        return response || fetch(event.request);
+      })
   );
 });
