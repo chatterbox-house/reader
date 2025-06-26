@@ -756,21 +756,7 @@
             font-size: 0.9rem;
         }
 
-        .paste-indicator {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background-color: var(--highlight);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            animation: pulse 2s infinite;
-            cursor: pointer;
-        }
+
 
         @keyframes pulse {
             0% { transform: scale(1); }
@@ -818,7 +804,13 @@
             background-color: var(--accent);
         }
 
-        .sound-toggle {
+      .sound-toggle {
+        display: none;
+    }
+    
+    /* Show it only during matching game */
+    #review-mode-view.active .sound-toggle {
+        display: flex;
             position: fixed;
             bottom: 1rem;
             right: 1rem;
@@ -827,7 +819,6 @@
             background-color: var(--highlight);
             color: white;
             border-radius: 50%;
-            display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.2rem;
@@ -1402,9 +1393,7 @@
                 <div class="text-import-container">
                     <h2>Import Japanese Text</h2>
                     <p>Paste Japanese text below to start learning (max 5,000 characters)</p>
-                    <div id="paste-indicator" class="paste-indicator" style="display: none;">
-                        📋 Click to paste
-                    </div>
+
 <textarea class="text-input" id="text-input" placeholder="例: 猫が寝ている。犬が走っている。..." aria-label="Japanese text input"></textarea>
 <div class="char-count"><span id="char-count">0</span>/5000 characters</div>
 <div class="input-actions">
@@ -1936,7 +1925,7 @@ const elements = {
     toast: document.getElementById('toast'),
     themeToggle: document.getElementById('theme-toggle'),
     soundToggle: document.getElementById('sound-toggle'),
-    pasteIndicator: document.getElementById('paste-indicator'),
+
     matchingGameContainer: document.getElementById('matching-game-container'),
     leftColumn: document.getElementById('left-column'),
     rightColumn: document.getElementById('right-column'),
@@ -3292,16 +3281,7 @@ function toggleTheme() {
 }
 
 // Check clipboard for text to paste
-async function checkClipboard() {
-    try {
-        const text = await navigator.clipboard.readText();
-        if (text && text.trim().length > 0) {
-            elements.pasteIndicator.style.display = 'flex';
-        }
-    } catch (err) {
-        console.log('Clipboard access denied:', err);
-    }
-}
+
 
 function setupEventListeners() {
 // Favorite button
@@ -3480,27 +3460,7 @@ function startVoiceInput(lang, targetId, buttonElement) {
         document.getElementById('translate-char-count').textContent = text.length;
     });
 
-    // Paste indicator
-    elements.pasteIndicator.addEventListener('click', async () => {
-        try {
-            const text = await navigator.clipboard.readText();
-            if (text) {
-                elements.textInput.value = text;
-                elements.charCount.textContent = text.length;
-                elements.pasteIndicator.style.display = 'none';
-                
-                // Auto-detect language
-                const detectedLang = detectLanguage(text);
-                if (detectedLang === 'ja') {
-                    document.querySelector('.mode-toggle-btn[data-mode="import"]').click();
-                } else {
-                    document.querySelector('.mode-toggle-btn[data-mode="translate"]').click();
-                }
-            }
-        } catch (err) {
-            console.log('Failed to paste:', err);
-        }
-    });
+
 // Paste button
 document.getElementById('paste-btn').addEventListener('click', async () => {
     try {
@@ -3906,8 +3866,7 @@ async function initApp() {
         initAudio();
         elements.soundToggle.textContent = state.soundsEnabled ? '🔊' : '🔇';
         
-        // Check clipboard for paste
-        checkClipboard();
+ 
         
         // Pre-warm TTS
         if ('speechSynthesis' in window) {
