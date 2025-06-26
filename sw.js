@@ -7,11 +7,10 @@ const urlsToCache = [
   // Don't include files that don't exist (like styles.css, app.js if you don't have them)
 ];
 
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Opened cache');
+self.addEventListener('install', (event) => {
+  self.skipWaiting(); // Force activation of the new SW
+});
+
         // Only cache essential files that definitely exist
         return cache.addAll(urlsToCache.filter(url => {
           // Skip files that might not exist
