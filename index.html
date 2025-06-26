@@ -1319,11 +1319,12 @@ header {
         <span>JapLearner</span>
         <span class="streak-badge" id="streak-badge">0-day streak</span>
     </div>
-    <div class="nav-tabs">
-        <button class="nav-btn active" data-view="text-import" aria-label="Text Reader">Reader</button>
-        <button class="nav-btn" data-view="vocab-review" aria-label="Vocabulary Review">Vocabulary</button>
-        <button class="nav-btn" data-view="bookmarks" aria-label="Bookmarks">Bookmarks</button>
-    </div>
+<div class="nav-tabs">
+    <button class="nav-btn active" data-view="text-import" aria-label="Text Reader">Reader</button>
+    <button class="nav-btn" data-view="vocab-review" aria-label="Vocabulary Review">Vocabulary</button>
+    <button class="nav-btn" data-view="bookmarks" aria-label="Bookmarks">Bookmarks</button>
+    <button class="nav-btn" data-view="passage-library" aria-label="Saved Passages">Library</button>
+</div>
     <div class="header-actions">
         <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">🌙</button>
         <button class="settings-btn" id="settings-btn" aria-label="Settings">⚙️</button>
@@ -1581,6 +1582,7 @@ header {
                     </div>
                 </div>
             </section>
+<!-- Bookmarks View -->
         <section id="bookmarks-view" class="view">
     <h2>Bookmarked Sentences</h2>
     <div id="bookmarks-list" class="resources-container">
@@ -1672,6 +1674,14 @@ header {
                     Back to Text Import
                 </button>
             </section>
+<!-- Library View -->
+<section id="passage-library-view" class="view">
+    <h2>Saved Passages</h2>
+    <button class="btn" id="save-current-passage">Save Current Text</button>
+    <div id="passage-list" class="resources-container" style="margin-top: 1rem;">
+        <!-- Passages will appear here -->
+    </div>
+</section>
         </main>
         
         <div class="confirmation-dialog" id="wipe-confirmation" style="display: none;">
@@ -1738,9 +1748,36 @@ readingStats: JSON.parse(localStorage.getItem('readingStats')) || {
     currentSessionStart: null,
     selectedCards: [],
     currentTtsUtterance: null,
-    wordLookupCache: {}
+    wordLookupCache: {},
+currentReadingSession: JSON.parse(localStorage.getItem('currentReadingSession')) || null,
+    savedPassages: JSON.parse(localStorage.getItem('savedPassages')) || []
 };
+// Session management functions
+function saveReadingSession() {
+    if (state.sentences.length > 0) {
+        state.currentReadingSession = {
+            text: elements.textInput.value,
+            sentences: state.sentences,
+            currentIndex: state.currentSentenceIndex,
+            timestamp: new Date().toISOString()
+        };
+        localStorage.setItem('currentReadingSession', JSON.stringify(state.currentReadingSession));
+    }
+}
 
+function restoreReadingSession() {
+    if (state.currentReadingSession) {
+        const restore = confirm('Continue your previous reading session?');
+        if (restore) {
+            state.sentences = state.currentReadingSession.sentences;
+            state.currentSentenceIndex = state.currentReadingSession.currentIndex;
+            elements.textInput.value = state.currentReadingSession.text;
+            elements.charCount.textContent = state.currentReadingSession.text.length;
+            showView('reading-view');
+            displaySentence();
+        }
+    }
+}
 // Initialize audio context and sounds
 function initAudio() {
     try {
@@ -3270,6 +3307,34 @@ async function checkClipboard() {
 }
 
 function setupEventListeners() {
+    // Save current passage button
+    document.getElementById('save-current-passage').addEventListener('click', saveCurrentPassage);
+    
+    // Passage library interactions
+    document.addEventListener('click', (e) => {
+        if (e.target.matches('[data-passage-id]')) {
+            const passageId = e.target.dataset.passageId;
+            const passage = state.savedPassages.find(p => p.id === passageId);
+            
+            if (e.target.textContent === 'Load') {
+                state.sentences = passage.sentences;
+                state.currentSentenceIndex = 0;
+                elements.textInput.value = passage.text;
+                elements.charCount.textContent = passage.text.length;
+                showView('reading-view');
+                displaySentence();
+            } 
+            else if (e.target.textContent === 'Delete') {
+                if (confirm(`Delete "${passage.title}"?`)) {
+                    state.savedPassages = state.savedPassages.filter(p => p.id !== passageId);
+                    localStorage.setItem('savedPassages', JSON.stringify(state.savedPassages));
+                    renderPassageLibrary();
+                }
+            }
+        }
+    });
+    
+
 // Japanese voice input
 document.getElementById('voice-input-jp').addEventListener('click', () => {
     if (!('webkitSpeechRecognition' in window)) {
@@ -3909,8 +3974,64 @@ async function initApp() {
             showToast('Failed to initialize app. Please refresh the page.', 'error');
         }
     }
+    // Restore session if available
+    setTimeout(restoreReadingSession, 500);
+    
+    // Save session when leaving page
+    window.addEventListener('beforeunload', saveReadingSession);
+}
+// Passage library functions
+function saveCurrentPassage() {
+    if (!elements.textInput.value.trim()) {
+        showToast('No text to save', 'error');
+        return;
+    }
+
+    const title = prompt('Name this passage:', `Passage ${state.savedPassages.length + 1}`);
+    if (title) {
+        const passage = {
+            id: generateUUID(),
+            title: title,
+            text: elements.textInput.value,
+            sentences: [...state.sentences],
+            createdAt: new Date().toISOString()
+        };
+        state.savedPassages.unshift(passage);
+        localStorage.setItem('savedPassages', JSON.stringify(state.savedPassages));
+        renderPassageLibrary();
+        showToast('Passage saved!', 'success');
+    }
 }
 
+function renderPassageLibrary() {
+    const container = document.getElementById('passage-list');
+    container.innerHTML = '';
+
+    if (state.savedPassages.length === 0) {
+        container.innerHTML = '<p>No saved passages yet</p>';
+        return;
+    }
+
+    state.savedPassages.forEach(passage => {
+        const item = document.createElement('div');
+        item.className = 'resource-link';
+        item.style.display = 'flex';
+        item.style.justifyContent = 'space-between';
+        item.style.alignItems = 'center';
+        
+        item.innerHTML = `
+            <span>${passage.title}</span>
+            <div>
+                <button class="nav-btn" style="padding: 0.3rem 0.6rem;" 
+                    data-passage-id="${passage.id}">Load</button>
+                <button class="nav-btn" style="padding: 0.3rem 0.6rem; background: var(--danger);" 
+                    data-passage-id="${passage.id}">Delete</button>
+            </div>
+        `;
+        
+        container.appendChild(item);
+    });
+}
 // Start the app
 window.addEventListener('DOMContentLoaded', initApp);
 </script>
