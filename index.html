@@ -478,6 +478,14 @@
             border-top-right-radius: 20px;
             box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.2);
         }
+#use-sentence-translation {
+    background-color: var(--highlight);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    margin-top: 0.5rem;
+    display: block;
+}
 
         .control-btn {
             background: var(--accent);
@@ -1181,7 +1189,11 @@
         border-radius: 6px;
         cursor: pointer;
     }
-    
+            .dictionary-reading {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 0.3rem;
+        }
     .dictionary-entry:hover {
         background-color: var(--accent);
     }
@@ -1436,7 +1448,8 @@
                     </div>
                     <button class="btn" id="add-to-vocab" aria-label="Add to vocabulary">Add to Vocabulary</button>
                 </div>
-                
+                <button id="use-sentence-translation">Use sentence translation</button>
+
                 <div class="jump-to-sentence">
                     <input type="number" class="jump-input" id="jump-input" placeholder="Jump to sentence..." min="1">
                     <button class="jump-btn" id="jump-btn">Go</button>
@@ -1953,6 +1966,11 @@ function initSettingsPanel() {
             displaySentence();
         }
     });
+
+document.getElementById('manage-vocab-btn').addEventListener('click', () => {
+    showView('manage-vocab-view');
+    loadVocabList();
+});
     
     elements.jumpInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
@@ -2033,35 +2051,36 @@ let db;
 async function openDatabase() {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open(DB_NAME, DB_VERSION);
-        
         request.onupgradeneeded = (event) => {
-            const db = event.target.result;
-            
-            if (!db.objectStoreNames.contains(STORE_SENTENCES)) {
-                const sentencesStore = db.createObjectStore(STORE_SENTENCES, { keyPath: 'id' });
-                sentencesStore.createIndex('position', 'position', { unique: true });
-            }
-            
-            if (!db.objectStoreNames.contains(STORE_VOCAB)) {
-                const vocabStore = db.createObjectStore(STORE_VOCAB, { keyPath: 'id' });
-                vocabStore.createIndex('bucket', 'bucket', { unique: false });
-                vocabStore.createIndex('word', 'word', { unique: true });
-                vocabStore.createIndex('favorite', 'favorite', { unique: false });
-            } else {
-                const vocabStore = event.target.transaction.objectStore(STORE_VOCAB);
-                if (!vocabStore.indexNames.contains('word')) {
-                    vocabStore.createIndex('word', 'word', { unique: true });
-                }
-                if (!vocabStore.indexNames.contains('favorite')) {
-                    vocabStore.createIndex('favorite', 'favorite', { unique: false });
-                }
-            }
-            
-            if (!db.objectStoreNames.contains(STORE_TRANSLATIONS)) {
-                const translationsStore = db.createObjectStore(STORE_TRANSLATIONS, { keyPath: 'id' });
-                translationsStore.createIndex('text', 'text', { unique: true });
-            }
-        };
+    const db = event.target.result;
+    
+    if (!db.objectStoreNames.contains(STORE_SENTENCES)) {
+        const sentencesStore = db.createObjectStore(STORE_SENTENCES, { keyPath: 'id' });
+        sentencesStore.createIndex('position', 'position', { unique: true });
+    }
+    
+    if (!db.objectStoreNames.contains(STORE_VOCAB)) {
+        const vocabStore = db.createObjectStore(STORE_VOCAB, { keyPath: 'id' });
+        vocabStore.createIndex('bucket', 'bucket', { unique: false });
+        vocabStore.createIndex('word', 'word', { unique: true });
+        vocabStore.createIndex('favorite', 'favorite', { unique: false });
+    } else {
+        // FIXED: Removed extra parenthesis here
+        const vocabStore = event.target.transaction.objectStore(STORE_VOCAB);
+        if (!vocabStore.indexNames.contains('word')) {
+            vocabStore.createIndex('word', 'word', { unique: true });
+        }
+        if (!vocabStore.indexNames.contains('favorite')) {
+            vocabStore.createIndex('favorite', 'favorite', { unique: false });
+        }
+    }
+    
+    // FIXED: Removed extra parenthesis here
+    if (!db.objectStoreNames.contains(STORE_TRANSLATIONS)) {
+        const translationsStore = db.createObjectStore(STORE_TRANSLATIONS, { keyPath: 'id' });
+        translationsStore.createIndex('text', 'text', { unique: true });
+    }
+};
         
         request.onsuccess = (event) => {
             resolve(event.target.result);
@@ -2683,26 +2702,56 @@ function displayTooltip(text, x, y) {
 
 async function lookupWordInDictionary(word) {
     try {
-        const apiUrl = `https://jisho.org/api/v1/search/words?keyword=${encodeURIComponent(word)}`;
+        // First try Jotoba API (CORS-friendly)
+        const response = await fetch('https://jotoba.de/api/search/words', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query: word, language: 'English' })
+        });
         
-        let response;
-        try {
-            response = await fetch(apiUrl);
-            if (!response.ok) throw new Error('Direct API failed');
-        } catch (directError) {
-            const proxyUrl = 'https://api.allorigins.win/raw?url=';
-            response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
-            if (!response.ok) throw new Error('API request failed');
-        }
-
+        if (!response.ok) throw new Error('API request failed');
+        
         const data = await response.json();
-        if (data.data && data.data.length > 0) {
-            return data.data[0].senses[0]?.english_definitions?.join(', ') || 'No definition found';
+        if (data.words && data.words.length > 0) {
+            // Format the definitions
+            const definitions = data.words.map(entry => {
+                const reading = entry.reading || '';
+                const kanji = entry.kanji || '';
+                const glosses = entry.senses[0]?.glosses?.join(', ') || 'No definition';
+                
+                return {
+                    word: kanji || word,
+                    reading: reading,
+                    definition: glosses
+                };
+            });
+            
+            return definitions;
         }
         return null;
     } catch (error) {
-        console.error('Dictionary lookup error:', error);
-        return null;
+        console.error('Dictionary error:', error);
+        // Fallback to Jisho API with proxy
+        try {
+            const proxyUrl = 'https://api.allorigins.win/raw?url=';
+            const encodedUrl = encodeURIComponent(`https://jisho.org/api/v1/search/words?keyword=${word}`);
+            const response = await fetch(proxyUrl + encodedUrl);
+            
+            if (!response.ok) throw new Error('Fallback API failed');
+            
+            const data = await response.json();
+            if (data.data && data.data.length > 0) {
+                return [{
+                    word: word,
+                    reading: '',
+                    definition: data.data[0].senses[0]?.english_definitions?.join(', ') || 'No definition'
+                }];
+            }
+            return null;
+        } catch (fallbackError) {
+            console.error('Fallback dictionary error:', fallbackError);
+            return null;
+        }
     }
 }
 
@@ -2732,7 +2781,49 @@ function translateCurrentSentence() {
         }
     });
 }
-
+// Add this missing function to fix the error
+function addWordClickHandlers() {
+    // Remove any existing word spans
+    const wordSpans = elements.sentenceDisplay.querySelectorAll('.word');
+    wordSpans.forEach(span => span.remove());
+    
+    // Get the current sentence
+    const sentence = state.sentences[state.currentSentenceIndex].original;
+    
+    // Split sentence into words (preserving Japanese characters)
+    const words = sentence.split(/([^\w\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\uFF00-\uFFEF\u4E00-\u9FAF]+)/).filter(Boolean);
+    
+    // Create new wrapped words
+    const wrappedWords = words.map(word => {
+        const span = document.createElement('span');
+        span.className = 'word';
+        span.textContent = word;
+        
+        // Add hover effect for desktop
+        span.addEventListener('mouseenter', (e) => {
+            const rect = e.target.getBoundingClientRect();
+            showWordTooltip(word, rect.left, rect.top - 30);
+        });
+        
+        span.addEventListener('mouseleave', () => {
+            elements.wordTooltip.classList.remove('show');
+        });
+        
+        // Add tap effect for mobile
+        span.addEventListener('click', (e) => {
+            if (window.innerWidth <= 600) {
+                const rect = e.target.getBoundingClientRect();
+                showWordTooltip(word, rect.left, rect.top - 30);
+            }
+        });
+        
+        return span;
+    });
+    
+    // Clear and rebuild the sentence display
+    elements.sentenceDisplay.textContent = '';
+    wrappedWords.forEach(span => elements.sentenceDisplay.appendChild(span));
+}
 // Vocabulary review functions
 async function startReview(bucket) {
     state.reviewMode = bucket;
@@ -2930,7 +3021,31 @@ function checkMatch(leftCard, rightCard) {
         
         selectedLeftCard = null;
         selectedRightCard = null;
-        
+
+        // Update streak for the matched word
+        const matchedWord = state.currentRoundWords.find(w => w.id === leftId);
+        if (matchedWord) {
+            matchedWord.streak = (matchedWord.streak || 0) + 1;
+
+            if (matchedWord.streak >= 3) {
+                if (matchedWord.bucket === 'new') {
+                    matchedWord.bucket = 'easy';
+                } else if (matchedWord.bucket === 'easy') {
+                    matchedWord.bucket = 'medium';
+                } else if (matchedWord.bucket === 'medium') {
+                    matchedWord.bucket = 'hard';
+                }
+                matchedWord.streak = 0;
+
+                showToast(`"${matchedWord.word}" moved to ${matchedWord.bucket.charAt(0).toUpperCase() + matchedWord.bucket.slice(1)}!`, 'success');
+            } else {
+                const remaining = 3 - matchedWord.streak;
+                showToast(`"${matchedWord.word}": ${remaining} more correct to level up.`, 'info');
+            }
+
+            updateVocabWord(matchedWord);
+        }
+
         // Check if all cards are matched
         const allCards = document.querySelectorAll('.word-card');
         const matchedCards = document.querySelectorAll('.word-card.correct');
@@ -2938,28 +3053,6 @@ function checkMatch(leftCard, rightCard) {
         if (matchedCards.length === allCards.length) {
             playSound('complete');
             showToast('Round completed!', 'success');
-            
-            // Update words in the database
-            state.currentRoundWords.forEach(word => {
-                word.streak = (word.streak || 0) + 1;
-                
-                if (word.streak >= 3) {
-                    if (word.bucket === 'new') {
-                        word.bucket = 'easy';
-                        word.streak = 0;
-                    } 
-                    else if (word.bucket === 'easy') {
-                        word.bucket = 'medium';
-                        word.streak = 0;
-                    }
-                    else if (word.bucket === 'medium') {
-                        word.bucket = 'hard';
-                        word.streak = 0;
-                    }
-                    
-                    updateVocabWord(word);
-                }
-            });
             
             // Move to next set of words
             state.currentReviewIndex += 5;
@@ -3335,19 +3428,19 @@ document.getElementById('translate-to-japanese').addEventListener('click', async
     elements.sentenceDisplay.addEventListener('mouseup', handleTextSelection);
     elements.sentenceDisplay.addEventListener('touchend', handleTextSelection);
 
-    function handleTextSelection() {
-        const selection = window.getSelection().toString().trim();
-        if (selection.length > 0) {
-            elements.selectedWord.textContent = selection;
-            elements.vocabTranslation.value = '';
-            elements.wordSelectionBox.style.display = 'block';
-            elements.vocabTranslation.focus();
-            
-            if (window.innerWidth <= 600) {
-                elements.wordSelectionBox.scrollIntoView({ behavior: 'smooth' });
-            }
+function handleTextSelection() {
+    const selection = window.getSelection().toString().trim();
+    if (selection.length > 0) {
+        elements.selectedWord.textContent = selection;
+        elements.vocabTranslation.value = '';
+        elements.wordSelectionBox.style.display = 'block';
+        elements.vocabTranslation.focus();
+
+        if (window.innerWidth <= 600) {
+            elements.wordSelectionBox.scrollIntoView({ behavior: 'smooth' });
         }
     }
+}
 
     // Dictionary lookup
     document.getElementById('lookup-word').addEventListener('click', async () => {
@@ -3359,58 +3452,38 @@ document.getElementById('translate-to-japanese').addEventListener('click', async
 
         try {
             document.getElementById('lookup-word').innerHTML = 'Searching...';
+            document.getElementById('dictionary-results').style.display = 'block';
+            document.getElementById('dictionary-entries').innerHTML = '<div class="loading-spinner" style="margin: 0 auto;"></div>';
             
-            // Try using a different CORS proxy or direct API call
-            const apiUrl = `https://jisho.org/api/v1/search/words?keyword=${encodeURIComponent(word)}`;
-            
-            // First try direct fetch (might work if deployed)
-            let response;
-            try {
-                response = await fetch(apiUrl);
-                if (!response.ok) throw new Error('Direct API failed');
-            } catch (directError) {
-                // If direct fails, try with a CORS proxy
-                const proxyUrl = 'https://api.allorigins.win/raw?url='; // Alternative proxy
-                response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
-                if (!response.ok) throw new Error('API request failed');
-            }
-
-            const data = await response.json();
-
+            const entries = await lookupWordInDictionary(word);
             const entriesContainer = document.getElementById('dictionary-entries');
             entriesContainer.innerHTML = '';
 
-            if (data.data && data.data.length > 0) {
-                data.data.slice(0, 5).forEach(entry => {
+            if (entries && entries.length > 0) {
+                entries.slice(0, 5).forEach(entry => {
                     const entryDiv = document.createElement('div');
                     entryDiv.className = 'dictionary-entry';
                     
-                    // Get the best display form of the word
-                    const japaneseDisplay = entry.japanese[0]?.word || entry.japanese[0]?.reading || word;
-                    
-                    // Get the first English definition or fallback
-                    const englishDefinition = entry.senses[0]?.english_definitions?.join(', ') || 'No definition found';
-                    
                     entryDiv.innerHTML = `
-                        <strong>${japaneseDisplay}</strong><br>
-                        ${englishDefinition}
+                        <strong>${entry.word}</strong>
+                        ${entry.reading ? `<div class="dictionary-reading">${entry.reading}</div>` : ''}
+                        <div>${entry.definition}</div>
                     `;
                     
                     entryDiv.addEventListener('click', () => {
-                        document.getElementById('vocab-translation').value = 
-                            entry.senses[0]?.english_definitions[0] || englishDefinition.split(',')[0];
+document.getElementById('vocab-translation').value = entry.definition;
                         document.getElementById('dictionary-results').style.display = 'none';
                     });
                     
                     entriesContainer.appendChild(entryDiv);
                 });
-                document.getElementById('dictionary-results').style.display = 'block';
             } else {
-                showToast('No dictionary results found', 'error');
+                entriesContainer.innerHTML = '<p>No dictionary results found</p>';
             }
         } catch (error) {
             console.error('Dictionary error:', error);
             showToast('Dictionary lookup failed. Try again later.', 'error');
+            document.getElementById('dictionary-results').style.display = 'none';
         } finally {
             document.getElementById('lookup-word').innerHTML = 'Lookup in Dictionary';
         }
@@ -3451,6 +3524,14 @@ document.getElementById('translate-to-japanese').addEventListener('click', async
             }
         }
     });
+document.getElementById('use-sentence-translation').addEventListener('click', () => {
+    const sentence = state.sentences[state.currentSentenceIndex];
+    if (sentence.cached_translation) {
+        elements.vocabTranslation.value = sentence.cached_translation;
+    } else {
+        showToast('No cached sentence translation available. Please translate the sentence first.', 'error');
+    }
+});
 
     // Vocabulary review
     document.querySelectorAll('.bucket-card').forEach(card => {
@@ -3563,6 +3644,48 @@ document.addEventListener('keydown', (e) => {
     window.addEventListener('offline', () => {
         state.isOnline = false;
         elements.offlineWarning.style.display = 'block';
+    });
+}
+function loadVocabList() {
+    const listContainer = document.getElementById('vocab-list');
+    listContainer.innerHTML = '';
+
+    state.vocabWords.forEach(word => {
+        const wordDiv = document.createElement('div');
+        wordDiv.style.borderBottom = '1px solid var(--accent)';
+        wordDiv.style.padding = '0.5rem';
+        wordDiv.style.display = 'flex';
+        wordDiv.style.justifyContent = 'space-between';
+        wordDiv.style.alignItems = 'center';
+
+        // Calculate how many corrects are left before leveling up
+        let matchesRemaining = 3 - (word.streak || 0);
+        if (matchesRemaining < 0) matchesRemaining = 0;
+
+        const wordInfo = document.createElement('div');
+        wordInfo.innerHTML = `
+            <strong>${word.word}</strong> - ${word.translation}<br>
+            <span style="font-size: 0.85rem; color: gray;">
+                Bucket: ${word.bucket} | Streak: ${word.streak || 0}/3 | ${matchesRemaining} more to level up
+            </span>
+        `;
+
+        // Optional: Add a delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = '❌';
+        deleteBtn.style.background = 'none';
+        deleteBtn.style.border = 'none';
+        deleteBtn.style.color = 'var(--danger)';
+        deleteBtn.style.cursor = 'pointer';
+        deleteBtn.style.fontSize = '1.2rem';
+        deleteBtn.title = 'Delete word';
+        deleteBtn.addEventListener('click', () => {
+            deleteVocabWord(word.id);
+        });
+
+        wordDiv.appendChild(wordInfo);
+        wordDiv.appendChild(deleteBtn);
+        listContainer.appendChild(wordDiv);
     });
 }
 
