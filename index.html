@@ -907,18 +907,18 @@
             margin-top: 1rem;
         }
 
-        .favorite-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 1.2rem;
-            margin-left: 0.5rem;
-        }
+.favorite-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 1.2rem;
+    margin-left: 0.5rem;
+}
 
-        .favorite-btn.active {
-            color: var(--highlight);
-        }
+.favorite-btn.active {
+    color: var(--highlight);
+}
 
         .offline-warning {
             position: fixed;
@@ -1300,6 +1300,7 @@
             <div class="nav-tabs">
                 <button class="nav-btn active" data-view="text-import" aria-label="Text Reader">Reader</button>
                 <button class="nav-btn" data-view="vocab-review" aria-label="Vocabulary Review">Vocabulary</button>
+    <button class="nav-btn" data-view="bookmarks-view" aria-label="Bookmarks">Bookmarks</button> 
             </div>
             <div>
                 <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">🌙</button>
@@ -1484,6 +1485,7 @@
                 
                 <div class="sentence-display" id="sentence-display" aria-label="Current sentence">
                     Select text to begin reading
+<button class="favorite-btn" id="favorite-sentence-btn" aria-label="Add to bookmarks">☆</button>
                 </div>
                 <div class="sentence-counter" id="sentence-counter">
                     Sentence 0/0
@@ -1634,6 +1636,18 @@
                     Back to Text Import
                 </button>
             </section>
+<section id="bookmarks-view" class="view">
+    <h2>Saved Bookmarks</h2>
+    <p>Your favorite sentences and readings</p>
+    
+    <div id="bookmarks-list" class="resources-container">
+        <!-- Bookmarks will appear here -->
+    </div>
+    
+    <button class="btn" id="clear-bookmarks-btn" style="background-color: var(--danger); margin-top: 1rem;">
+        Clear All Bookmarks
+    </button>
+</section>
         </main>
         
         <div class="confirmation-dialog" id="wipe-confirmation" style="display: none;">
@@ -1709,7 +1723,8 @@ const state = {
     currentSessionStart: null,
     selectedCards: [],
     currentTtsUtterance: null,
-    wordLookupCache: {}
+    wordLookupCache: {},
+bookmarks: JSON.parse(localStorage.getItem('bookmarks')) || []
 };
 
 // Initialize audio context and sounds
@@ -1809,7 +1824,63 @@ function toggleSounds() {
     document.getElementById('sound-toggle').textContent = state.soundsEnabled ? '🔊' : '🔇';
     showToast(`Sounds ${state.soundsEnabled ? 'enabled' : 'disabled'}`);
 }
+function toggleBookmark() {
+    if (state.sentences.length === 0) return;
+    
+    const currentSentence = state.sentences[state.currentSentenceIndex];
+    const index = state.bookmarks.findIndex(b => b.id === currentSentence.id);
+    
+    if (index === -1) {
+        // Add to bookmarks
+        state.bookmarks.push({
+            id: currentSentence.id,
+            sentence: currentSentence.original,
+            translation: currentSentence.cached_translation || '',
+            date: new Date().toISOString()
+        });
+        document.getElementById('favorite-sentence-btn').classList.add('active');
+        showToast('Added to bookmarks!', 'success');
+    } else {
+        // Remove from bookmarks
+        state.bookmarks.splice(index, 1);
+        document.getElementById('favorite-sentence-btn').classList.remove('active');
+        showToast('Removed from bookmarks', 'error');
+    }
+    
+    localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
+    renderBookmarks();
+}
 
+function renderBookmarks() {
+    const container = document.getElementById('bookmarks-list');
+    container.innerHTML = '';
+    
+    if (state.bookmarks.length === 0) {
+        container.innerHTML = '<p>No bookmarks yet</p>';
+        return;
+    }
+    
+    state.bookmarks.forEach(bookmark => {
+        const item = document.createElement('div');
+        item.className = 'resource-link';
+        item.innerHTML = `
+            <div style="flex: 1;">
+                <div>${bookmark.sentence}</div>
+                <div style="font-size: 0.8em; color: var(--text-secondary);">${bookmark.translation}</div>
+            </div>
+            <button class="nav-btn" style="background-color: var(--danger); padding: 0.2rem 0.5rem;" 
+                data-bookmark-id="${bookmark.id}">Remove</button>
+        `;
+        container.appendChild(item);
+    });
+}
+
+function clearBookmarks() {
+    state.bookmarks = [];
+    localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
+    renderBookmarks();
+    showToast('All bookmarks cleared', 'success');
+}
 // Toast notification
 function showToast(message, type = '') {
     const toast = document.getElementById('toast');
@@ -2675,6 +2746,13 @@ function displaySentence() {
     
     // Add click handlers for word lookup
     addWordClickHandlers();
+// Update favorite button state
+const favoriteBtn = document.getElementById('favorite-sentence-btn');
+if (state.bookmarks.some(b => b.id === sentence.id)) {
+    favoriteBtn.classList.add('active');
+} else {
+    favoriteBtn.classList.remove('active');
+}
 }
 function preloadAdjacentSentences() {
     // Pre-load next sentence translation if not already loaded
@@ -3226,6 +3304,22 @@ async function checkClipboard() {
 }
 
 function setupEventListeners() {
+// Favorite button
+document.getElementById('favorite-sentence-btn').addEventListener('click', toggleBookmark);
+
+// Clear bookmarks button
+document.getElementById('clear-bookmarks-btn').addEventListener('click', clearBookmarks);
+
+// Bookmark removal
+document.getElementById('bookmarks-list').addEventListener('click', (e) => {
+    if (e.target.hasAttribute('data-bookmark-id')) {
+        const id = e.target.getAttribute('data-bookmark-id');
+        state.bookmarks = state.bookmarks.filter(b => b.id !== id);
+        localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
+        renderBookmarks();
+        showToast('Bookmark removed', 'success');
+    }
+});
     // Initialize settings panel
     initSettingsPanel();
 // Voice input button
