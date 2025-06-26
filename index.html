@@ -464,7 +464,7 @@ body {
             border-radius: 12px;
             padding: 2rem;
             text-align: center;
-            font-size: 1.8rem;
+    font-size: calc(var(--font-size) * 1.5); /* Scales with settings */
             min-height: 200px;
             display: flex;
             align-items: center;
@@ -487,7 +487,7 @@ body {
         }
 
         .selected-word {
-            font-size: 1.5rem;
+            font-size: 2rem;
             text-align: center;
             margin-bottom: 1rem;
             padding: 0.5rem;
@@ -607,6 +607,7 @@ body {
             display: flex;
             flex: 1;
             gap: 1rem;
+    min-height: 0; /* Important for flex children */
             overflow: hidden;
         }
 
@@ -614,6 +615,7 @@ body {
             flex: 1;
             display: flex;
             flex-direction: column;
+   min-height: 0; /* Important for scrolling */
             overflow-y: auto;
             padding: 0.5rem;
         }
@@ -628,21 +630,25 @@ body {
             border-radius: 8px;
         }
 
-        .word-card {
-            background-color: var(--accent);
-            padding: 1.5rem;
-            border-radius: 12px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.2s ease;
-            margin-bottom: 0.75rem;
-            font-size: 1.2rem;
-            min-height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            word-break: break-word;
-        }
+.word-card {
+    position: relative;
+    padding: 1rem;
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+    margin-bottom: 0.75rem;
+    font-size: calc(var(--font-size) * 1.25); /* Scales with settings */
+    min-height: 0; /* Remove fixed min-height */
+    height: 100%; /* Take full height of container */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    word-break: break-word;
+    flex: 1; /* Allow cards to grow */
+    box-sizing: border-box;
+}
 
         .word-card:hover {
             transform: translateY(-2px);
@@ -651,6 +657,7 @@ body {
 
         .word-card.selected {
             background-color: var(--highlight);
+        transform: scale(0.98); /* More subtle selection effect */
         }
 
         .word-card.correct {
@@ -672,7 +679,7 @@ body {
         }
 
         .review-question {
-            font-size: 1.8rem;
+    font-size: calc(var(--font-size) * 1.5); /* Scales with settings */
             margin-bottom: 1.5rem;
             min-height: 100px;
             display: flex;
@@ -1157,9 +1164,9 @@ body {
      font-size: 1rem !important;
  }
         .sentence-display {
-            font-size: 1.3rem;
+        font-size: calc(var(--font-size) * 1.3); /* Now scales */
             padding: 1rem;
-            min-height: 150px;
+            min-height: 160px;
         }
         
         .input-actions {
@@ -1191,14 +1198,16 @@ body {
         }
         
         .matching-column {
-            max-height: 60vh;
-            overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem; /* Reduce gap between cards */
         }
         
         .word-card {
             padding: 1rem;
-            min-height: 70px;
-            font-size: 1.1rem;
+            min-height: 90px;
+        font-size: calc(var(--font-size) * 1.1); /* Now scales */
+         margin-bottom: 0.5rem;
         }
         
         .paste-indicator {
@@ -1316,8 +1325,8 @@ body {
         
         /* Adjust review mode for mobile */
         .review-question {
-            font-size: 1.5rem;
-            min-height: 80px;
+             font-size: 1.8rem; /* Increased from 1.5rem */
+        min-height: 90px; /* Increased from 80px */
         }
         
         .hard-mode-buttons {
@@ -2820,13 +2829,16 @@ function displaySentence() {
     
     // Add click handlers for word lookup
     addWordClickHandlers();
-// Update favorite button state
-const favoriteBtn = document.getElementById('favorite-sentence-btn');
-if (state.bookmarks.some(b => b.id === sentence.id)) {
-    favoriteBtn.classList.add('active');
-} else {
-    favoriteBtn.classList.remove('active');
-}
+    
+    // Safely update favorite button state if it exists
+    const favoriteBtn = document.getElementById('favorite-sentence-btn');
+    if (favoriteBtn) {
+        if (state.bookmarks.some(b => b.id === sentence.id)) {
+            favoriteBtn.classList.add('active');
+        } else {
+            favoriteBtn.classList.remove('active');
+        }
+    }
 }
 function preloadAdjacentSentences() {
     // Pre-load next sentence translation if not already loaded
@@ -3055,44 +3067,51 @@ function updateProgressDisplay() {
     elements.progressFill.style.width = `${(currentPosition / totalWords) * 100}%`;
 }
 
-        function createWordCard(word) {
-            const card = document.createElement('div');
-            card.className = 'word-card';
-            card.dataset.id = word.id;
-            card.dataset.type = word.type;
-            card.dataset.streak = word.streak || 0;
-            card.textContent = word.text;
-            card.title = `Streak: ${word.streak || 0}/3`;
-            card.setAttribute('aria-label', `${word.type} word: ${word.text} (${word.streak || 0}/3 correct)`);
-            
-            // Add streak indicator
-            const streakIndicator = document.createElement('div');
-            streakIndicator.className = 'streak-indicator';
-            
-            const progressBar = document.createElement('div');
-            progressBar.className = 'streak-progress';
-            progressBar.style.width = `${(word.streak || 0) * 33.33}%`;
-            
-            streakIndicator.appendChild(progressBar);
-            card.appendChild(streakIndicator);
-            
-            card.addEventListener('click', function() {
-                playSound('flip');
-                
-                // FIXED: Removed extra parenthesis from this condition
-                if ((word.type === 'japanese' && state.reviewMode === 'medium') ||
-                    (word.type === 'english' && (state.reviewMode === 'new' || state.reviewMode === 'easy'))) {
-                        const matchingWord = state.currentRoundWords.find(w => w.id === word.id);
-                        if (matchingWord) {
-                            speakText(matchingWord.word);
-                        }
-                    }
-                
-                selectCard(this, word.type);
-            });
-            
-            return card;
-        }
+function createWordCard(word) {
+    const card = document.createElement('div');
+    card.className = 'word-card';
+    card.dataset.id = word.id;
+    card.dataset.type = word.type;
+    card.dataset.streak = word.streak || 0;
+    
+    // Create content container
+    const content = document.createElement('div');
+    content.style.flex = '1';
+    content.style.display = 'flex';
+    content.style.alignItems = 'center';
+    content.style.justifyContent = 'center';
+    content.style.width = '100%';
+    content.textContent = word.text;
+    
+    card.appendChild(content);
+    
+    // Add streak indicator
+    const streakIndicator = document.createElement('div');
+    streakIndicator.className = 'streak-indicator';
+    
+    const progressBar = document.createElement('div');
+    progressBar.className = 'streak-progress';
+    progressBar.style.width = `${(word.streak || 0) * 33.33}%`;
+    
+    streakIndicator.appendChild(progressBar);
+    card.appendChild(streakIndicator);
+    
+    card.addEventListener('click', function() {
+        playSound('flip');
+        
+        if ((word.type === 'japanese' && state.reviewMode === 'medium') ||
+            (word.type === 'english' && (state.reviewMode === 'new' || state.reviewMode === 'easy'))) {
+                const matchingWord = state.currentRoundWords.find(w => w.id === word.id);
+                if (matchingWord) {
+                    speakText(matchingWord.word);
+                }
+            }
+        
+        selectCard(this, word.type);
+    });
+    
+    return card;
+}
 
 function checkMatch(leftCard, rightCard) {
     const leftId = leftCard.dataset.id;
