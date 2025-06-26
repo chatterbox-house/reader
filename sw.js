@@ -2,8 +2,8 @@ const CACHE_NAME = 'jap-learner-v3';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/styles.css',
-  '/app.js'
+  '/manifest.json',
+  // No need to include styles.css as your styles are in index.html
 ];
 
 self.addEventListener('install', event => {
@@ -16,6 +16,9 @@ self.addEventListener('install', event => {
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
-      .then(response => response || fetch(event.request))
+      .then(response => {
+        // Return cached response if found, otherwise fetch from network
+        return response || fetch(event.request);
+      })
   );
 });
