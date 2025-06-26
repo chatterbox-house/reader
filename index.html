@@ -22,6 +22,10 @@ body {
     width: 100%;
     overflow-x: hidden;
 }
+/* Always show theme and settings buttons */
+.theme-toggle, .settings-btn {
+    display: flex !important;
+}
     :root {
         --primary: #1a1a2e;
         --secondary: #16213e;
@@ -1145,6 +1149,13 @@ body {
 
 
     @media (max-width: 600px) {
+ /* Keep theme toggle and settings buttons visible */
+ .theme-toggle, .settings-btn {
+     display: flex !important;
+     width: 35px !important;
+     height: 35px !important;
+     font-size: 1rem !important;
+ }
         .sentence-display {
             font-size: 1.3rem;
             padding: 1rem;
