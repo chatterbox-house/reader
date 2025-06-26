@@ -594,7 +594,27 @@ header {
         color: var(--text);
         cursor: pointer;
     }
+/* IntroJS custom styling */
+.customIntroJS .introjs-tooltip {
+    color: #000 !important;
+    background-color: #fff !important;
+    max-width: 300px;
+}
 
+.customIntroJS .introjs-tooltip-header .introjs-skipbutton {
+    color: #e94560 !important;
+    font-weight: bold;
+}
+
+.customIntroJS .introjs-tooltiptext {
+    color: #000 !important;
+}
+
+.customIntroJS .introjs-button {
+    color: #fff !important;
+    background-color: #e94560 !important;
+    text-shadow: none !important;
+}
     /* Vocabulary Review */
     .bucket-container {
         display: grid;
@@ -1039,13 +1059,26 @@ header {
     .tooltip.show {
         opacity: 1;
     }
+#voice-input-jp {
+    background-color: var(--highlight) !important;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-top: 0.5rem;
+    margin-left: 0;
+}
 
+@media (max-width: 600px) {
+    #voice-input-jp {
+        bottom: 5.5rem;
+        right: 1rem;
+    }
+}
     /* TTS Controls */
-
-
-
-
-
 
     .sound-toggle {
         position: fixed;
@@ -1102,7 +1135,29 @@ header {
         margin-left: 10px;
         vertical-align: middle;
     }
+/* Enhanced Stats Display */
+.session-stats {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: var(--card-bg);
+    border-radius: 12px;
+}
 
+.session-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.session-date {
+    color: var(--text-secondary);
+}
+
+.session-duration {
+    font-weight: bold;
+    color: var(--highlight);
+}
     /* Responsive Styles */
     @media (max-width: 600px) {
         body {
@@ -1378,10 +1433,14 @@ header {
                 <div class="text-import-container">
                     <h2>Import Japanese Text</h2>
                     <p>Paste Japanese text below to start learning (max 5,000 characters)</p>
-                    <div id="paste-indicator" class="paste-indicator" style="display: none;">
-                        📋 Click to paste
-                    </div>
-                    <textarea class="text-input" id="text-input" placeholder="例: 猫が寝ている。犬が走っている。..." aria-label="Japanese text input"></textarea>
+
+<div style="position: relative;">
+    <textarea class="text-input" id="text-input" placeholder="例: 猫が寝ている。犬が走っている。..." aria-label="Japanese text input"></textarea>
+    <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+        <button id="voice-input-jp" style="background: var(--highlight); border: none; font-size: 1.2rem; cursor: pointer; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;" aria-label="Japanese voice input">🎤</button>
+        <button id="paste-indicator" style="background: var(--accent); border: none; border-radius: 20px; padding: 0.5rem 1rem; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;" aria-label="Paste text">📋 Paste</button>
+    </div>
+</div>
                     <div class="char-count"><span id="char-count">0</span>/5000 characters</div>
                     <div class="button-group">
                         <button class="btn" id="process-text" aria-label="Process text">
@@ -1666,14 +1725,16 @@ bookmarkedSentences: JSON.parse(localStorage.getItem('bookmarkedSentences')) || 
     currentLineHeight: parseFloat(localStorage.getItem('lineHeight')) || 1.6,
     autoTranslate: localStorage.getItem('autoTranslate') === 'true',
     clozeMode: localStorage.getItem('clozeMode') === 'true',
-    readingStats: JSON.parse(localStorage.getItem('readingStats')) || {
-        streak: 0,
-        lastActiveDate: '',
-        wordsLearned: 0,
-        timeSpent: 0,
-        dailyWords: 0,
-        dailyTime: 0
-    },
+readingStats: JSON.parse(localStorage.getItem('readingStats')) || {
+    streak: 0,
+    lastActiveDate: '',
+    wordsLearned: 0,
+    timeSpent: 0, // in seconds
+    dailyWords: 0,
+    dailyTime: 0, // in seconds
+    sessions: [], // New: track individual sessions
+    streakMilestones: [] // New: track achieved milestones
+},
     currentSessionStart: null,
     selectedCards: [],
     currentTtsUtterance: null,
@@ -2009,7 +2070,39 @@ function updateStatsDisplay() {
     elements.dailyWordsLearned.textContent = state.readingStats.dailyWords;
     elements.dailyTimeSpent.textContent = `${Math.floor(state.readingStats.dailyTime / 60)} min`;
 }
-
+function updateEnhancedStats() {
+    // Update session tracking
+    if (state.currentSessionStart) {
+        const now = new Date();
+        const sessionDuration = (now - state.currentSessionStart) / 1000; // in seconds
+        
+        // Add new session record
+        state.readingStats.sessions.push({
+            date: now.toISOString(),
+            duration: sessionDuration,
+            wordsAdded: state.newWordsToday
+        });
+        
+        // Keep only last 30 sessions
+        if (state.readingStats.sessions.length > 30) {
+            state.readingStats.sessions.shift();
+        }
+        
+        // Check for streak milestones
+        const milestones = [3, 7, 14, 30, 60, 90];
+        const currentStreak = state.readingStats.streak;
+        
+        milestones.forEach(milestone => {
+            if (currentStreak >= milestone && 
+                !state.readingStats.streakMilestones.includes(milestone)) {
+                state.readingStats.streakMilestones.push(milestone);
+                showToast(`🎉 ${milestone}-day streak! Keep it up!`, 'success');
+            }
+        });
+        
+        localStorage.setItem('readingStats', JSON.stringify(state.readingStats));
+    }
+}
 // Track reading time
 function startReadingSession() {
     if (!state.currentSessionStart) {
@@ -2024,7 +2117,8 @@ function endReadingSession() {
         state.readingStats.timeSpent += timeSpent;
         state.readingStats.dailyTime += timeSpent;
         state.currentSessionStart = null;
-        localStorage.setItem('readingStats', JSON.stringify(state.readingStats));
+        
+        updateEnhancedStats(); // Add this line
         updateStatsDisplay();
     }
 }
@@ -3176,7 +3270,40 @@ async function checkClipboard() {
 }
 
 function setupEventListeners() {
-    // Initialize settings panel
+// Japanese voice input
+document.getElementById('voice-input-jp').addEventListener('click', () => {
+    if (!('webkitSpeechRecognition' in window)) {
+        showToast('Voice input not supported in your browser', 'error');
+        return;
+    }
+
+    const recognition = new webkitSpeechRecognition();
+    recognition.lang = 'ja-JP'; // Set to Japanese
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+        document.getElementById('voice-input-jp').textContent = '🔴';
+        showToast('音声認識中... (Listening...)');
+    };
+
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('text-input').value = transcript;
+        document.getElementById('char-count').textContent = transcript.length;
+    };
+
+    recognition.onerror = (event) => {
+        showToast('音声認識エラー: ' + event.error, 'error');
+        document.getElementById('voice-input-jp').textContent = '🎤';
+    };
+
+    recognition.onend = () => {
+        document.getElementById('voice-input-jp').textContent = '🎤';
+    };
+
+    recognition.start();
+});    
+// Initialize settings panel
     initSettingsPanel();
     
     // How to use toggle
@@ -3294,26 +3421,26 @@ function setupEventListeners() {
     });
 
     // Paste indicator
-    elements.pasteIndicator.addEventListener('click', async () => {
-        try {
-            const text = await navigator.clipboard.readText();
-            if (text) {
-                elements.textInput.value = text;
-                elements.charCount.textContent = text.length;
-                elements.pasteIndicator.style.display = 'none';
-                
-                // Auto-detect language
-                const detectedLang = detectLanguage(text);
-                if (detectedLang === 'ja') {
-                    document.querySelector('.mode-toggle-btn[data-mode="import"]').click();
-                } else {
-                    document.querySelector('.mode-toggle-btn[data-mode="translate"]').click();
-                }
+document.getElementById('paste-indicator').addEventListener('click', async () => {
+    try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+            elements.textInput.value = text;
+            elements.charCount.textContent = text.length;
+            
+            // Auto-detect language
+            const detectedLang = detectLanguage(text);
+            if (detectedLang === 'ja') {
+                document.querySelector('.mode-toggle-btn[data-mode="import"]').click();
+            } else {
+                document.querySelector('.mode-toggle-btn[data-mode="translate"]').click();
             }
-        } catch (err) {
-            console.log('Failed to paste:', err);
         }
-    });
+    } catch (err) {
+        console.log('Failed to paste:', err);
+        showToast('Failed to paste text. Please check clipboard permissions.', 'error');
+    }
+});
 
     // Process text button event listener
     elements.processTextBtn.addEventListener('click', async () => {
@@ -3728,8 +3855,7 @@ async function initApp() {
         initAudio();
         elements.soundToggle.textContent = state.soundsEnabled ? '🔊' : '🔇';
         
-        // Check clipboard for paste
-        checkClipboard();
+
         
         // Pre-warm TTS
         if ('speechSynthesis' in window) {
@@ -3787,6 +3913,64 @@ async function initApp() {
 
 // Start the app
 window.addEventListener('DOMContentLoaded', initApp);
+</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intro.js@6.0.0/minified/introjs.min.css">
+<script src="https://cdn.jsdelivr.net/npm/intro.js@6.0.0/minified/intro.min.js"></script>
+
+<script>
+// First-time tutorial
+function startTutorial() {
+    const tutorialShown = localStorage.getItem('tutorialShown');
+    if (!tutorialShown) {
+        const intro = introJs();
+// Replace the entire introJs options object with this:
+intro.setOptions({
+    steps: [
+        {
+            element: document.querySelector('.text-import-container'),
+            intro: "<div style='color:black;'>Start by pasting Japanese text here to begin learning</div>",
+            position: 'bottom'
+        },
+        {
+            element: document.querySelector('.bucket-container'),
+            intro: "<div style='color:black;'>Review vocabulary words organized by difficulty level</div>",
+            position: 'top'
+        },
+        {
+            element: document.getElementById('bookmark-btn'),
+            intro: "<div style='color:black;'>Bookmark sentences to review later</div>",
+            position: 'left'
+        },
+        {
+            element: document.getElementById('settings-btn'),
+            intro: "<div style='color:black;'>Customize your learning experience in settings</div>",
+            position: 'left'
+        }
+    ],
+    nextLabel: 'Next',
+    prevLabel: 'Back',
+    doneLabel: 'Got it!',
+    skipLabel: 'Skip tutorial', // Add skip button
+    showProgress: true,
+    tooltipClass: 'customIntroJS' // Add custom class for styling
+});
+        
+        intro.oncomplete(() => {
+            localStorage.setItem('tutorialShown', 'true');
+        });
+        
+        intro.onexit(() => {
+            localStorage.setItem('tutorialShown', 'true');
+        });
+        
+        intro.start();
+    }
+}
+
+// Start tutorial when app initializes
+window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(startTutorial, 1000); // Small delay for UI to load
+});
 </script>
 </body>
 </html>
