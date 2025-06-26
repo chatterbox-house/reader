@@ -1994,7 +1994,24 @@ function startReadingSession() {
         state.currentSessionStart = new Date();
     }
 }
-
+function addWordClickHandlers() {
+    // Clear previous click handlers
+    elements.sentenceDisplay.onclick = null;
+    
+    // Add new click handler for word lookup
+    elements.sentenceDisplay.onclick = (e) => {
+        const selection = window.getSelection();
+        const selectedText = selection.toString().trim();
+        
+        if (selectedText.length > 0) {
+            const range = selection.getRangeAt(0);
+            const rect = range.getBoundingClientRect();
+            
+            // Show tooltip with word lookup
+            showWordTooltip(selectedText, rect.left, rect.top - 30);
+        }
+    };
+}
 function endReadingSession() {
     if (state.currentSessionStart) {
         const now = new Date();
