@@ -1,5 +1,7 @@
 // sw.js - Basic Service Worker
 const CACHE_NAME = 'jap-learner-v1';
+// Add version to cache name
+const CACHE_NAME = 'jap-learner-v2'; // Increment when updating
 const urlsToCache = [
   '/',
   '/index.html',
