@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="theme-color" content="#1a1a2e">
     <title>JapLearner - Japanese Learning Tool</title>
     <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkphcExlYXJuZXIiLAogICJzaG9ydF9uYW1lIjogIkphcExlYXJuZXIiLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzFhMWEyZSIsCiAgInRoZW1lX2NvbG9yIjogIiMxYTFhMmUiCn0=">
@@ -1159,147 +1159,130 @@ header {
     color: var(--highlight);
 }
     /* Responsive Styles */
-    @media (max-width: 600px) {
-        body {
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior-x: none;
-        }
+@media (max-width: 600px) {
+    body {
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: none;
+        font-size: 18px;
+    }
 
-        .sentence-display {
-            font-size: 1.3rem;
-            padding: 1rem;
-            min-height: 150px;
-        }
-
-        .control-btn {
-            width: 45px;
-            height: 45px;
-            font-size: 1rem;
-        }
-
-        .bucket-container {
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-        }
-
-        .bucket-card {
-            padding: 0.5rem;
-        }
-
-        .bucket-count {
-            font-size: 1.5rem;
-        }
-
-        .matching-game-columns {
-            flex-direction: row;
-            gap: 0.5rem;
-            height: auto;
-            overflow-x: hidden;
-            touch-action: pan-y;
-        }
-
-        .matching-column {
-            width: 48%;
-            flex: 1;
-            overflow-x: hidden;
-        }
-
-        .word-card {
-            padding: 1rem;
-            font-size: 1.2rem;
-            min-height: 90px;
-            height: auto;
-            word-break: break-word;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            line-height: 1.5;
-            text-align: center;
-        }
-
-        .word-card[data-type="japanese"] {
-            font-size: 1.4rem;
-            font-weight: bold;
-        }
-
-        .paste-indicator {
-            top: auto;
-            bottom: 1rem;
-            right: 1rem;
-        }
-
-        .text-import-container .btn {
-            width: 100%;
-            margin: 0.5rem 0;
-        }
-
-        .mode-toggle {
-            flex-direction: column;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .mode-toggle-btn {
-            width: 100%;
-            margin: 0;
-        }
-
-        #process-text,
-        #clear-text,
-        #show-history-btn,
-        #translate-to-japanese {
-            width: 100%;
-            margin-top: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .settings-panel {
-            width: 100%;
-            right: -100%;
-        }
-
-        .settings-panel.open {
-            right: 0;
-        }
-
-
-.sound-toggle {
-    bottom: 1rem !important;
-    right: 1rem !important;
+    header {
+        padding: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .nav-tabs {
+        order: 3;
+        width: 100%;
+        margin-top: 0.5rem;
+        justify-content: center;
+    }
+    
+    main {
+        padding: 0.5rem;
+        padding-bottom: 80px;
+    }
+    
+    .text-input {
+        min-height: 200px;
+        font-size: 1.1rem;
+    }
+    
+    .btn {
+        padding: 1rem;
+        font-size: 1.1rem;
+        margin: 0.5rem 0;
+    }
+    
+    .sentence-display {
+        font-size: 1.5rem;
+        padding: 1.5rem;
+        min-height: 180px;
+        line-height: 1.8;
+    }
+    
+    .sentence-controls {
+        padding: 0.8rem;
+    }
+    
+    .control-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+    
+    .bucket-container {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.8rem;
+    }
+    
+    .bucket-card {
+        padding: 1rem;
+    }
+    
+    .bucket-count {
+        font-size: 1.8rem;
+    }
+    
+    .review-question {
+        font-size: 1.8rem;
+        min-height: 120px;
+    }
+    
+    .hard-mode-btn {
+        padding: 1.2rem;
+        font-size: 1.1rem;
+    }
+    
+    .settings-panel {
+        width: 90%;
+        right: -90%;
+        padding: 1rem;
+    }
+    
+    input, select, textarea {
+        font-size: 16px !important;
+    }
+    
+    a, button, [role="button"] {
+        min-width: 44px;
+        min-height: 44px;
+    }
+    
+    .resource-link {
+        padding: 1rem;
+    }
+    
+    #voice-input-jp {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+    
+    #paste-indicator {
+        padding: 0.8rem 1.2rem;
+        font-size: 1rem;
+    }
 }
 
-        header {
-            padding: 0.5rem;
-        }
-
-        .nav-tabs {
-            gap: 0.2rem;
-        }
-
-        .nav-btn {
-            padding: 0.3rem 0.6rem;
-            font-size: 0.8rem;
-        }
-
-        main {
-            padding-bottom: 80px;
-        }
-
-        .review-question {
-            font-size: 1.5rem;
-            min-height: 80px;
-        }
-
-        .hard-mode-buttons {
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .hard-mode-btn {
-            width: 100%;
-        }
+@media (max-width: 400px) {
+    .bucket-container {
+        grid-template-columns: 1fr;
     }
+    
+    .sentence-display {
+        font-size: 1.4rem;
+    }
+    
+    .control-btn {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .btn {
+        padding: 0.8rem;
+    }
+}
 
     @media (min-width: 601px) {
 
