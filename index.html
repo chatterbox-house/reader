@@ -1087,7 +1087,27 @@
             opacity: 1;
         }
 
-    
+.streak-indicator {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background-color: var(--secondary);
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+}
+
+.streak-progress {
+    height: 100%;
+    background-color: var(--highlight);
+    transition: width 0.3s ease;
+}
+
+.word-card {
+    position: relative;
+    padding-bottom: 12px; /* Make room for streak indicator */
+}    
 
 
 @media (max-width: 600px) {
@@ -2774,7 +2794,6 @@ async function startReview(bucket) {
         setupMatchingGame();
     }
 }
-
 function setupMatchingGame() {
     elements.matchingGameContainer.style.display = 'block';
     elements.hardModeContainer.style.display = 'none';
@@ -2848,49 +2867,218 @@ function setupMatchingGame() {
     }
     
     // Update progress
-    elements.progressText.textContent = `Words: ${state.currentReviewIndex + 1}-${Math.min(state.currentReviewIndex + 5, state.reviewWords.length)}/${state.reviewWords.length}`;
-    elements.progressFill.style.width = `${(state.currentReviewIndex / state.reviewWords.length) * 100}%`;
+    updateProgressDisplay();
 }
 
-function createWordCard(word) {
-    const card = document.createElement('div');
-    card.className = 'word-card';
-    card.dataset.id = word.id;
-    card.dataset.type = word.type;
-    card.textContent = word.text;
-    card.setAttribute('aria-label', `${word.type} word: ${word.text}`);
+function updateProgressDisplay() {
+    const totalWords = state.reviewWords.length;
+    const currentPosition = state.currentReviewIndex;
+    const wordsInRound = Math.min(5, totalWords - currentPosition);
     
-    card.addEventListener('click', function() {
-        playSound('flip');
+    elements.progressText.textContent = `Words: ${currentPosition + 1}-${currentPosition + wordsInRound}/${totalWords}`;
+    elements.progressFill.style.width = `${(currentPosition / totalWords) * 100}%`;
+}
+
+        function createWordCard(word) {
+            const card = document.createElement('div');
+            card.className = 'word-card';
+            card.dataset.id = word.id;
+            card.dataset.type = word.type;
+            card.dataset.streak = word.streak || 0;
+            card.textContent = word.text;
+            card.title = `Streak: ${word.streak || 0}/3`;
+            card.setAttribute('aria-label', `${word.type} word: ${word.text} (${word.streak || 0}/3 correct)`);
+            
+            // Add streak indicator
+            const streakIndicator = document.createElement('div');
+            streakIndicator.className = 'streak-indicator';
+            
+            const progressBar = document.createElement('div');
+            progressBar.className = 'streak-progress';
+            progressBar.style.width = `${(word.streak || 0) * 33.33}%`;
+            
+            streakIndicator.appendChild(progressBar);
+            card.appendChild(streakIndicator);
+            
+            card.addEventListener('click', function() {
+                playSound('flip');
+                
+                // FIXED: Removed extra parenthesis from this condition
+                if ((word.type === 'japanese' && state.reviewMode === 'medium') ||
+                    (word.type === 'english' && (state.reviewMode === 'new' || state.reviewMode === 'easy'))) {
+                        const matchingWord = state.currentRoundWords.find(w => w.id === word.id);
+                        if (matchingWord) {
+                            speakText(matchingWord.word);
+                        }
+                    }
+                
+                selectCard(this, word.type);
+            });
+            
+            return card;
+        }
+
+function checkMatch(leftCard, rightCard) {
+    const leftId = leftCard.dataset.id;
+    const rightId = rightCard.dataset.id;
+    
+    if (leftId === rightId) {
+        leftCard.classList.remove('selected');
+        leftCard.classList.add('correct');
+        rightCard.classList.remove('selected');
+        rightCard.classList.add('correct');
         
-        // Play TTS for Japanese words in medium mode or english words in easy/new mode
-        if ((word.type === 'japanese' && (state.reviewMode === 'medium')) ||
-            (word.type === 'english' && (state.reviewMode === 'new' || state.reviewMode === 'easy'))) {
-            const matchingWord = state.currentRoundWords.find(w => w.id === word.id);
-            if (matchingWord) {
-                speakText(matchingWord.word);
-            }
+        state.reviewStats.correct++;
+        playSound('correct');
+        
+        // Find the matched word
+        const matchedWord = state.currentRoundWords.find(w => w.id === leftId);
+        const wordIndex = state.reviewWords.findIndex(w => w.id === leftId);
+        
+        if (matchedWord && wordIndex !== -1) {
+            // Update streak count
+            matchedWord.streak = (matchedWord.streak || 0) + 1;
+            state.reviewWords[wordIndex].streak = matchedWord.streak;
+            
+            // Persist the streak to database
+            updateVocabWord(state.reviewWords[wordIndex]).then(() => {
+                // Update streak display
+                leftCard.dataset.streak = matchedWord.streak;
+                rightCard.dataset.streak = matchedWord.streak;
+                leftCard.title = `Streak: ${matchedWord.streak}/3`;
+                rightCard.title = `Streak: ${matchedWord.streak}/3`;
+                
+                const leftProgress = leftCard.querySelector('.streak-progress');
+                const rightProgress = rightCard.querySelector('.streak-progress');
+                if (leftProgress && rightProgress) {
+                    leftProgress.style.width = `${matchedWord.streak * 33.33}%`;
+                    rightProgress.style.width = `${matchedWord.streak * 33.33}%`;
+                }
+                
+                // Show feedback
+                const neededForNext = 3 - matchedWord.streak;
+                if (neededForNext > 0) {
+                    showToast(`Correct! Need ${neededForNext} more correct answers to move up`, 'success');
+                } else {
+                    showToast('Correct! Word will move to next bucket', 'success');
+                    moveWordToNextBucket(matchedWord);
+                }
+            });
         }
         
-        selectCard(this, word.type);
-    });
-    
-    return card;
+        selectedLeftCard = null;
+        selectedRightCard = null;
+        
+        // Check if all cards are matched
+        checkRoundCompletion();
+    } else {
+        // Incorrect match
+        leftCard.classList.remove('selected');
+        leftCard.classList.add('incorrect');
+        rightCard.classList.remove('selected');
+        rightCard.classList.add('incorrect');
+        
+        state.reviewStats.incorrect++;
+        playSound('incorrect');
+        showToast('Try again!', 'error');
+        
+        setTimeout(() => {
+            leftCard.classList.remove('incorrect');
+            rightCard.classList.remove('incorrect');
+            selectedLeftCard = null;
+            selectedRightCard = null;
+        }, 1000);
+    }
 }
+
+function moveWordToNextBucket(word) {
+    if (word.bucket === 'new') {
+        word.bucket = 'easy';
+    } else if (word.bucket === 'easy') {
+        word.bucket = 'medium';
+    } else if (word.bucket === 'medium') {
+        word.bucket = 'hard';
+    }
+    
+    // Reset streak after moving
+    word.streak = 0;
+    
+    // Update in database
+    updateVocabWord(word);
+}
+
+function checkRoundCompletion() {
+    const allCards = document.querySelectorAll('.word-card');
+    const matchedCards = document.querySelectorAll('.word-card.correct');
+    
+    if (matchedCards.length === allCards.length) {
+        playSound('complete');
+        
+        // Move to next set of words
+        state.currentReviewIndex += 5;
+        if (state.currentReviewIndex < state.reviewWords.length) {
+            setTimeout(() => {
+                setupMatchingGame();
+            }, 1500);
+        } else {
+            // Review complete
+            setTimeout(() => {
+                showView('vocab-review-view');
+                updateBucketCounts();
+            }, 1500);
+        }
+    }
+}
+
+
 
 function setupHardMode() {
     elements.matchingGameContainer.style.display = 'none';
     elements.hardModeContainer.style.display = 'flex';
     
     if (state.currentReviewIndex >= state.reviewWords.length) {
-        // Review complete
         elements.reviewQuestion.textContent = "Review complete!";
         elements.hardModeContainer.style.display = 'none';
         return;
     }
     
     state.currentHardWord = state.reviewWords[state.currentReviewIndex];
-    elements.reviewQuestion.textContent = state.currentHardWord.word;
+    
+    // Create question with streak indicator
+    const questionDiv = document.createElement('div');
+    questionDiv.style.textAlign = 'center';
+    
+    const wordElement = document.createElement('div');
+    wordElement.textContent = state.currentHardWord.word;
+    wordElement.style.fontSize = '2rem';
+    wordElement.style.marginBottom = '1rem';
+    
+    const streakElement = document.createElement('div');
+    streakElement.textContent = `Streak: ${state.currentHardWord.streak || 0}/3`;
+    streakElement.style.fontSize = '0.9rem';
+    streakElement.style.color = 'var(--text-secondary)';
+    
+    const progressBar = document.createElement('div');
+    progressBar.style.height = '4px';
+    progressBar.style.width = '100%';
+    progressBar.style.backgroundColor = 'var(--secondary)';
+    progressBar.style.borderRadius = '2px';
+    progressBar.style.margin = '0.5rem auto';
+    
+    const progressFill = document.createElement('div');
+    progressFill.style.height = '100%';
+    progressFill.style.width = `${(state.currentHardWord.streak || 0) * 33.33}%`;
+    progressFill.style.backgroundColor = 'var(--highlight)';
+    progressFill.style.borderRadius = '2px';
+    
+    progressBar.appendChild(progressFill);
+    
+    questionDiv.appendChild(wordElement);
+    questionDiv.appendChild(streakElement);
+    questionDiv.appendChild(progressBar);
+    
+    elements.reviewQuestion.innerHTML = '';
+    elements.reviewQuestion.appendChild(questionDiv);
     
     // Update progress
     elements.progressText.textContent = `Word ${state.currentReviewIndex + 1}/${state.reviewWords.length}`;
@@ -2932,85 +3120,6 @@ function selectCard(cardElement, cardType) {
     }
 }
 
-function checkMatch(leftCard, rightCard) {
-    const leftId = leftCard.dataset.id;
-    const rightId = rightCard.dataset.id;
-    
-    if (leftId === rightId) {
-        leftCard.classList.remove('selected');
-        leftCard.classList.add('correct');
-        rightCard.classList.remove('selected');
-        rightCard.classList.add('correct');
-        
-        state.reviewStats.correct++;
-        playSound('correct');
-        showToast('Correct!', 'success');
-        
-        selectedLeftCard = null;
-        selectedRightCard = null;
-        
-        // Check if all cards are matched
-        const allCards = document.querySelectorAll('.word-card');
-        const matchedCards = document.querySelectorAll('.word-card.correct');
-        
-        if (matchedCards.length === allCards.length) {
-            playSound('complete');
-            showToast('Round completed!', 'success');
-            
-            // Update words in the database
-            state.currentRoundWords.forEach(word => {
-                word.streak = (word.streak || 0) + 1;
-                
-                if (word.streak >= 3) {
-                    if (word.bucket === 'new') {
-                        word.bucket = 'easy';
-                        word.streak = 0;
-                    } 
-                    else if (word.bucket === 'easy') {
-                        word.bucket = 'medium';
-                        word.streak = 0;
-                    }
-                    else if (word.bucket === 'medium') {
-                        word.bucket = 'hard';
-                        word.streak = 0;
-                    }
-                    
-                    updateVocabWord(word);
-                }
-            });
-            
-            // Move to next set of words
-            state.currentReviewIndex += 5;
-            if (state.currentReviewIndex < state.reviewWords.length) {
-                setTimeout(() => {
-                    setupMatchingGame();
-                }, 1500);
-            } else {
-                // Review complete
-                setTimeout(() => {
-                    showView('vocab-review-view');
-                    updateBucketCounts();
-                }, 1500);
-            }
-        }
-    } else {
-        leftCard.classList.remove('selected');
-        leftCard.classList.add('incorrect');
-        rightCard.classList.remove('selected');
-        rightCard.classList.add('incorrect');
-        
-        state.reviewStats.incorrect++;
-        playSound('incorrect');
-        showToast('Try again!', 'error');
-        
-        setTimeout(() => {
-            leftCard.classList.remove('incorrect');
-            rightCard.classList.remove('incorrect');
-            selectedLeftCard = null;
-            selectedRightCard = null;
-        }, 1000);
-    }
-}
 
 function handleHardModeResponse(knewIt) {
     if (!state.currentHardWord) return;
@@ -3556,7 +3665,7 @@ document.addEventListener('keydown', (e) => {
         }
     } // This closes the outer if statement
     
-    if (state.currentView === 'review-mode-view' && state.reviewMode === 'hard') {
+if (state.currentView === 'review-mode-view' && state.reviewMode === 'hard') {
         if (e.key === 'Enter') {
             elements.knewItBtn.click();
         } else if (e.key === 'Escape') {
