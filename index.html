@@ -388,7 +388,15 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
+.input-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
 
+.input-actions .btn {
+    flex: 1;
+}
         .translation-result {
             background-color: var(--card-bg);
             border-radius: 12px;
@@ -1116,7 +1124,9 @@
         padding: 1rem;
         min-height: 150px;
     }
-    
+ .input-actions {
+    flex-direction: column;
+}   
     .control-btn {
         width: 45px;
         height: 45px;
@@ -1393,19 +1403,27 @@
                     <div id="paste-indicator" class="paste-indicator" style="display: none;">
                         📋 Click to paste
                     </div>
-                    <textarea class="text-input" id="text-input" placeholder="例: 猫が寝ている。犬が走っている。..." aria-label="Japanese text input"></textarea>
-                    <div class="char-count"><span id="char-count">0</span>/5000 characters</div>
-                    <div class="button-group">
-                        <button class="btn" id="process-text" aria-label="Process text">
-                            <span>Process Text</span>
-                        </button>
-                        <button class="btn" id="clear-text" style="background-color: var(--danger);" aria-label="Clear text">
-                            Clear Text
-                        </button>
-                        <button class="btn" id="show-history-btn" style="background-color: var(--accent);" aria-label="View history">
-                            View History
-                        </button>
-                    </div>
+<textarea class="text-input" id="text-input" placeholder="例: 猫が寝ている。犬が走っている。..." aria-label="Japanese text input"></textarea>
+<div class="char-count"><span id="char-count">0</span>/5000 characters</div>
+<div class="input-actions">
+    <button id="paste-btn" class="btn" style="background-color: var(--accent);">
+        📋 Paste
+    </button>
+    <button id="voice-input-btn" class="btn" style="background-color: var(--accent);">
+        🎤 Speak
+    </button>
+</div>
+<div class="button-group">
+    <button class="btn" id="process-text" aria-label="Process text">
+        <span>Process Text</span>
+    </button>
+    <button class="btn" id="clear-text" style="background-color: var(--danger);" aria-label="Clear text">
+        Clear Text
+    </button>
+    <button class="btn" id="show-history-btn" style="background-color: var(--accent);" aria-label="View history">
+        View History
+    </button>
+</div>
                 </div>
                 
                 <div class="mode-toggle">
@@ -1796,7 +1814,12 @@ function showToast(message, type = '') {
     const toast = document.getElementById('toast');
     toast.textContent = message;
     toast.className = 'toast';
-    toast.classList.add(type);
+    
+    // Only add class if type is not empty
+    if (type) {
+        toast.classList.add(type);
+    }
+    
     toast.classList.add('show');
     
     setTimeout(() => {
@@ -3204,7 +3227,50 @@ async function checkClipboard() {
 function setupEventListeners() {
     // Initialize settings panel
     initSettingsPanel();
+// Voice input button
+document.getElementById('voice-input-btn').addEventListener('click', function() {
+    startVoiceInput('ja', 'text-input', this);
+});
+
+function startVoiceInput(lang, targetId, buttonElement) {
+    if (!('webkitSpeechRecognition' in window)) {
+        showToast('Voice input not supported in your browser', 'error');
+        return;
+    }
+
+    const recognition = new webkitSpeechRecognition();
+    recognition.lang = lang;
+    recognition.interimResults = false;
     
+    const originalButtonContent = buttonElement.innerHTML;
+    buttonElement.innerHTML = '🔴 Listening...';
+    
+    recognition.onstart = () => {
+        showToast('Listening...', 'info');
+    };
+
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById(targetId).value = transcript;
+        
+        // Trigger input event to update count
+        const inputEvent = new Event('input', { bubbles: true });
+        document.getElementById(targetId).dispatchEvent(inputEvent);
+        
+        showToast('Speech recognized!', 'success');
+    };
+
+    recognition.onerror = (event) => {
+        showToast('Voice input error: ' + event.error, 'error');
+        buttonElement.innerHTML = originalButtonContent;
+    };
+
+    recognition.onend = () => {
+        buttonElement.innerHTML = originalButtonContent;
+    };
+
+    recognition.start();
+}   
     // How to use toggle
     elements.howToUseToggle.addEventListener('click', () => {
         elements.howToUseContent.classList.toggle('show');
@@ -3340,7 +3406,27 @@ function setupEventListeners() {
             console.log('Failed to paste:', err);
         }
     });
-
+// Paste button
+document.getElementById('paste-btn').addEventListener('click', async () => {
+    try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+            elements.textInput.value = text;
+            elements.charCount.textContent = text.length;
+            
+            // Auto-detect language
+            const detectedLang = detectLanguage(text);
+            if (detectedLang === 'ja') {
+                document.querySelector('.mode-toggle-btn[data-mode="import"]').click();
+            } else {
+                document.querySelector('.mode-toggle-btn[data-mode="translate"]').click();
+            }
+        }
+    } catch (err) {
+        console.log('Failed to paste:', err);
+        showToast('Paste failed. Please try again.', 'error');
+    }
+});
     // Process text button event listener
     elements.processTextBtn.addEventListener('click', async () => {
         const text = elements.textInput.value.trim();
