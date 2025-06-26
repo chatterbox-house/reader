@@ -2794,6 +2794,9 @@ function preloadAdjacentSentences() {
 
 
 function showWordTooltip(word, x, y) {
+    // Only show tooltips on desktop
+    if (window.innerWidth <= 600) return;
+    
     // Check cache first
     if (state.wordLookupCache[word]) {
         displayTooltip(state.wordLookupCache[word], x, y);
@@ -2937,19 +2940,29 @@ function addWordClickHandlers() {
         
         // Add hover effect for desktop
         span.addEventListener('mouseenter', (e) => {
-            const rect = e.target.getBoundingClientRect();
-            showWordTooltip(word, rect.left, rect.top - 30);
+            if (window.innerWidth > 600) { // Only on desktop
+                const rect = e.target.getBoundingClientRect();
+                showWordTooltip(word, rect.left, rect.top - 30);
+            }
         });
         
         span.addEventListener('mouseleave', () => {
             elements.wordTooltip.classList.remove('show');
         });
         
-        // Add tap effect for mobile
+        // Add tap effect for mobile - SIMPLIFIED
         span.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent default behavior
+            e.stopPropagation(); // Stop event bubbling
+            
+            // Just show the word selection box, don't try to show tooltip
+            elements.selectedWord.textContent = word;
+            elements.vocabTranslation.value = '';
+            elements.wordSelectionBox.style.display = 'block';
+            elements.vocabTranslation.focus();
+            
             if (window.innerWidth <= 600) {
-                const rect = e.target.getBoundingClientRect();
-                showWordTooltip(word, rect.left, rect.top - 30);
+                elements.wordSelectionBox.scrollIntoView({ behavior: 'smooth' });
             }
         });
         
