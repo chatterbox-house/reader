@@ -716,7 +716,34 @@
         .confirmation-dialog.show {
             opacity: 1;
         }
+.streak-badge {
+    font-size: 0.8rem;
+    background: var(--highlight);
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 1rem;
+    margin-left: 0.5rem;
+}
+.bookmark-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 10;
+}
 
+.bookmark-btn.active {
+    color: var(--highlight);
+}
+
+.sentence-display {
+    position: relative;
+    padding: 2rem;
+}
         .toast {
             position: fixed;
             bottom: 1rem;
@@ -815,24 +842,35 @@
             transform: translateX(5px);
             background-color: var(--accent);
         }
+.minimalist-mode .control-btn,
+.minimalist-mode .sentence-controls,
+.minimalist-mode .nav-tabs {
+    opacity: 0.2;
+    transition: opacity 0.3s;
+}
 
-        .sound-toggle {
-            position: fixed;
-            bottom: 1rem;
-            right: 1rem;
-            width: 50px;
-            height: 50px;
-            background-color: var(--highlight);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            z-index: 100;
-            box-shadow: var(--shadow);
-            cursor: pointer;
-        }
+.minimalist-mode:hover .control-btn,
+.minimalist-mode:hover .sentence-controls,
+.minimalist-mode:hover .nav-tabs {
+    opacity: 1;
+}
+#review-mode-view .sound-toggle {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    width: 50px;
+    height: 50px;
+    background-color: var(--highlight);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    z-index: 100;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+}
 
 .loading-spinner {
     border: 3px solid rgba(255, 255, 255, 0.3);
@@ -1276,7 +1314,10 @@
 <body>
     <div class="app-container">
         <header>
-            <div class="logo">JapLearner</div>
+<div class="logo">
+    <span>JapLearner</span>
+    <span class="streak-badge" id="streak-badge">0-day streak</span>
+</div>
             <div class="nav-tabs">
                 <button class="nav-btn active" data-view="text-import" aria-label="Text Reader">Reader</button>
                 <button class="nav-btn" data-view="vocab-review" aria-label="Vocabulary Review">Vocabulary</button>
@@ -1284,6 +1325,7 @@
             <div>
                 <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">🌙</button>
                 <button class="settings-btn" id="settings-btn" aria-label="Settings">⚙️</button>
+<button class="nav-btn" data-view="bookmarks" aria-label="Bookmarks">Bookmarks</button>
             </div>
         </header>
         
@@ -1317,6 +1359,13 @@
             
             <div class="settings-group">
                 <h3>Appearance</h3>
+    <div class="settings-toggle">
+        <label class="toggle-switch">
+            <input type="checkbox" id="minimalist-toggle">
+            <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label">Minimalist Mode</span>
+    </div>
                 <label class="settings-label">Font Family</label>
                 <select class="settings-select" id="font-select">
                     <option value="system">System UI</option>
@@ -1455,9 +1504,10 @@
                     <button class="jump-btn" id="jump-btn">Go</button>
                 </div>
                 
-                <div class="sentence-display" id="sentence-display" aria-label="Current sentence">
-                    Select text to begin reading
-                </div>
+<div class="sentence-display" id="sentence-display" aria-label="Current sentence">
+    <button class="bookmark-btn" id="bookmark-btn" aria-label="Bookmark sentence">★</button>
+    <div class="sentence-content">Select text to begin reading</div>
+</div>
                 <div class="sentence-counter" id="sentence-counter">
                     Sentence 0/0
                 </div>
@@ -1524,7 +1574,15 @@
                     </div>
                 </div>
             </section>
-            
+        <section id="bookmarks-view" class="view">
+    <h2>Bookmarked Sentences</h2>
+    <div id="bookmarks-list" class="resources-container">
+        <!-- Bookmarks will appear here -->
+    </div>
+    <button class="btn" id="clear-bookmarks-btn" style="background-color: var(--danger); margin-top: 1rem;">
+        Clear All Bookmarks
+    </button>
+</section>    
             <section id="review-mode-view" class="view">
                 <div class="review-container">
                     <div class="progress-container">
@@ -1553,10 +1611,10 @@
                         <button class="hard-mode-btn didnt-know" id="didnt-know-btn" aria-label="Don't know">Don't know</button>
                         <button class="hard-mode-btn skip-btn" id="skip-btn" aria-label="Skip word">Skip</button>
                     </div>
-                </div>
-                
-                <button class="btn" id="exit-review" aria-label="Exit review">Exit Review</button>
-            </section>
+    </div>
+    <button class="btn" id="exit-review" aria-label="Exit review">Exit Review</button>
+    <div class="sound-toggle" id="sound-toggle" aria-label="Toggle sound">🔊</div>
+</section>
             
             <section id="manage-vocab-view" class="view">
                 <h2>Manage Vocabulary</h2>
@@ -1621,7 +1679,7 @@
         </div>
         
         <div class="toast" id="toast"></div>
-        <div class="sound-toggle" id="sound-toggle" aria-label="Toggle sound">🔊</div>
+
         
         <!-- New floating controls -->
 <div class="tts-speed-control" id="tts-speed-control">
@@ -1664,7 +1722,7 @@ const state = {
     uiLanguage: localStorage.getItem('uiLanguage') || 'en',
     newWordsToday: parseInt(localStorage.getItem('newWordsToday')) || 0,
     lastWordAddedDate: localStorage.getItem('lastWordAddedDate') || '',
-
+bookmarkedSentences: JSON.parse(localStorage.getItem('bookmarkedSentences')) || [],
     currentTtsSpeed: parseFloat(localStorage.getItem('ttsSpeed')) || 1.0,
     currentFont: localStorage.getItem('font') || 'system',
     currentFontSize: parseInt(localStorage.getItem('fontSize')) || 16,
@@ -1788,7 +1846,11 @@ function showToast(message, type = '') {
     const toast = document.getElementById('toast');
     toast.textContent = message;
     toast.className = 'toast';
-    toast.classList.add(type);
+    
+    if (type) {
+        toast.classList.add(type);
+    }
+    
     toast.classList.add('show');
     
     setTimeout(() => {
