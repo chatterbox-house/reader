@@ -468,23 +468,28 @@ body {
             color: white;
         }
 
-        .sentence-display {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 2rem;
-            text-align: center;
-    font-size: calc(var(--font-size) * 1.5); /* Scales with settings */
-            min-height: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1rem;
-            box-shadow: var(--shadow);
-            line-height: var(--line-height);
-            user-select: text;
-            position: relative;
-        }
-
+.sentence-display {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    font-size: calc(var(--font-size) * 1.5);
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+    line-height: var(--line-height);
+    user-select: text;
+    position: relative;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: normal;
+    hyphens: auto;
+    padding: 1.5rem;
+    max-width: 100%;
+}
 
         .word-selection-box {
             background-color: var(--card-bg);
@@ -1099,29 +1104,6 @@ body {
             cursor: pointer;
         }
 
-        .cloze-word {
-            color: transparent;
-            text-shadow: 0 0 8px var(--text);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .cloze-word:hover {
-            color: var(--text);
-            text-shadow: none;
-        }
-
-        .cloze-word::after {
-            content: "";
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background-color: var(--highlight);
-        }
-
         .tooltip {
             position: absolute;
             background-color: var(--secondary);
@@ -1440,14 +1422,7 @@ body {
             <div class="settings-group">
                 <h3>Reading Settings</h3>
 
-                
-                <div class="settings-toggle">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="cloze-toggle">
-                        <span class="toggle-slider"></span>
-                    </label>
-                    <span class="toggle-label">Cloze Deletion Mode</span>
-                </div>
+
                 
                 <div class="settings-toggle">
                     <label class="toggle-switch">
@@ -1858,7 +1833,7 @@ const state = {
     currentFontSize: parseInt(localStorage.getItem('fontSize')) || 16,
     currentLineHeight: parseFloat(localStorage.getItem('lineHeight')) || 1.6,
     autoTranslate: localStorage.getItem('autoTranslate') === 'true',
-    clozeMode: localStorage.getItem('clozeMode') === 'true',
+
 readingStats: JSON.parse(localStorage.getItem('readingStats')) || {
     streak: 0,
     lastActiveDate: '',
@@ -2225,7 +2200,6 @@ const elements = {
     settingsOverlay: document.getElementById('settings-overlay'),
     closeSettings: document.getElementById('close-settings'),
 
-    clozeToggle: document.getElementById('cloze-toggle'),
     autoTranslateToggle: document.getElementById('auto-translate-toggle'),
     fontSelect: document.getElementById('font-select'),
     fontSizeRange: document.getElementById('font-size-range'),
@@ -2251,7 +2225,6 @@ console.log('Settings panel:', document.getElementById('settings-panel'));
 function initSettingsPanel() {
     // Set initial values
 
-    elements.clozeToggle.checked = state.clozeMode;
     elements.autoTranslateToggle.checked = state.autoTranslate;
     elements.fontSelect.value = state.currentFont;
     elements.fontSizeRange.value = state.currentFontSize;
@@ -2281,21 +2254,7 @@ if (state.readingStats.streak > 3 && state.readingStats.lastActiveDate !== new D
     });
     
 
-    
-    elements.clozeToggle.addEventListener('change', (e) => {
-        state.clozeMode = e.target.checked;
-        localStorage.setItem('clozeMode', state.clozeMode);
-        if (state.currentView === 'reading-view') {
-            displaySentence();
-// Track daily sentences
-if (!state.readingStats.lastActiveDate || state.readingStats.lastActiveDate !== new Date().toDateString()) {
-  state.readingStats.dailySentences = 0;
-}
-state.readingStats.dailySentences++;
-localStorage.setItem('readingStats', JSON.stringify(state.readingStats));
-document.getElementById('daily-goal-count').textContent = state.readingStats.dailySentences;
-        }
-    });
+   
     
     elements.autoTranslateToggle.addEventListener('change', (e) => {
         state.autoTranslate = e.target.checked;
@@ -2747,17 +2706,6 @@ function detectLanguage(text) {
     return japaneseChars.test(text) ? 'ja' : 'en';
 }
 
-function applyClozeDeletion(text) {
-    // Randomly hide some words for recall practice
-    const words = text.split(/([^\w\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\uFF00-\uFFEF\u4E00-\u9FAF]+)/);
-    const clozeText = words.map(word => {
-        if (word.trim().length > 1 && Math.random() > 0.7) { // 30% chance to hide
-            return `<span class="cloze-word">${word}</span>`;
-        }
-        return word;
-    }).join('');
-    return clozeText;
-}
 
 async function translateToJapanese(text, sourceLang) {
     try {
@@ -2993,6 +2941,9 @@ function displaySentence() {
     
     const sentence = state.sentences[state.currentSentenceIndex];
     elements.sentenceDisplay.textContent = sentence.original;
+
+
+    
     elements.sentenceDisplay.classList.add('current-sentence');
     elements.wordSelectionBox.style.display = 'none';
     
@@ -3975,19 +3926,21 @@ document.getElementById('translate-to-japanese').addEventListener('click', async
     elements.sentenceDisplay.addEventListener('mouseup', handleTextSelection);
     elements.sentenceDisplay.addEventListener('touchend', handleTextSelection);
 
-    function handleTextSelection() {
-        const selection = window.getSelection().toString().trim();
-        if (selection.length > 0) {
-            elements.selectedWord.textContent = selection;
-            elements.vocabTranslation.value = '';
-            elements.wordSelectionBox.style.display = 'block';
-            elements.vocabTranslation.focus();
-            
-            if (window.innerWidth <= 600) {
-                elements.wordSelectionBox.scrollIntoView({ behavior: 'smooth' });
-            }
+function handleTextSelection() {
+    // Get the selected text
+    const selection = window.getSelection().toString().trim();
+    
+    if (selection.length > 0) {
+        elements.selectedWord.textContent = selection;
+        elements.vocabTranslation.value = '';
+        elements.wordSelectionBox.style.display = 'block';
+        elements.vocabTranslation.focus();
+        
+        if (window.innerWidth <= 600) {
+            elements.wordSelectionBox.scrollIntoView({ behavior: 'smooth' });
         }
     }
+}
 
     // Dictionary lookup
     document.getElementById('lookup-word').addEventListener('click', async () => {
