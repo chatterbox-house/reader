@@ -619,20 +619,18 @@ html, body {
 .matching-game-container {
     display: flex;
     flex-direction: column;
-    height: auto;
-    min-height: 60vh;
-    margin-top: 1rem;
-    padding-bottom: 120px; /* Space for buttons */
+    flex: 1;
+    margin: 0;
+    overflow: hidden;
 }
 
 .matching-game-columns {
     display: flex;
     flex: 1;
-    gap: 1rem;
+    gap: 0.5rem;
     min-height: 0;
-    overflow: hidden;
-    height: 100%;
-    max-height: calc(100vh - 200px); /* Adjusted to fit content */
+    padding: 0.5rem;
+    overflow-y: auto;
 }
 
 .matching-column {
@@ -640,17 +638,23 @@ html, body {
     display: flex;
     flex-direction: column;
     min-height: 0;
-    overflow-y: auto;
     padding: 0.5rem;
     gap: 0.5rem;
     justify-content: flex-start;
     align-items: center;
+    /* Removed overflow-y: auto */
 }
 
 /* Add this new rule to ensure buttons stay at bottom */
 .review-container {
-    position: relative;
-    min-height: 70vh;
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 0;
+    margin: 0;
+    box-shadow: var(--shadow);
+    height: calc(100vh - 120px); /* Full height minus header and buttons */
+    display: flex;
+    flex-direction: column;
 }
 
 .hard-mode-buttons, .shuffle-btn {
@@ -661,33 +665,24 @@ html, body {
     padding: 0 1rem;
 }
 
-        .matching-column-header {
-            text-align: center;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-            padding: 0.5rem;
-            background-color: var(--secondary);
-            border-radius: 8px;
-        }
+
 
 .word-card {
     position: relative;
-    padding: 1rem;
-    border-radius: 12px;
+    padding: 0.8rem;
+    border-radius: 10px;
     cursor: pointer;
     text-align: center;
     transition: all 0.2s ease;
-    margin-bottom: 0.75rem;
-    font-size: calc(var(--font-size) * 1.25); /* Scales with settings */
-    min-height: 0; /* Remove fixed min-height */
-    height: 100%; /* Take full height of container */
+    margin-bottom: 0.5rem;
+    font-size: calc(var(--font-size) * 1.25); /* Now properly using the variable */
+    min-height: calc(var(--font-size) * 4); /* Makes height proportional to font */
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     word-break: break-word;
-    flex: 1; /* Allow cards to grow */
+    flex: 1;
     box-sizing: border-box;
 }
 
@@ -759,23 +754,6 @@ html, body {
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
-        .progress-container {
-            margin: 1rem 0;
-            text-align: center;
-        }
-
-        .progress-bar {
-            background-color: var(--secondary);
-            border-radius: 4px;
-            height: 8px;
-            margin-bottom: 0.5rem;
-            overflow: hidden;
-        }
-
-        .progress-text {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
 
         .confirmation-dialog {
             position: fixed;
@@ -1058,54 +1036,6 @@ html, body {
             color: var(--text-secondary);
         }
 
-.tts-speed-control {
-    position: fixed;
-    bottom: 5rem;
-    right: 1rem;
-    background-color: var(--accent);
-    color: white;
-    border-radius: 20px;
-    padding: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    z-index: 100;
-    font-size: 0.9rem;
-    box-shadow: var(--shadow);
-}
-
-.tts-speed-btn {
-    padding: 0.3rem 0.6rem;
-    background: none;
-    border: none;
-    color: white;
-    cursor: pointer;
-    border-radius: 4px;
-}
-
-.tts-speed-btn.active {
-    background-color: var(--highlight);
-    color: white;
-}
-
-@media (max-width: 600px) {
-    .tts-speed-control {
-        display: none !important;
-    }
-}
-
-@media (min-width: 601px) {
-    .tts-speed-control {
-        transform: scale(1);
-        padding: 0.5rem;
-        gap: 0.5rem;
-    }
-    
-    .tts-speed-label {
-        display: inline;
-    }
-}
-
         .jump-to-sentence {
             display: flex;
             align-items: center;
@@ -1173,18 +1103,34 @@ html, body {
 }    
 
 
-    @media (max-width: 600px) {
-    .matching-game-container {
-        padding-bottom: 150px; /* More space for mobile buttons */
+@media (max-width: 600px) {
+    .review-container {
+        height: calc(100vh - 100px); /* Even more compact */
+        border-radius: 0;
     }
     
     .matching-game-columns {
-        max-height: calc(100vh - 250px);
+        gap: 0.3rem;
+        padding: 0.3rem;
     }
     
     .word-card {
-        min-height: 80px !important; /* Ensure consistent card size */
+        min-height: calc(var(--font-size) * 3.5) !important; /* Smaller but proportional */
+        padding: 0.5rem;
+        font-size: calc(var(--font-size) * 1.15) !important; /* Now respects font size */
     }
+    
+    .shuffle-btn {
+        margin-top: 0.5rem;
+        padding: 0.8rem;
+    }
+    
+    .review-question {
+        display: none; /* We've removed progress text */
+    }
+}
+    
+
     #show-history-btn {
         font-size: 0.9rem !important;
         padding: 0.5rem !important;
@@ -1715,23 +1661,17 @@ html, body {
             
             <section id="review-mode-view" class="view">
                 <div class="review-container">
-                    <div class="progress-container">
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="progress-fill" style="width: 0%; height: 8px; background-color: var(--highlight); border-radius: 4px;"></div>
-                        </div>
-<div class="progress-text" id="progress-text">0/0 (0% mastered)</div>
-
-                    </div>
+ 
                     
                     <div class="review-question" id="review-question"></div>
                     
                     <div id="matching-game-container" class="matching-game-container" style="display: none;">
                         <div class="matching-game-columns">
                             <div class="matching-column" id="left-column">
-                                <div class="matching-column-header" id="left-header"></div>
+          
                             </div>
                             <div class="matching-column" id="right-column">
-                                <div class="matching-column-header" id="right-header"></div>
+
                             </div>
                         </div>
                         <button class="btn shuffle-btn" id="shuffle-cards" aria-label="Shuffle cards">Shuffle Cards</button>
@@ -1823,18 +1763,7 @@ html, body {
         
         <div class="toast" id="toast"></div>
         <div class="sound-toggle" id="sound-toggle" aria-label="Toggle sound">🔊</div>
-        
-        <!-- New floating controls -->
-<div class="tts-speed-control" id="tts-speed-control">
-    <span class="tts-speed-label">Speed:</span>
-    <button class="tts-speed-btn" data-speed="0.5">0.5x</button>
-    <button class="tts-speed-btn active" data-speed="1.0">1.0x</button>
-    <button class="tts-speed-btn" data-speed="1.5">1.5x</button>
-</div>
-        
 
-
-        
         <div class="tooltip" id="word-tooltip"></div>
     </div>
 
@@ -1866,7 +1795,7 @@ const state = {
     newWordsToday: parseInt(localStorage.getItem('newWordsToday')) || 0,
     lastWordAddedDate: localStorage.getItem('lastWordAddedDate') || '',
 
-    currentTtsSpeed: parseFloat(localStorage.getItem('ttsSpeed')) || 1.0,
+
     currentFont: localStorage.getItem('font') || 'system',
     currentFontSize: parseInt(localStorage.getItem('fontSize')) || 16,
     currentLineHeight: parseFloat(localStorage.getItem('lineHeight')) || 1.6,
@@ -2213,8 +2142,7 @@ const elements = {
     startReviewBtn: document.getElementById('start-review'),
     reviewQuestion: document.getElementById('review-question'),
     exitReviewBtn: document.getElementById('exit-review'),
-    progressFill: document.getElementById('progress-fill'),
-    progressText: document.getElementById('progress-text'),
+
     toast: document.getElementById('toast'),
     themeToggle: document.getElementById('theme-toggle'),
     soundToggle: document.getElementById('sound-toggle'),
@@ -2222,8 +2150,8 @@ const elements = {
     matchingGameContainer: document.getElementById('matching-game-container'),
     leftColumn: document.getElementById('left-column'),
     rightColumn: document.getElementById('right-column'),
-    leftHeader: document.getElementById('left-header'),
-    rightHeader: document.getElementById('right-header'),
+
+
     hardModeContainer: document.getElementById('hard-mode-container'),
     knewItBtn: document.getElementById('knew-it-btn'),
     didntKnowBtn: document.getElementById('didnt-know-btn'),
@@ -2308,11 +2236,16 @@ if (state.readingStats.streak > 3 && state.readingStats.lastActiveDate !== new D
         document.documentElement.setAttribute('data-font', state.currentFont);
     });
     
-    elements.fontSizeRange.addEventListener('input', (e) => {
-        state.currentFontSize = e.target.value;
-        localStorage.setItem('fontSize', state.currentFontSize);
-        document.documentElement.style.setProperty('--font-size', `${state.currentFontSize}px`);
-    });
+elements.fontSizeRange.addEventListener('input', (e) => {
+    state.currentFontSize = e.target.value;
+    localStorage.setItem('fontSize', state.currentFontSize);
+    document.documentElement.style.setProperty('--font-size', `${state.currentFontSize}px`);
+    
+    // Force redraw of cards if in matching game
+    if (state.currentView === 'review-mode-view' && state.reviewMode && state.reviewMode !== 'hard') {
+        setupMatchingGame();
+    }
+});
     
     elements.lineHeightRange.addEventListener('input', (e) => {
         state.currentLineHeight = e.target.value;
@@ -2327,18 +2260,6 @@ if (state.readingStats.streak > 3 && state.readingStats.lastActiveDate !== new D
         elements.themeToggle.textContent = state.theme === 'dark' ? '🌙' : '☀️';
     });
     
-
-
-    
-    // TTS speed controls
-    document.querySelectorAll('.tts-speed-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.tts-speed-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            state.currentTtsSpeed = parseFloat(btn.dataset.speed);
-            localStorage.setItem('ttsSpeed', state.currentTtsSpeed);
-        });
-    });
     
     // Jump to sentence
     elements.jumpBtn.addEventListener('click', () => {
@@ -2873,14 +2794,13 @@ async function translateSentence(sentence) {
 }
 
 // TTS functionality
-function speakText(text, rate = null) {
+function speakText(text) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'ja-JP';
-        utterance.rate = rate || state.currentTtsSpeed;
-        
+           
         state.currentTtsUtterance = utterance;
         
         if (speechSynthesis.getVoices().length === 0) {
@@ -3165,34 +3085,38 @@ async function startReview(bucket) {
     }
 }
 function setupMatchingGame() {
-    elements.matchingGameContainer.style.display = 'block';
-    elements.hardModeContainer.style.display = 'none';
-    
     // Clear previous cards
-    elements.leftColumn.innerHTML = '<div class="matching-column-header" id="left-header"></div>';
-    elements.rightColumn.innerHTML = '<div class="matching-column-header" id="right-header"></div>';
+    elements.leftColumn.innerHTML = '';
+    elements.rightColumn.innerHTML = '';
     
     // Get words for this round (max 5)
     const wordsToShow = state.reviewWords.slice(state.currentReviewIndex, state.currentReviewIndex + 5);
     state.currentRoundWords = wordsToShow;
-    
-    // Set column headers based on mode
+
+    // Show matching game container
+    elements.matchingGameContainer.style.display = 'flex';
+    elements.hardModeContainer.style.display = 'none';
+
+    if (wordsToShow.length === 0) {
+        showToast('No words to review!', 'error');
+        return;
+    }
+
     if (state.reviewMode === 'new' || state.reviewMode === 'easy') {
-        elements.leftHeader.textContent = "English";
-        elements.rightHeader.textContent = "Japanese";
-        
         // English cards on left (translations)
         const englishCards = shuffleArray([...wordsToShow]).map(word => ({
-            ...word,
+            id: word.id,
             type: 'english',
-            text: word.translation
+            text: word.translation,
+            streak: word.streak || 0
         }));
         
         // Japanese cards on right (words)
         const japaneseCards = shuffleArray([...wordsToShow]).map(word => ({
-            ...word,
+            id: word.id,
             type: 'japanese',
-            text: word.word
+            text: word.word,
+            streak: word.streak || 0
         }));
         
         // Add cards to columns
@@ -3207,21 +3131,20 @@ function setupMatchingGame() {
         });
         
     } else { // medium mode
-        elements.leftHeader.textContent = "Japanese";
-        elements.rightHeader.textContent = "English";
-        
         // Japanese cards on left (words)
         const japaneseCards = shuffleArray([...wordsToShow]).map(word => ({
-            ...word,
+            id: word.id,
             type: 'japanese',
-            text: word.word
+            text: word.word,
+            streak: word.streak || 0
         }));
         
         // English cards on right (translations)
         const englishCards = shuffleArray([...wordsToShow]).map(word => ({
-            ...word,
+            id: word.id,
             type: 'english',
-            text: word.translation
+            text: word.translation,
+            streak: word.streak || 0
         }));
         
         // Add cards to columns
@@ -3239,15 +3162,34 @@ function setupMatchingGame() {
     // Update progress
     updateProgressDisplay();
 }
+     // Add scroll synchronization
+    elements.leftColumn.addEventListener('scroll', syncScroll);
+    elements.rightColumn.addEventListener('scroll', syncScroll);
+
+// New function to add
+function syncScroll(e) {
+    // Determine which column was scrolled
+    const scrolledColumn = e.target;
+    const otherColumn = scrolledColumn === elements.leftColumn ? elements.rightColumn : elements.leftColumn;
+    
+    // Remove the event listener temporarily to prevent infinite loop
+    otherColumn.removeEventListener('scroll', syncScroll);
+    
+    // Sync the scroll position
+    otherColumn.scrollTop = scrolledColumn.scrollTop;
+    
+    // Re-add the event listener
+    setTimeout(() => {
+        otherColumn.addEventListener('scroll', syncScroll);
+    }, 10);
+
+
+}
 
 function updateProgressDisplay() {
-    const totalWords = state.reviewWords.length;
-    const currentPosition = state.currentReviewIndex;
-    const wordsInRound = Math.min(5, totalWords - currentPosition);
-    
-const percentMastered = Math.round((state.reviewStats.correct / totalWords) * 100);
-elements.progressText.textContent = `Words: ${currentPosition + 1}-${currentPosition + wordsInRound}/${totalWords} (${percentMastered}% mastered)`;
-    elements.progressFill.style.width = `${(currentPosition / totalWords) * 100}%`;
+    // Empty function or remove calls to it
+    // Or keep minimal logic if needed elsewhere:
+    state.currentProgress = (state.currentReviewIndex / state.reviewWords.length) * 100;
 }
 
 function createWordCard(word) {
@@ -3264,6 +3206,8 @@ function createWordCard(word) {
     content.style.alignItems = 'center';
     content.style.justifyContent = 'center';
     content.style.width = '100%';
+    content.style.padding = '10px';
+    content.style.wordBreak = 'break-word';
     content.textContent = word.text;
     
     card.appendChild(content);
@@ -3284,7 +3228,7 @@ function createWordCard(word) {
         
         if ((word.type === 'japanese' && state.reviewMode === 'medium') ||
             (word.type === 'english' && (state.reviewMode === 'new' || state.reviewMode === 'easy'))) {
-                const matchingWord = state.currentRoundWords.find(w => w.id === word.id);
+                const matchingWord = state.reviewWords.find(w => w.id === word.id);
                 if (matchingWord) {
                     speakText(matchingWord.word);
                 }
