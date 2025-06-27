@@ -352,14 +352,15 @@ body {
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .text-import-container {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: var(--shadow);
-            margin-bottom: 1rem;
-            position: relative;
-        }
+.text-import-container {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden; /* Add this line */
+}
 
         h2 {
             margin-bottom: 1rem;
@@ -391,22 +392,22 @@ body {
             margin-bottom: 1rem;
         }
 
-        .btn {
-            background-color: var(--highlight);
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 30px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            min-height: 56px;
-        }
+.btn {
+    background-color: var(--highlight);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 56px;
+}
 
         .btn:disabled {
             background-color: var(--text-secondary);
@@ -421,6 +422,15 @@ body {
     display: flex;
     gap: 0.5rem;
     margin-bottom: 0.5rem;
+    justify-content: flex-end;
+    padding: 0 10px;
+}
+
+.char-count {
+    text-align: right;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 1.5rem 0 1rem 0;
 }
 
 .input-actions .btn {
@@ -1155,6 +1165,10 @@ body {
 
 
     @media (max-width: 600px) {
+    #show-history-btn {
+        font-size: 0.9rem !important;
+        padding: 0.5rem !important;
+    }
  /* Keep theme toggle and settings buttons visible */
  .theme-toggle, .settings-btn {
      display: flex !important;
@@ -1162,6 +1176,39 @@ body {
      height: 35px !important;
      font-size: 1rem !important;
  }
+    header {
+        padding: 0.5rem;
+        gap: 0.5rem;
+    }
+    
+    .logo {
+        font-size: 1.2rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 30%; /* Limits logo width */
+    }
+    
+    .nav-tabs {
+        flex: 1; /* Takes remaining space */
+        justify-content: center;
+        gap: 0.2rem;
+    }
+    
+    .nav-btn {
+        padding: 0.4rem 0.6rem !important;
+        font-size: 0.75rem !important;
+        min-width: unset;
+    }
+    
+    .theme-toggle, .settings-btn {
+        display: flex !important;
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 0.9rem !important;
+        margin-left: 0.25rem !important;
+        flex-shrink: 0;
+    }
         .sentence-display {
         font-size: calc(var(--font-size) * 1.3); /* Now scales */
             padding: 1rem;
@@ -1170,8 +1217,22 @@ body {
         
         .input-actions {
             flex-direction: column;
+        position: static;
+        margin-top: -10px;
+        margin-bottom: 10px;
         }   
-        
+.input-actions .btn {
+    min-height: 40px;
+    padding: 0.5rem;
+    justify-content: center;
+    flex: 1; /* Allow buttons to grow */
+    width: auto; /* Remove fixed width */
+}
+
+.input-actions .btn span {
+    display: inline; /* Show text on mobile */
+    font-size: 0.8rem; /* Make text smaller */
+}
         .control-btn {
             width: 45px;
             height: 45px;
@@ -1336,6 +1397,12 @@ body {
         .hard-mode-btn {
             width: 100%;
         }
+@media (max-width: 600px) {
+    .input-actions .btn {
+        background-color: var(--highlight) !important;
+        color: white !important;
+        border: 2px solid white !important;
+    }
     }
 </style
 </head>
@@ -1446,49 +1513,62 @@ body {
                     </div>
                 </div>
                 
-                <div class="text-import-container">
-                    <h2>Import Japanese Text</h2>
+<div class="text-import-container">
+<h2>Import Japanese Text <span role="img" aria-label="Japanese">🇯🇵</span></h2>
+
                     <p>Paste Japanese text below to start learning (max 5,000 characters)</p>
 
 <textarea class="text-input" id="text-input" placeholder="例: 猫が寝ている。犬が走っている。..." aria-label="Japanese text input"></textarea>
 <div class="char-count"><span id="char-count">0</span>/5000 characters</div>
-<div class="input-actions">
-    <button id="paste-btn" class="btn" style="background-color: var(--accent);">
-        📋 Paste
+<div class="input-actions" style="gap: 0.5rem; margin-bottom: 1rem;">
+    <button id="paste-btn" class="btn" style="background-color: var(--accent); flex: 1;" aria-label="Paste">
+        <span>📋 Paste</span>
     </button>
-    <button id="voice-input-btn" class="btn" style="background-color: var(--accent);">
-        🎤 Speak
+    <button id="voice-input-btn" class="btn" style="background-color: var(--accent); flex: 1;" aria-label="Speak">
+        <span>🎤 Speak</span>
     </button>
-</div>
-<div class="button-group">
-    <button class="btn" id="process-text" aria-label="Process text">
+</div><div class="button-group" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;">
+    <button class="btn" id="process-text" aria-label="Process text" style="flex: 1;">
         <span>Process Text</span>
     </button>
-    <button class="btn" id="clear-text" style="background-color: var(--danger);" aria-label="Clear text">
+    <button class="btn" id="clear-text" style="background-color: var(--danger); flex: 1;" aria-label="Clear text">
         Clear Text
     </button>
-    <button class="btn" id="show-history-btn" style="background-color: var(--accent);" aria-label="View history">
+    <button class="btn" id="show-history-btn" style="background-color: var(--accent); width: 100%; margin-top: 0.5rem;" aria-label="View history">
         View History
     </button>
 </div>
-                </div>
+</div>
                 
                 <div class="mode-toggle">
                     <button class="mode-toggle-btn active" data-mode="import" aria-label="Import Japanese text">Import Japanese Text</button>
                     <button class="mode-toggle-btn" data-mode="translate" aria-label="Translate to Japanese">Translate to Japanese</button>
                 </div>
-                
                 <div class="text-import-container" id="translate-container" style="display: none;">
-                    <h2>Translate to Japanese</h2>
-                    <p>Type or speak text in your language to translate to Japanese</p>
-                    <textarea class="text-input" id="translate-input" placeholder="Example: The cat is sleeping. The dog is running..." aria-label="Translation input"></textarea>
-                    <div class="char-count"><span id="translate-char-count">0</span>/5000 characters</div>
-                    <div class="button-group">
-                        <button class="btn" id="translate-to-japanese" aria-label="Translate to Japanese">
-                            <span>Translate to Japanese</span>
-                        </button>
-                    </div>
-                </div>
+    <h2>Translate to Japanese <span role="img" aria-label="From your language to Japanese">🌐 → 🇯🇵</span></h2>
+    <p>Type or speak text in your language to translate to Japanese (max 5,000 characters)</p>
+    <textarea class="text-input" id="translate-input" placeholder="Example: The cat is sleeping. The dog is running..." aria-label="Translation input"></textarea>
+    <div class="char-count"><span id="translate-char-count">0</span>/5000 characters</div>
+    <div class="input-actions" style="gap: 0.5rem; margin-bottom: 1rem;">
+        <button id="paste-btn-translate" class="btn" style="background-color: var(--accent); flex: 1;" aria-label="Paste">
+            <span>📋 Paste</span>
+        </button>
+        <button id="voice-input-btn-translate" class="btn" style="background-color: var(--accent); flex: 1;" aria-label="Speak">
+            <span>🎤 Speak</span>
+        </button>
+    </div>
+    <div class="button-group" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;">
+        <button class="btn" id="translate-to-japanese" aria-label="Translate text" style="flex: 1;">
+            <span>Translate to Japanese</span>
+        </button>
+        <button class="btn" id="clear-text-translate" style="background-color: var(--danger); flex: 1;" aria-label="Clear text">
+            Clear Text
+        </button>
+        <button class="btn" id="show-history-btn-translate" style="background-color: var(--accent); width: 100%; margin-top: 0.5rem;" aria-label="View history">
+            View History
+        </button>
+    </div>
+</div>
                 
                 <div class="resources-container">
                     <h3 class="resources-title">📚 Japanese Learning Resources</h3>
@@ -3387,6 +3467,35 @@ function toggleTheme() {
 
 
 function setupEventListeners() {
+// Translate section: Paste button
+document.getElementById('paste-btn-translate').addEventListener('click', async () => {
+    try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+            document.getElementById('translate-input').value = text;
+            document.getElementById('translate-char-count').textContent = text.length;
+        }
+    } catch (err) {
+        console.log('Failed to paste:', err);
+        showToast('Paste failed. Please try again.', 'error');
+    }
+});
+
+// Translate section: Voice input button
+document.getElementById('voice-input-btn-translate').addEventListener('click', function() {
+    const lang = navigator.language || 'en-US';
+    startVoiceInput(lang, 'translate-input', this);
+});
+
+// Translate section: Clear text button
+document.getElementById('clear-text-translate').addEventListener('click', function() {
+    document.getElementById('translate-input').value = '';
+    document.getElementById('translate-char-count').textContent = '0';
+    showToast('Text cleared', 'success');
+});
+
+// Translate section: View History button
+document.getElementById('show-history-btn-translate').addEventListener('click', showHistoryView);
 // Favorite button
 document.getElementById('favorite-sentence-btn').addEventListener('click', toggleBookmark);
 
@@ -3403,6 +3512,45 @@ document.getElementById('bookmarks-list').addEventListener('click', (e) => {
         showToast('Bookmark removed', 'success');
     }
 });
+function startVoiceInput(lang, targetId, buttonElement) {
+    if (!('webkitSpeechRecognition' in window)) {
+        showToast('Voice input not supported in your browser', 'error');
+        return;
+    }
+
+    const recognition = new webkitSpeechRecognition();
+    recognition.lang = lang;
+    recognition.interimResults = false;
+    
+    const originalButtonContent = buttonElement.innerHTML;
+    buttonElement.innerHTML = '🔴 Listening...';
+    
+    recognition.onstart = () => {
+        showToast('Listening...', 'info');
+    };
+
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById(targetId).value = transcript;
+        
+        // Trigger input event to update count
+        const inputEvent = new Event('input', { bubbles: true });
+        document.getElementById(targetId).dispatchEvent(inputEvent);
+        
+        showToast('Speech recognized!', 'success');
+    };
+
+    recognition.onerror = (event) => {
+        showToast('Voice input error: ' + event.error, 'error');
+        buttonElement.innerHTML = originalButtonContent;
+    };
+
+    recognition.onend = () => {
+        buttonElement.innerHTML = originalButtonContent;
+    };
+
+    recognition.start();
+}
     // Initialize settings panel
     initSettingsPanel();
 // Voice input button
@@ -3496,7 +3644,17 @@ function startVoiceInput(lang, targetId, buttonElement) {
     });
 
     // History buttons
-    document.getElementById('show-history-btn').addEventListener('click', showHistoryView);
+document.getElementById('show-history-btn').addEventListener('click', showHistoryView);
+
+// Add this new function to hide history after loading
+function loadHistoryItem(index) {
+    const item = state.textHistory[index];
+    elements.textInput.value = item.text;
+    elements.charCount.textContent = item.text.length;
+    showView('text-import-view');
+    document.getElementById('history-view').style.display = 'none'; // Add this line
+    showToast('Text loaded from history');
+}
     document.getElementById('back-to-import-btn').addEventListener('click', () => showView('text-import-view'));
     document.getElementById('clear-history-btn').addEventListener('click', clearHistory);
     
