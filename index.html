@@ -1403,6 +1403,14 @@ body {
         color: white !important;
         border: 2px solid white !important;
     }
+#vocab-review-view .btn {
+    width: 100%;
+    margin-top: 0;
+}
+
+#vocab-review-view .btn#wipe-data-btn {
+    margin-top: 1rem;
+}
     }
 </style
 </head>
@@ -1539,29 +1547,36 @@ body {
     </button>
 </div>
 </div>
-                
-                <div class="mode-toggle">
-                    <button class="mode-toggle-btn active" data-mode="import" aria-label="Import Japanese text">Import Japanese Text</button>
-                    <button class="mode-toggle-btn" data-mode="translate" aria-label="Translate to Japanese">Translate to Japanese</button>
-                </div>
-                <div class="text-import-container" id="translate-container" style="display: none;">
+
+<div class="mode-toggle">
+    <button class="mode-toggle-btn active" data-mode="import" aria-label="Import Japanese text">Import Japanese Text</button>
+    <button class="mode-toggle-btn" data-mode="translate" aria-label="Translate to Japanese">Translate to Japanese</button>
+</div>
+
+<!-- Import Section -->
+<div id="import-container" class="text-import-container" style="display: block;">
+    <h2>Import Japanese Text <span role="img" aria-label="Japanese">🇯🇵</span></h2>
+    <!-- keep all your existing import content here -->
+</div>
+
+<!-- Translate Section -->
+<div id="translate-container" class="text-import-container" style="display: none;">
     <h2>Translate to Japanese <span role="img" aria-label="From your language to Japanese">🌐 → 🇯🇵</span></h2>
     <p>Type or speak text in your language to translate to Japanese (max 5,000 characters)</p>
-    <textarea class="text-input" id="translate-input" placeholder="Example: The cat is sleeping. The dog is running..." aria-label="Translation input"></textarea>
-    <div class="char-count"><span id="translate-char-count">0</span>/5000 characters</div>
-    <div class="input-actions" style="gap: 0.5rem; margin-bottom: 1rem;">
-        <button id="paste-btn-translate" class="btn" style="background-color: var(--accent); flex: 1;" aria-label="Paste">
-            <span>📋 Paste</span>
-        </button>
-        <button id="voice-input-btn-translate" class="btn" style="background-color: var(--accent); flex: 1;" aria-label="Speak">
-            <span>🎤 Speak</span>
-        </button>
-    </div>
+        <textarea class="text-input" id="translate-input" placeholder="Example: The cat is sleeping. The dog is running..." aria-label="Translation input"></textarea>
+        <div class="char-count"><span id="translate-char-count">0</span>/5000 characters</div>
+        <div class="input-actions" style="gap: 0.5rem; margin-bottom: 1rem;">
+            <button id="paste-btn-translate" class="btn" style="background-color: var(--accent); flex: 1;" aria-label="Paste">
+                <span>📋 Paste</span>
+            </button>
+            <button id="voice-input-btn-translate" class="btn" style="background-color: var(--accent); flex: 1;" aria-label="Speak">
+                <span>🎤 Speak</span>
+            </button>
+        </div>
     <div class="button-group" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;">
-        <button class="btn" id="translate-to-japanese" aria-label="Translate text" style="flex: 1;">
-            <span>Translate to Japanese</span>
-        </button>
-        <button class="btn" id="clear-text-translate" style="background-color: var(--danger); flex: 1;" aria-label="Clear text">
+<button class="btn" id="translate-to-japanese" aria-label="Translate text" style="flex: 1;">
+    <span>Translate to Japanese</span>
+</button>        <button class="btn" id="clear-text-translate" style="background-color: var(--danger); flex: 1;" aria-label="Clear text">
             Clear Text
         </button>
         <button class="btn" id="show-history-btn-translate" style="background-color: var(--accent); width: 100%; margin-top: 0.5rem;" aria-label="View history">
@@ -1654,13 +1669,15 @@ body {
                     </div>
                 </div>
                 
-                <button class="btn" id="start-review" disabled aria-label="Start review">Select a difficulty to start</button>
-                <button class="btn" id="wipe-data-btn" style="background-color: var(--danger); margin-top: 1rem;" aria-label="Wipe all data">
-                    Wipe All Data
-                </button>
-                <button class="btn" id="manage-vocab-btn" style="background-color: var(--accent); margin-top: 1rem;" aria-label="Manage vocabulary">
-                    Manage Vocabulary
-                </button>
+<div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+    <button class="btn" id="start-review" disabled aria-label="Start review" style="flex: 1;">Select a difficulty to start</button>
+    <button class="btn" id="manage-vocab-btn" style="background-color: var(--accent); flex: 1;" aria-label="Manage vocabulary">
+        Manage Vocabulary
+    </button>
+</div>
+<button class="btn" id="wipe-data-btn" style="background-color: var(--danger); width: 100%;" aria-label="Wipe all data">
+    Wipe All Data
+</button>
                 
                 <div class="progress-stats">
                     <h3>Today's Progress</h3>
@@ -1982,46 +1999,111 @@ function renderBookmarks() {
     
     container.innerHTML = '';
     
-    if (state.bookmarks.length === 0) {
+    // Load history if not loaded
+    const savedHistory = localStorage.getItem('textHistory');
+    if (savedHistory) {
+        state.textHistory = JSON.parse(savedHistory);
+    }
+    
+    if (state.bookmarks.length === 0 && state.textHistory.length === 0) {
         container.innerHTML = `
             <p style="padding: 1rem; color: var(--text-secondary);">
-                No bookmarks yet. Select text while reading and click the ☆ button to bookmark.
+                No saved content yet. Import text to start reading.
             </p>
         `;
         return;
     }
     
-    // Sort by most recent first
-    const sortedBookmarks = [...state.bookmarks].sort((a, b) => 
-        new Date(b.date) - new Date(a.date)
-    );
-    
-    sortedBookmarks.forEach(bookmark => {
-        const item = document.createElement('div');
-        item.className = 'resource-link';
-        item.style.alignItems = 'flex-start';
-        item.style.padding = '1rem';
-        item.innerHTML = `
-            <div style="flex: 1; min-width: 0; overflow: hidden;">
-                <div style="font-size: 1.1rem; margin-bottom: 0.5rem;">${bookmark.sentence}</div>
-                <div style="font-size: 0.9rem; color: var(--text-secondary);">
-                    ${bookmark.translation || 'No translation available'}
+    // Show bookmarks
+    if (state.bookmarks.length > 0) {
+        const bookmarksHeader = document.createElement('h3');
+        bookmarksHeader.textContent = 'Bookmarked Sentences';
+        bookmarksHeader.style.margin = '1rem 0 0.5rem 0';
+        bookmarksHeader.style.color = 'var(--highlight)';
+        container.appendChild(bookmarksHeader);
+        
+        const sortedBookmarks = [...state.bookmarks].sort((a, b) => 
+            new Date(b.date) - new Date(a.date)
+        );
+        
+        sortedBookmarks.forEach(bookmark => {
+            const item = document.createElement('div');
+            item.className = 'resource-link';
+            item.style.alignItems = 'flex-start';
+            item.style.padding = '1rem';
+            item.innerHTML = `
+                <div style="flex: 1; min-width: 0; overflow: hidden;">
+                    <div style="font-size: 1.1rem; margin-bottom: 0.5rem;">${bookmark.sentence}</div>
+                    <div style="font-size: 0.9rem; color: var(--text-secondary);">
+                        ${bookmark.translation || 'No translation available'}
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                        ${new Date(bookmark.date).toLocaleString()}
+                    </div>
                 </div>
-                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">
-                    ${new Date(bookmark.date).toLocaleString()}
-                </div>
-            </div>
-            <button class="nav-btn" 
-                    style="background-color: var(--danger); padding: 0.5rem; margin-left: 0.5rem;"
-                    data-bookmark-id="${bookmark.id}"
-                    aria-label="Remove bookmark">
-                ✕
-            </button>
-        `;
-        container.appendChild(item);
-    });
+                <button class="nav-btn" 
+                        style="background-color: var(--danger); padding: 0.5rem; margin-left: 0.5rem;"
+                        data-bookmark-id="${bookmark.id}"
+                        aria-label="Remove bookmark">
+                    ✕
+                </button>
+            `;
+            container.appendChild(item);
+        });
+    }
     
-    // Add click handler for delete buttons
+    // Show reading history
+    if (state.textHistory.length > 0) {
+        const historyHeader = document.createElement('h3');
+        historyHeader.textContent = 'Reading History';
+        historyHeader.style.margin = '1rem 0 0.5rem 0';
+        historyHeader.style.color = 'var(--highlight)';
+        container.appendChild(historyHeader);
+        
+        // Filter out expired items (older than 24 hours)
+        const now = new Date();
+        state.textHistory = state.textHistory.filter(item => {
+            const itemDate = new Date(item.timestamp);
+            return (now - itemDate) < (24 * 60 * 60 * 1000); // 24 hours
+        });
+        
+        state.textHistory.forEach((item, index) => {
+            const historyItem = document.createElement('div');
+            historyItem.className = 'resource-link';
+            historyItem.style.marginBottom = '0.5rem';
+            historyItem.style.alignItems = 'center';
+            
+            const progressBar = document.createElement('div');
+            progressBar.style.width = '100%';
+            progressBar.style.height = '4px';
+            progressBar.style.backgroundColor = 'var(--secondary)';
+            progressBar.style.borderRadius = '2px';
+            progressBar.style.marginTop = '0.5rem';
+            
+            const progressFill = document.createElement('div');
+            progressFill.style.height = '100%';
+            progressFill.style.width = `${item.progress || 0}%`;
+            progressFill.style.backgroundColor = 'var(--highlight)';
+            progressFill.style.borderRadius = '2px';
+            progressBar.appendChild(progressFill);
+            
+            historyItem.innerHTML = `
+                <span style="flex: 1;">${item.title}</span>
+                <span style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0.5rem;">
+                    ${Math.round(item.progress || 0)}% read
+                </span>
+                <button class="nav-btn" style="padding: 0.2rem 0.5rem;" 
+                    data-history-index="${index}" aria-label="Load text">Load</button>
+                <button class="nav-btn" style="background-color: var(--danger); padding: 0.2rem 0.5rem;" 
+                    data-history-index="${index}" aria-label="Delete text">Delete</button>
+            `;
+            
+            historyItem.appendChild(progressBar);
+            container.appendChild(historyItem);
+        });
+    }
+    
+    // Add event listeners
     container.querySelectorAll('[data-bookmark-id]').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const id = e.target.getAttribute('data-bookmark-id');
@@ -2030,6 +2112,17 @@ function renderBookmarks() {
             renderBookmarks();
             showToast('Bookmark removed', 'success');
             e.stopPropagation();
+        });
+    });
+    
+    container.querySelectorAll('[data-history-index]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const index = parseInt(e.target.dataset.historyIndex);
+            if (e.target.textContent === 'Load') {
+                loadHistoryItem(index);
+            } else {
+                deleteHistoryItem(index);
+            }
         });
     });
 }
@@ -2301,18 +2394,7 @@ function endReadingSession() {
     }
 }
 
-// Set up voice input button
-elements.voiceInputBtn.innerHTML = '🎤';
-elements.voiceInputBtn.style.background = 'none';
-elements.voiceInputBtn.style.border = 'none';
-elements.voiceInputBtn.style.fontSize = '1.5rem';
-elements.voiceInputBtn.style.cursor = 'pointer';
-elements.voiceInputBtn.style.marginLeft = '0.5rem';
-elements.voiceInputBtn.setAttribute('aria-label', 'Voice input');
 
-// Insert the button next to the translate input
-const translateInput = document.getElementById('translate-input');
-translateInput.parentNode.insertBefore(elements.voiceInputBtn, translateInput.nextSibling);
 
 // Database operations
 
@@ -2458,7 +2540,7 @@ function loadHistoryItem(index) {
     elements.textInput.value = item.text;
     elements.charCount.textContent = item.text.length;
     showView('text-import-view');
-    showToast('Text loaded from history');
+    showToast(`"${item.title}" loaded from history`);
 }
 
 function deleteHistoryItem(index) {
@@ -2719,10 +2801,8 @@ async function cacheTranslation(text, sourceLang, targetLang, translatedText) {
 }
 
 function toggleTranslationMode(showTranslate) {
-    const importContainer = document.querySelector('.text-import-container');
+    const importContainer = document.getElementById('import-container');
     const translateContainer = document.getElementById('translate-container');
-    
-    if (!importContainer || !translateContainer) return;
     
     if (showTranslate) {
         importContainer.style.display = 'none';
@@ -3512,91 +3592,77 @@ document.getElementById('bookmarks-list').addEventListener('click', (e) => {
         showToast('Bookmark removed', 'success');
     }
 });
-function startVoiceInput(lang, targetId, buttonElement) {
-    if (!('webkitSpeechRecognition' in window)) {
-        showToast('Voice input not supported in your browser', 'error');
-        return;
+async function startVoiceInput(lang, targetId, buttonElement) {
+    try {
+        if (!('webkitSpeechRecognition' in window)) {
+            showToast('Voice input not supported in your browser', 'error');
+            return;
+        }
+
+        const originalButtonContent = buttonElement.innerHTML;
+        buttonElement.innerHTML = '🔴 Listening...';
+        
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = lang;
+        recognition.interimResults = false;
+        
+        recognition.onstart = () => {
+            showToast('Listening...', 'info');
+        };
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            document.getElementById(targetId).value = transcript;
+            
+            // Update character count
+            const charCountElement = targetId === 'text-input' ? 
+                document.getElementById('char-count') : 
+                document.getElementById('translate-char-count');
+            charCountElement.textContent = transcript.length;
+            
+            showToast('Speech recognized!', 'success');
+        };
+
+        recognition.onerror = (event) => {
+            let errorMessage = 'Voice input error';
+            switch(event.error) {
+                case 'not-allowed':
+                    errorMessage = 'Microphone access denied. Please allow microphone access.';
+                    break;
+                case 'no-speech':
+                    errorMessage = 'No speech detected. Try again.';
+                    break;
+                case 'audio-capture':
+                    errorMessage = 'Audio capture error. Check your microphone.';
+                    break;
+                case 'network':
+                    errorMessage = 'Network error occurred. Check your connection.';
+                    break;
+                default:
+                    errorMessage = `Voice input error: ${event.error}`;
+            }
+            showToast(errorMessage, 'error');
+            buttonElement.innerHTML = originalButtonContent;
+        };
+
+        recognition.onend = () => {
+            buttonElement.innerHTML = originalButtonContent;
+        };
+
+        recognition.start();
+    } catch (error) {
+        console.error('Voice input error:', error);
+        showToast('Voice input failed. Please ensure you\'re on HTTPS and have granted microphone permissions.', 'error');
+        buttonElement.innerHTML = originalButtonContent;
     }
-
-    const recognition = new webkitSpeechRecognition();
-    recognition.lang = lang;
-    recognition.interimResults = false;
-    
-    const originalButtonContent = buttonElement.innerHTML;
-    buttonElement.innerHTML = '🔴 Listening...';
-    
-    recognition.onstart = () => {
-        showToast('Listening...', 'info');
-    };
-
-    recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        document.getElementById(targetId).value = transcript;
-        
-        // Trigger input event to update count
-        const inputEvent = new Event('input', { bubbles: true });
-        document.getElementById(targetId).dispatchEvent(inputEvent);
-        
-        showToast('Speech recognized!', 'success');
-    };
-
-    recognition.onerror = (event) => {
-        showToast('Voice input error: ' + event.error, 'error');
-        buttonElement.innerHTML = originalButtonContent;
-    };
-
-    recognition.onend = () => {
-        buttonElement.innerHTML = originalButtonContent;
-    };
-
-    recognition.start();
 }
     // Initialize settings panel
     initSettingsPanel();
 // Voice input button
 document.getElementById('voice-input-btn').addEventListener('click', function() {
-    startVoiceInput('ja', 'text-input', this);
+    startVoiceInput('ja-JP', 'text-input', this);
 });
-
-function startVoiceInput(lang, targetId, buttonElement) {
-    if (!('webkitSpeechRecognition' in window)) {
-        showToast('Voice input not supported in your browser', 'error');
-        return;
-    }
-
-    const recognition = new webkitSpeechRecognition();
-    recognition.lang = lang;
-    recognition.interimResults = false;
-    
-    const originalButtonContent = buttonElement.innerHTML;
-    buttonElement.innerHTML = '🔴 Listening...';
-    
-    recognition.onstart = () => {
-        showToast('Listening...', 'info');
-    };
-
-    recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        document.getElementById(targetId).value = transcript;
-        
-        // Trigger input event to update count
-        const inputEvent = new Event('input', { bubbles: true });
-        document.getElementById(targetId).dispatchEvent(inputEvent);
-        
-        showToast('Speech recognized!', 'success');
-    };
-
-    recognition.onerror = (event) => {
-        showToast('Voice input error: ' + event.error, 'error');
-        buttonElement.innerHTML = originalButtonContent;
-    };
-
-    recognition.onend = () => {
-        buttonElement.innerHTML = originalButtonContent;
-    };
-
-    recognition.start();
-}   
+  
     // How to use toggle
     elements.howToUseToggle.addEventListener('click', () => {
         elements.howToUseContent.classList.toggle('show');
@@ -3604,44 +3670,13 @@ function startVoiceInput(lang, targetId, buttonElement) {
             elements.howToUseContent.classList.contains('show') ? '▲' : '▼';
     });
 
-    document.querySelectorAll('.mode-toggle-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            toggleTranslationMode(btn.dataset.mode === 'translate');
-        });
+document.querySelectorAll('.mode-toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        toggleTranslationMode(btn.dataset.mode === 'translate');
     });
+});
 
-    elements.voiceInputBtn.addEventListener('click', () => {
-        if (!('webkitSpeechRecognition' in window)) {
-            showToast('Voice input not supported in your browser', 'error');
-            return;
-        }
 
-        const recognition = new webkitSpeechRecognition();
-        recognition.lang = 'en-US';
-        recognition.interimResults = false;
-
-        recognition.onstart = () => {
-            elements.voiceInputBtn.innerHTML = '🔴';
-            showToast('Listening...');
-        };
-
-        recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            document.getElementById('translate-input').value = transcript;
-            document.getElementById('translate-char-count').textContent = transcript.length;
-        };
-
-        recognition.onerror = (event) => {
-            showToast('Voice input error: ' + event.error, 'error');
-            elements.voiceInputBtn.innerHTML = '🎤';
-        };
-
-        recognition.onend = () => {
-            elements.voiceInputBtn.innerHTML = '🎤';
-        };
-
-        recognition.start();
-    });
 
     // History buttons
 document.getElementById('show-history-btn').addEventListener('click', showHistoryView);
@@ -3730,6 +3765,7 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 document.getElementById('paste-btn').addEventListener('click', async () => {
     try {
         const text = await navigator.clipboard.readText();
+        // Rest of the code remains the same
         if (text) {
             elements.textInput.value = text;
             elements.charCount.textContent = text.length;
@@ -3755,11 +3791,14 @@ document.getElementById('paste-btn').addEventListener('click', async () => {
             return;
         }
         
-        // Save to history
-        state.textHistory.unshift({
-            text: text,
-            timestamp: new Date().toISOString()
-        });
+// Save to history with title and progress
+const title = prompt("Give this text a title (or leave blank for automatic title):", text.substring(0, 20) + (text.length > 20 ? "..." : ""));
+state.textHistory.unshift({
+    text: text,
+    title: title || text.substring(0, 20) + (text.length > 20 ? "..." : ""),
+    timestamp: new Date().toISOString(),
+    progress: 0 // Starts at 0% progress
+});
         
         // Keep only the last 10 items
         if (state.textHistory.length > 10) {
@@ -3804,8 +3843,8 @@ document.getElementById('paste-btn').addEventListener('click', async () => {
         }
     });
 
-    // Translate to Japanese button event listener
-document.getElementById('translate-to-japanese').addEventListener('click', async () => {
+// Translate to Japanese button event listener
+document.getElementById('translate-to-japanese').addEventListener('click', async function() {
     const text = document.getElementById('translate-input').value.trim();
     if (text.length === 0) {
         showToast('Please enter some text to translate', 'error');
@@ -3813,24 +3852,31 @@ document.getElementById('translate-to-japanese').addEventListener('click', async
     }
 
     try {
-        const button = document.getElementById('translate-to-japanese');
+        const button = this;
         button.innerHTML = '<span>Translating...</span><span class="loading-spinner"></span>';
         button.disabled = true;
         
+        // Show loading state
+        showToast('Translating...', 'info');
+        
         // Detect source language from input
-        const sourceLang = detectLanguage(text) || 'en'; // default to English if detection fails
+        const sourceLang = detectLanguage(text) || 'en';
         const translatedText = await translateToJapanese(text, sourceLang);
         
-        // Put the translated text in the Japanese input field
-        document.getElementById('text-input').value = translatedText;
-        document.getElementById('char-count').textContent = translatedText.length;
-        
-        // Switch back to Japanese input view
-        toggleTranslationMode(false);
-        showToast('Translation complete!', 'success');
+        if (translatedText) {
+            // Put the translated text in the Japanese input field
+            document.getElementById('text-input').value = translatedText;
+            document.getElementById('char-count').textContent = translatedText.length;
+            
+            // Switch to Japanese input view
+            document.querySelector('.mode-toggle-btn[data-mode="import"]').click();
+            showToast('Translation complete!', 'success');
+        } else {
+            showToast('Translation failed. Please try again.', 'error');
+        }
     } catch (error) {
         console.error('Translation error:', error);
-        showToast('Translation failed. Please try again.', 'error');
+        showToast('Translation failed: ' + error.message, 'error');
     } finally {
         const button = document.getElementById('translate-to-japanese');
         button.innerHTML = '<span>Translate to Japanese</span>';
@@ -4066,9 +4112,9 @@ document.addEventListener('keydown', (e) => {
             e.preventDefault(); // Prevent scrolling
         } else if (e.key === 't' || e.key === 'T') {
             elements.floatingTranslationToggle.click();
-        } else if (e.key === 'f' || e.key === 'F') {
-            // This was missing its closing brace
-        }
+} else if (e.key === 'f' || e.key === 'F') {
+    document.getElementById('favorite-sentence-btn').click();
+}
     } // This closes the outer if statement
     
 if (state.currentView === 'review-mode-view' && state.reviewMode === 'hard') {
