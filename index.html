@@ -1992,15 +1992,19 @@ function toggleBookmark() {
     localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
     renderBookmarks();
 }
-
 function renderBookmarks() {
     const container = document.getElementById('bookmarks-list');
     if (!container) return;
     
     container.innerHTML = '';
     
-    // Load history if not loaded
+    // Load both bookmarks and history if not loaded
+    const savedBookmarks = localStorage.getItem('bookmarks');
     const savedHistory = localStorage.getItem('textHistory');
+    
+    if (savedBookmarks) {
+        state.bookmarks = JSON.parse(savedBookmarks);
+    }
     if (savedHistory) {
         state.textHistory = JSON.parse(savedHistory);
     }
@@ -2014,7 +2018,7 @@ function renderBookmarks() {
         return;
     }
     
-    // Show bookmarks
+    // Show bookmarks first
     if (state.bookmarks.length > 0) {
         const bookmarksHeader = document.createElement('h3');
         bookmarksHeader.textContent = 'Bookmarked Sentences';
@@ -2029,20 +2033,27 @@ function renderBookmarks() {
         sortedBookmarks.forEach(bookmark => {
             const item = document.createElement('div');
             item.className = 'resource-link';
-            item.style.alignItems = 'flex-start';
-            item.style.padding = '1rem';
+            item.style.alignItems = 'center';
+            item.style.padding = '0.8rem';
+            
+            // Use title if available, otherwise create one from content
+let displayText = bookmark.title || '';
+if (!displayText && bookmark.sentence) {
+    // Get first 2-3 words as title
+    const words = bookmark.sentence.split(/\s+/).slice(0, 3);
+    displayText = words.join(' ');
+    if (bookmark.sentence.length > displayText.length) {
+        displayText += '...';
+    }
+}
+            
             item.innerHTML = `
-                <div style="flex: 1; min-width: 0; overflow: hidden;">
-                    <div style="font-size: 1.1rem; margin-bottom: 0.5rem;">${bookmark.sentence}</div>
-                    <div style="font-size: 0.9rem; color: var(--text-secondary);">
-                        ${bookmark.translation || 'No translation available'}
-                    </div>
-                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">
-                        ${new Date(bookmark.date).toLocaleString()}
-                    </div>
-                </div>
+                <span style="flex: 1;">${displayText}</span>
+                <span style="font-size: 0.8rem; color: var(--text-secondary); margin-right: 0.5rem;">
+                    ${new Date(bookmark.date).toLocaleDateString()}
+                </span>
                 <button class="nav-btn" 
-                        style="background-color: var(--danger); padding: 0.5rem; margin-left: 0.5rem;"
+                        style="background-color: var(--danger); padding: 0.3rem;"
                         data-bookmark-id="${bookmark.id}"
                         aria-label="Remove bookmark">
                     ✕
@@ -2052,7 +2063,7 @@ function renderBookmarks() {
         });
     }
     
-    // Show reading history
+    // Then show reading history
     if (state.textHistory.length > 0) {
         const historyHeader = document.createElement('h3');
         historyHeader.textContent = 'Reading History';
@@ -2089,13 +2100,13 @@ function renderBookmarks() {
             
             historyItem.innerHTML = `
                 <span style="flex: 1;">${item.title}</span>
-                <span style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0.5rem;">
-                    ${Math.round(item.progress || 0)}% read
+                <span style="font-size: 0.8rem; color: var(--text-secondary); margin-right: 0.5rem;">
+                    ${Math.round(item.progress || 0)}%
                 </span>
                 <button class="nav-btn" style="padding: 0.2rem 0.5rem;" 
                     data-history-index="${index}" aria-label="Load text">Load</button>
                 <button class="nav-btn" style="background-color: var(--danger); padding: 0.2rem 0.5rem;" 
-                    data-history-index="${index}" aria-label="Delete text">Delete</button>
+                    data-history-index="${index}" aria-label="Delete text">✕</button>
             `;
             
             historyItem.appendChild(progressBar);
@@ -2504,17 +2515,20 @@ function showHistoryView() {
             historyItem.className = 'resource-link';
             historyItem.style.marginBottom = '0.5rem';
             
-            const preview = item.text.length > 100 ? 
-                item.text.substring(0, 100) + '...' : 
-                item.text;
-            
-            historyItem.innerHTML = `
-                <span>${preview}</span>
-                <button class="nav-btn" style="margin-left: auto; padding: 0.2rem 0.5rem;" 
-                    data-history-index="${index}" aria-label="Load text">Load</button>
-                <button class="nav-btn" style="background-color: var(--danger); padding: 0.2rem 0.5rem;" 
-                    data-history-index="${index}" aria-label="Delete text">Delete</button>
-            `;
+let preview = item.title || item.text.split(/\s+/).slice(0, 3).join(' ');
+if (item.text.length > preview.length) {
+    preview += '...';
+}          
+historyItem.innerHTML = `
+    <span style="flex: 1;">${preview}</span>
+    <span style="font-size: 0.8rem; color: var(--text-secondary); margin-right: 0.5rem;">
+        ${new Date(item.timestamp).toLocaleDateString()}
+    </span>
+    <button class="nav-btn" style="padding: 0.3rem 0.6rem;" 
+        data-history-index="${index}" aria-label="Load text">Load</button>
+    <button class="nav-btn" style="background-color: var(--danger); padding: 0.3rem 0.6rem;" 
+        data-history-index="${index}" aria-label="Delete text">✕</button>
+`;
             
             historyList.appendChild(historyItem);
         });
@@ -3734,6 +3748,16 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
         
         // Special handling for bookmarks view
         if (btn.dataset.view === 'bookmarks') {
+            // Load both bookmarks and history
+            const savedBookmarks = localStorage.getItem('bookmarks');
+            const savedHistory = localStorage.getItem('textHistory');
+            
+            if (savedBookmarks) {
+                state.bookmarks = JSON.parse(savedBookmarks);
+            }
+            if (savedHistory) {
+                state.textHistory = JSON.parse(savedHistory);
+            }
             renderBookmarks();
         }
     });
@@ -3793,12 +3817,23 @@ document.getElementById('paste-btn').addEventListener('click', async () => {
         
 // Save to history with title and progress
 const title = prompt("Give this text a title (or leave blank for automatic title):", text.substring(0, 20) + (text.length > 20 ? "..." : ""));
+const textTitle = title || text.substring(0, 20) + (text.length > 20 ? "..." : "");
 state.textHistory.unshift({
     text: text,
-    title: title || text.substring(0, 20) + (text.length > 20 ? "..." : ""),
+    title: textTitle,
     timestamp: new Date().toISOString(),
     progress: 0 // Starts at 0% progress
 });
+
+// Also save to bookmarks with the actual text content
+state.bookmarks.unshift({
+    id: generateUUID(),
+    sentence: text, // Store the actual text content
+    translation: "",
+    date: new Date().toISOString(),
+    title: textTitle // Also store the title for display
+});
+localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
         
         // Keep only the last 10 items
         if (state.textHistory.length > 10) {
