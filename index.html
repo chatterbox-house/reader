@@ -112,17 +112,45 @@ html, body {
         font-size: var(--font-size);
         line-height: var(--line-height);
     }
-        header {
-            background-color: var(--secondary);
-            padding: 1rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: var(--shadow);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+     header {
+    background-color: var(--secondary);
+    padding: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.3s ease;
+}
+
+header.hidden {
+    transform: translateY(-100%);
+}
+
+.hide-header-btn {
+    position: fixed;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 101;
+    background-color: var(--highlight);
+    color: white;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.hide-header-btn.visible {
+    opacity: 1;
+}
 
         .logo {
             font-size: 1.5rem;
@@ -1660,6 +1688,7 @@ html, body {
             </section>
             
             <section id="review-mode-view" class="view">
+    <button id="hide-header-btn" class="hide-header-btn" onclick="toggleHeaderVisibility()">↑</button>
                 <div class="review-container">
  
                     
@@ -3085,6 +3114,15 @@ async function startReview(bucket) {
     }
 }
 function setupMatchingGame() {
+    // Hide header when matching game starts
+    const header = document.querySelector('header');
+    header.classList.add('hidden');
+    
+    // Show the show-header button
+    const hideHeaderBtn = document.getElementById('hide-header-btn');
+    hideHeaderBtn.classList.add('visible');
+    hideHeaderBtn.textContent = '↓';
+
     // Clear previous cards
     elements.leftColumn.innerHTML = '';
     elements.rightColumn.innerHTML = '';
@@ -3191,7 +3229,18 @@ function updateProgressDisplay() {
     // Or keep minimal logic if needed elsewhere:
     state.currentProgress = (state.currentReviewIndex / state.reviewWords.length) * 100;
 }
-
+function toggleHeaderVisibility() {
+    const header = document.querySelector('header');
+    const hideHeaderBtn = document.getElementById('hide-header-btn');
+    
+    if (header.classList.contains('hidden')) {
+        header.classList.remove('hidden');
+        hideHeaderBtn.textContent = '↑';
+    } else {
+        header.classList.add('hidden');
+        hideHeaderBtn.textContent = '↓';
+    }
+}
 function createWordCard(word) {
     const card = document.createElement('div');
     card.className = 'word-card';
@@ -4051,10 +4100,14 @@ function handleTextSelection() {
     });
 
     // Review mode
-    elements.exitReviewBtn.addEventListener('click', () => {
-        state.currentHardStreak = 0; // Reset streak when exiting
-        showView('vocab-review-view');
-    });
+elements.exitReviewBtn.addEventListener('click', () => {
+    // Show header when exiting review
+    document.querySelector('header').classList.remove('hidden');
+    document.getElementById('hide-header-btn').classList.remove('visible');
+    
+    state.currentHardStreak = 0; // Reset streak when exiting
+    showView('vocab-review-view');
+});
 
     // Hard mode buttons
     elements.knewItBtn.addEventListener('click', () => {
