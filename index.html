@@ -1483,10 +1483,12 @@ body {
             
             <div class="settings-group">
                 <h3>Progress</h3>
-                <div class="streak-display">
-                    <span class="streak-count" id="streak-count">0</span>
-                    <span class="streak-label">Day Streak</span>
-                </div>
+<div class="streak-display">
+  <span class="streak-count" id="streak-count">0</span>
+  <span class="streak-label">Day Streak</span>
+  <span class="streak-count" id="daily-goal-count">0</span>
+  <span class="streak-label">/5 today</span>
+</div>
                 
                 <div class="stat-item">
                     <span class="stat-label">Words Learned:</span>
@@ -1623,7 +1625,9 @@ body {
                     <button class="jump-btn" id="jump-btn">Go</button>
                 </div>
                 
-                <div class="sentence-display" id="sentence-display" aria-label="Current sentence">
+<div class="sentence-display" id="sentence-display" aria-label="Current sentence" 
+     ontouchstart="handleTouchStart(event)" 
+     ontouchend="handleTouchEnd(event)">
                     Select text to begin reading
 <button class="favorite-btn" id="favorite-sentence-btn" aria-label="Add to bookmarks">☆</button>
                 </div>
@@ -1702,7 +1706,8 @@ body {
                         <div class="progress-bar">
                             <div class="progress-fill" id="progress-fill" style="width: 0%; height: 8px; background-color: var(--highlight); border-radius: 4px;"></div>
                         </div>
-                        <div class="progress-text" id="progress-text">0/0</div>
+<div class="progress-text" id="progress-text">0/0 (0% mastered)</div>
+
                     </div>
                     
                     <div class="review-question" id="review-question"></div>
@@ -1854,18 +1859,19 @@ const state = {
     currentLineHeight: parseFloat(localStorage.getItem('lineHeight')) || 1.6,
     autoTranslate: localStorage.getItem('autoTranslate') === 'true',
     clozeMode: localStorage.getItem('clozeMode') === 'true',
-    readingStats: JSON.parse(localStorage.getItem('readingStats')) || {
-        streak: 0,
-        lastActiveDate: '',
-        wordsLearned: 0,
-        timeSpent: 0,
-        dailyWords: 0,
-        dailyTime: 0
-    },
-    currentSessionStart: null,
-    selectedCards: [],
-    currentTtsUtterance: null,
-    wordLookupCache: {},
+readingStats: JSON.parse(localStorage.getItem('readingStats')) || {
+    streak: 0,
+    lastActiveDate: '',
+    wordsLearned: 0,
+    timeSpent: 0,
+    dailyWords: 0,
+    dailyTime: 0,
+    dailySentences: 0  // <-- Add this line
+},
+currentSessionStart: null,
+selectedCards: [],
+currentTtsUtterance: null,
+wordLookupCache: {},
 bookmarks: JSON.parse(localStorage.getItem('bookmarks')) || []
 };
 
@@ -2254,7 +2260,10 @@ function initSettingsPanel() {
     
     // Update stats display
     updateStatsDisplay();
-    
+    // Streak reminder
+if (state.readingStats.streak > 3 && state.readingStats.lastActiveDate !== new Date().toDateString()) {
+  showToast(`🔥 Don't break your ${state.readingStats.streak}-day streak!`, 'warning');
+}
     // Set up event listeners
     elements.settingsBtn.addEventListener('click', () => {
         elements.settingsPanel.classList.add('open');
@@ -2278,6 +2287,13 @@ function initSettingsPanel() {
         localStorage.setItem('clozeMode', state.clozeMode);
         if (state.currentView === 'reading-view') {
             displaySentence();
+// Track daily sentences
+if (!state.readingStats.lastActiveDate || state.readingStats.lastActiveDate !== new Date().toDateString()) {
+  state.readingStats.dailySentences = 0;
+}
+state.readingStats.dailySentences++;
+localStorage.setItem('readingStats', JSON.stringify(state.readingStats));
+document.getElementById('daily-goal-count').textContent = state.readingStats.dailySentences;
         }
     });
     
@@ -3126,6 +3142,10 @@ function translateCurrentSentence() {
             copyBtn.addEventListener('click', () => {
                 navigator.clipboard.writeText(translation);
                 showToast('Translation copied!', 'success');
+// Check for milestones
+if (state.readingStats.wordsLearned === 100) {
+  showToast('🎉 100 Words Learned!', 'success');
+}
             });
             elements.translationDisplay.appendChild(copyBtn);
         }
@@ -3236,7 +3256,8 @@ function updateProgressDisplay() {
     const currentPosition = state.currentReviewIndex;
     const wordsInRound = Math.min(5, totalWords - currentPosition);
     
-    elements.progressText.textContent = `Words: ${currentPosition + 1}-${currentPosition + wordsInRound}/${totalWords}`;
+const percentMastered = Math.round((state.reviewStats.correct / totalWords) * 100);
+elements.progressText.textContent = `Words: ${currentPosition + 1}-${currentPosition + wordsInRound}/${totalWords} (${percentMastered}% mastered)`;
     elements.progressFill.style.width = `${(currentPosition / totalWords) * 100}%`;
 }
 
@@ -3603,7 +3624,12 @@ document.getElementById('bookmarks-list').addEventListener('click', (e) => {
         state.bookmarks = state.bookmarks.filter(b => b.id !== id);
         localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
         renderBookmarks();
-        showToast('Bookmark removed', 'success');
+const undoId = generateUUID();
+showToast(`Bookmark removed <button onclick="undoDelete('${undoId}')" style="margin-left: 10px; background: none; border: none; color: var(--highlight); text-decoration: underline; cursor: pointer;">Undo</button>`, 'success');
+
+// Store the deleted item temporarily
+state.lastDeleted = { id: id, item: state.bookmarks.find(b => b.id === id) };
+setTimeout(() => delete state.lastDeleted, 5000); // Clear after 5 sec
     }
 });
 async function startVoiceInput(lang, targetId, buttonElement) {
@@ -4262,6 +4288,29 @@ async function initApp() {
 
 // Start the app
 window.addEventListener('DOMContentLoaded', initApp);
+// Swipe detection for mobile
+let touchStartX = 0;
+
+function handleTouchStart(e) {
+  touchStartX = e.changedTouches[0].screenX;
+}
+
+function handleTouchEnd(e) {
+  const touchEndX = e.changedTouches[0].screenX;
+  if (touchEndX < touchStartX - 50) { // Swipe left = next
+    document.getElementById('next-sentence').click();
+  } else if (touchEndX > touchStartX + 50) { // Swipe right = previous
+    document.getElementById('prev-sentence').click();
+  }
+}
+function undoDelete(id) {
+  if (state.lastDeleted && state.lastDeleted.id === id) {
+    state.bookmarks.push(state.lastDeleted.item);
+    localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
+    renderBookmarks();
+    showToast('Bookmark restored!', 'success');
+  }
+}
 </script>
 </body>
 </html>
