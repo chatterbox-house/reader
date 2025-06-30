@@ -147,7 +147,155 @@
             color: var(--text-secondary);
             font-size: 0.9rem;
         }
+.motivation-section {
+    background-color: var(--card-bg);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    box-shadow: var(--shadow);
+    text-align: center;
+}
 
+.motivation-title {
+    color: var(--highlight);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.motivation-quote {
+    font-style: italic;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    line-height: 1.5;
+}
+
+.motivation-author {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+.difficulty-meter {
+    display: flex;
+    gap: 4px;
+    margin-top: 0.5rem;
+    justify-content: center;
+}
+
+.difficulty-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--text-secondary);
+    opacity: 0.3;
+}
+
+.difficulty-dot.active {
+    opacity: 1;
+    background-color: var(--highlight);
+}
+        .progress-section {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+        
+        .progress-stats {
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            padding: 0.8rem;
+            background-color: var(--secondary);
+            border-radius: 8px;
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: var(--highlight);
+        }
+        
+        .quick-access {
+            display: flex;
+            justify-content: center;
+        }
+        
+        .quick-access .btn {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+        }
+.flag {
+    transition: all 0.3s ease;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.flag:hover {
+    transform: scale(1.5) rotate(10deg);
+    filter: drop-shadow(0 0 5px rgba(255,255,255,0.5));
+}
+.quick-start-section {
+    background-color: var(--card-bg);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+}
+
+.quick-start-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.quick-start-card {
+    background-color: var(--secondary);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--text);
+}
+
+.quick-start-card:hover {
+    transform: translateY(-5px);
+    background-color: var(--accent);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.quick-start-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.quick-start-title {
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.quick-start-desc {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.loading {
+    animation: pulse 1.5s infinite ease-in-out;
+}
         @media (max-width: 768px) {
             .logo {
                 font-size: 2rem;
@@ -177,16 +325,16 @@
 <body>
     <div class="container">
         <header class="header">
-            <h1 class="logo">
-                SentenceMODE
-                <span class="logo-flags">
-                    <span>🇯🇵</span>
-                    <span>🇺🇸</span>
-                    <span>🇪🇸</span>
-                    <span>🇫🇷</span>
-                    <span>🇨🇳</span>
-                </span>
-            </h1>
+<h1 class="logo">
+    SentenceMODE
+    <span class="logo-flags">
+        <span class="flag" title="Japanese">🇯🇵</span>
+        <span class="flag" title="English">🇺🇸</span>
+        <span class="flag" title="Spanish">🇪🇸</span>
+        <span class="flag" title="French">🇫🇷</span>
+        <span class="flag" title="Chinese">🇨🇳</span>
+    </span>
+</h1>
             <p class="tagline">Learn languages through sentences and context</p>
         </header>
 
@@ -197,10 +345,17 @@
                 For English Speakers
             </h2>
             <div class="language-grid">
-                <a href="japanese.html" class="language-card">
-                    <div class="language-flag">🇯🇵</div>
-                    <div class="language-name">Japanese</div>
-                </a>
+
+<a href="japanese.html" class="language-card">
+    <div class="language-flag">🇯🇵</div>
+    <div class="language-name">Japanese</div>
+    <div class="difficulty-meter">
+        <span class="difficulty-dot active"></span>
+        <span class="difficulty-dot active"></span>
+        <span class="difficulty-dot"></span>
+        <span class="difficulty-dot"></span>
+    </div>
+</a>
                 <a href="spanish.html" class="language-card">
                     <div class="language-flag">🇪🇸</div>
                     <div class="language-name">Spanish</div>
@@ -244,9 +399,124 @@
             </div>
         </section>
 
-        <footer class="footer">
-            <p>SentenceMODE © 2025 - Learn languages through immersive sentence practice</p>
-        </footer>
+        <section class="progress-section">
+            <h2 class="section-title">
+                <span>📊</span>
+                Your Language Progress
+            </h2>
+            <div class="progress-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Total Words Learned:</span>
+                    <span class="stat-value" id="total-words">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Current Streak:</span>
+                    <span class="stat-value" id="current-streak">0 days</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Recently Studied:</span>
+                    <span class="stat-value" id="recent-languages">None yet</span>
+                </div>
+            </div>
+            <div class="quick-access">
+                <button class="btn" id="continue-learning" style="background-color: var(--highlight);">
+                    Continue Learning
+                </button>
+            </div>
+        </section>
+<section class="quick-start-section">
+    <h2 class="section-title">
+        <span>⚡</span>
+        Quick Start
+    </h2>
+    <div class="quick-start-grid">
+        <a href="spanish.html" class="quick-start-card">
+            <div class="quick-start-icon">🇪🇸</div>
+            <div class="quick-start-title">Start with Spanish</div>
+            <div class="quick-start-desc">Most popular choice</div>
+        </a>
+        <a href="japanese.html" class="quick-start-card">
+            <div class="quick-start-icon">🇯🇵</div>
+            <div class="quick-start-title">Try Japanese</div>
+            <div class="quick-start-desc">Great for beginners</div>
+        </a>
+        <a href="french.html" class="quick-start-card">
+            <div class="quick-start-icon">🇫🇷</div>
+            <div class="quick-start-title">Learn French</div>
+            <div class="quick-start-desc">Romance language</div>
+        </a>
+    </div>
+</section>
+<section class="motivation-section">
+    <div class="motivation-card">
+        <h3 class="motivation-title">Daily Language Motivation</h3>
+        <p class="motivation-quote" id="daily-quote">"The limits of my language mean the limits of my world."</p>
+        <p class="motivation-author">- Ludwig Wittgenstein</p>
+    </div>
+</section>
+
+<footer class="footer">
+    <p>SentenceMODE © 2025 - Learn languages through immersive sentence practice</p>
+</footer>
+<script>
+    // Load progress stats from localStorage
+    function loadProgressStats() {
+        // Get stats from Japanese page
+        const jpStats = JSON.parse(localStorage.getItem('readingStats_ja') || '{}');
+        
+        // Update the display
+        document.getElementById('total-words').textContent = jpStats.wordsLearned || '0';
+        document.getElementById('current-streak').textContent = (jpStats.streak || '0') + ' days';
+        
+        // Get recently studied languages
+        const recentLangs = JSON.parse(localStorage.getItem('recentLanguages') || '[]');
+        document.getElementById('recent-languages').textContent = 
+            recentLangs.length > 0 ? recentLangs.join(', ') : 'None yet';
+    }
+const quotes = [
+    {
+        text: "Learning another language is not only learning different words for the same things, but learning another way to think about things.",
+        author: "Flora Lewis"
+    },
+    {
+        text: "To have another language is to possess a second soul.",
+        author: "Charlemagne"
+    },
+    {
+        text: "Language is the road map of a culture. It tells you where its people come from and where they are going.",
+        author: "Rita Mae Brown"
+    },
+    {
+        text: "One language sets you in a corridor for life. Two languages open every door along the way.",
+        author: "Frank Smith"
+    }
+];
+
+function showDailyQuote() {
+    const today = new Date().getDate();
+    const quoteIndex = today % quotes.length;
+    const quote = quotes[quoteIndex];
+    document.getElementById('daily-quote').textContent = `"${quote.text}"`;
+    document.querySelector('.motivation-author').textContent = `- ${quote.author}`;
+}
+
+window.addEventListener('DOMContentLoaded', showDailyQuote);
+    
+    // Continue learning button
+    document.getElementById('continue-learning').addEventListener('click', () => {
+        const recentLangs = JSON.parse(localStorage.getItem('recentLanguages') || '[]');
+        if (recentLangs.length > 0) {
+            // Redirect to the most recent language
+            window.location.href = recentLangs[0].toLowerCase() + '.html';
+        } else {
+            // Default to Japanese if no recent languages
+            window.location.href = 'japanese.html';
+        }
+    });
+    
+    // Load stats when page loads
+    window.addEventListener('DOMContentLoaded', loadProgressStats);
+</script>
     </div>
 
     <script>
