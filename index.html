@@ -3,47 +3,268 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Language Learner</title>
+    <title>SentenceMODE - Language Learning</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #0f3460;
+            --highlight: #e94560;
+            --text: #f1f1f1;
+            --text-secondary: #b8b8b8;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --danger: #ef4444;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --font-size: 16px;
+            --line-height: 1.6;
+            --font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        [data-theme="light"] {
+            --primary: #f8f9fa;
+            --secondary: #e9ecef;
+            --accent: #dee2e6;
+            --highlight: #e94560;
+            --text: #212529;
+            --text-secondary: #495057;
+            --card-bg: rgba(255, 255, 255, 0.8);
+        }
+
+        * {
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            box-sizing: border-box;
+            font-family: var(--font-family);
         }
+
+        body {
+            background-color: var(--primary);
+            color: var(--text);
+            min-height: 100vh;
+            transition: background-color 0.3s ease;
+            font-size: var(--font-size);
+            line-height: var(--line-height);
+        }
+
         .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
             text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
         }
-        .btn {
-            display: block;
-            width: 200px;
-            padding: 15px;
-            margin: 20px auto;
-            background-color: #4CAF50;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-size: 18px;
-            transition: background-color 0.3s;
+
+        .logo {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--highlight);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
-        .btn:hover {
-            background-color: #45a049;
+
+        .logo-flags {
+            display: flex;
+            gap: 0.5rem;
         }
-        h1 {
-            color: #333;
+
+        .tagline {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .language-section {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--highlight);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .language-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .language-card {
+            background-color: var(--secondary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .language-card:hover {
+            transform: translateY(-5px);
+            background-color: var(--accent);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .language-flag {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .language-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: var(--accent);
+            margin: 2rem 0;
+            opacity: 0.3;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2rem;
+                flex-direction: column;
+            }
+            
+            .language-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .language-card {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .language-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Choose Your Learning Path</h1>
-        <a href="spanish.html" class="btn">Learn Spanish</a>
-        <a href="japanese.html" class="btn">Learn Japanese</a>
+        <header class="header">
+            <h1 class="logo">
+                SentenceMODE
+                <span class="logo-flags">
+                    <span>🇯🇵</span>
+                    <span>🇺🇸</span>
+                    <span>🇪🇸</span>
+                    <span>🇫🇷</span>
+                    <span>🇨🇳</span>
+                </span>
+            </h1>
+            <p class="tagline">Learn languages through sentences and context</p>
+        </header>
 
+        <!-- For English Speakers -->
+        <section class="language-section">
+            <h2 class="section-title">
+                <span>🇺🇸</span>
+                For English Speakers
+            </h2>
+            <div class="language-grid">
+                <a href="japanese.html" class="language-card">
+                    <div class="language-flag">🇯🇵</div>
+                    <div class="language-name">Japanese</div>
+                </a>
+                <a href="spanish.html" class="language-card">
+                    <div class="language-flag">🇪🇸</div>
+                    <div class="language-name">Spanish</div>
+                </a>
+                <a href="french.html" class="language-card">
+                    <div class="language-flag">🇫🇷</div>
+                    <div class="language-name">French</div>
+                </a>
+                <a href="chinese.html" class="language-card">
+                    <div class="language-flag">🇨🇳</div>
+                    <div class="language-name">Chinese</div>
+                </a>
+                <a href="latin.html" class="language-card">
+                    <div class="language-flag">🏛️</div>
+                    <div class="language-name">Latin</div>
+                </a>
+                <a href="italian.html" class="language-card">
+                    <div class="language-flag">🇮🇹</div>
+                    <div class="language-name">Italian</div>
+                </a>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- For Japanese Speakers -->
+        <section class="language-section">
+            <h2 class="section-title">
+                <span>🇯🇵</span>
+                日本語話者の方へ
+            </h2>
+            <div class="language-grid">
+                <a href="japanese-english.html" class="language-card">
+                    <div class="language-flag">🇺🇸</div>
+                    <div class="language-name">英語 (English)</div>
+                </a>
+                <a href="japanese-spanish.html" class="language-card">
+                    <div class="language-flag">🇪🇸</div>
+                    <div class="language-name">スペイン語 (Spanish)</div>
+                </a>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <p>SentenceMODE © 2025 - Learn languages through immersive sentence practice</p>
+        </footer>
     </div>
+
+    <script>
+        // Apply saved theme preference
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        
+        // Add animation to language cards
+        document.querySelectorAll('.language-card').forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = `all 0.3s ease ${index * 0.1}s`;
+            
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
 </body>
 </html>
