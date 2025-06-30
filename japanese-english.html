@@ -3167,32 +3167,31 @@ function setupMatchingGame() {
 
     if (state.reviewMode === 'new' || state.reviewMode === '簡単') {
 <!-- NEW CODE -->
-// English cards on left (translations)
-const englishCards = shuffleArray([...wordsToShow]).map(word => ({
+// english cards on left (words)
+const englishWordCards = shuffleArray([...wordsToShow]).map(word => ({
+    id: word.id,
+    type: 'english',
+    text: word.word,
+    streak: word.streak || 0
+}));
+
+// English cards on right (translations)
+const englishTranslationCards = shuffleArray([...wordsToShow]).map(word => ({
     id: word.id,
     type: 'english',
     text: word.translation,
     streak: word.streak || 0
 }));
-
-// Japanese cards on right (words)
-const japaneseCards = shuffleArray([...wordsToShow]).map(word => ({
-    id: word.id,
-    type: 'japanese',
-    text: word.word,
-    streak: word.streak || 0
-}));
-        
         // Add cards to columns
-        englishCards.forEach(word => {
-            const card = createWordCard(word);
-            elements.leftColumn.appendChild(card);
-        });
-        
-        englishCards.forEach(word => {
-            const card = createWordCard(word);
-            elements.rightColumn.appendChild(card);
-        });
+englishWordCards.forEach(word => {
+    const card = createWordCard(word);
+    elements.leftColumn.appendChild(card);
+});
+
+englishTranslationCards.forEach(word => {
+    const card = createWordCard(word);
+    elements.rightColumn.appendChild(card);
+});
         
     } else { // 中級 mode
         // english cards on left (words)
