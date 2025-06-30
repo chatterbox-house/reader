@@ -3051,45 +3051,74 @@ function displayTooltip(text, x, y) {
 }
 
 async function lookupWordInDictionary(word) {
+    // First try a local dictionary of common Latin words
+    const commonLatinWords = {
+        'numquam': 'never, at no time',
+        'et': 'and, also, even',
+        'in': 'in, on, at, upon, among',
+        'non': 'not',
+        'est': 'he/she/it is',
+        'sum': 'I am',
+        'es': 'you are',
+        'sed': 'but, however',
+        'ad': 'to, toward, near',
+        'per': 'through, by means of',
+        'pro': 'for, on behalf of, in front of',
+        'qui': 'who, which, what',
+        'quae': 'who, which, what (feminine)',
+        'quod': 'because, which, that',
+        'hoc': 'this',
+        'ille': 'that, he',
+        'illa': 'that, she',
+        'illud': 'that, it',
+        'is': 'he, this, that',
+        'ea': 'she, this, that',
+        'id': 'it, this, that',
+        'cum': 'with, when',
+        'de': 'about, concerning, down from',
+        'ab': 'from, away from, by',
+        'ex': 'out of, from',
+        'e': 'out of, from',
+        'sub': 'under, beneath',
+        'super': 'over, above, upon',
+        'ante': 'before, in front of',
+        'post': 'after, behind',
+        'inter': 'between, among'
+    };
+
+    // Check local dictionary first
+    if (commonLatinWords[word.toLowerCase()]) {
+        return commonLatinWords[word.toLowerCase()];
+    }
+
     try {
-        // Try first API (Whitaker's Words)
-        const wordsApiUrl = `https://archives.nd.edu/cgi-bin/wordz.pl?keyword=${encodeURIComponent(word)}`;
+        // Try a CORS-friendly API
+        const response = await fetch(`https://latin-words-api.herokuapp.com/api/v1/words/${encodeURIComponent(word.toLowerCase())}`);
         
-        let response = await fetch(wordsApiUrl);
-        if (!response.ok) throw new Error('First API failed');
+        if (!response.ok) throw new Error('API request failed');
         
-        const text = await response.text();
+        const data = await response.json();
         
-        // Parse the response from Whitaker's Words
-        if (text.includes("No such word")) {
-            throw new Error('Word not found in first dictionary');
+        if (data.length > 0 && data[0].definition) {
+            return data[0].definition;
         }
         
-        // Extract definition from the HTML response
-        const parser = new DOMParser();
-        const htmlDoc = parser.parseFromString(text, 'text/html');
-        const definition = htmlDoc.querySelector('pre')?.textContent || 'No definition found';
-        
-        // Clean up the definition
-        return definition.split('\n')
-            .filter(line => line.trim() && !line.includes("No such word"))
-            .join('\n')
-            .substring(0, 200); // Limit to 200 characters
-        
+        throw new Error('Word not found in first API');
     } catch (firstError) {
-        console.log('First dictionary failed, trying fallback:', firstError);
+        console.log('First API failed, trying fallback:', firstError);
         
         try {
-            // Fallback to Latin Dictionary API
-            const latinApiUrl = `https://latin-dictionary-api.vercel.app/api/${encodeURIComponent(word)}`;
-            const fallbackResponse = await fetch(latinApiUrl);
+            // Fallback to Wiktionary API
+            const wiktionaryResponse = await fetch(
+                `https://en.wiktionary.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(word)}%20language:la&format=json&origin=*`
+            );
             
-            if (!fallbackResponse.ok) throw new Error('Fallback API failed');
+            if (!wiktionaryResponse.ok) throw new Error('Wiktionary API failed');
             
-            const fallbackData = await fallbackResponse.json();
+            const wiktionaryData = await wiktionaryResponse.json();
             
-            if (fallbackData.definition) {
-                return fallbackData.definition;
+            if (wiktionaryData.query.searchinfo.totalhits > 0) {
+                return `Found in Wiktionary (check https://en.wiktionary.org/wiki/${encodeURIComponent(word)}#Latin)`;
             }
             
             return 'No definition found in any dictionary';
@@ -4029,34 +4058,49 @@ document.getElementById('lookup-word').addEventListener('click', async () => {
     try {
         document.getElementById('lookup-word').innerHTML = 'Searching...';
         const entriesContainer = document.getElementById('dictionary-entries');
-        entriesContainer.innerHTML = '';
+        entriesContainer.innerHTML = '<div class="dictionary-entry">Searching...</div>';
+        document.getElementById('dictionary-results').style.display = 'block';
 
-        // Look up the word using our improved function
         const definition = await lookupWordInDictionary(word);
+        
+        entriesContainer.innerHTML = '';
         
         if (definition && definition !== 'No definition found') {
             const entryDiv = document.createElement('div');
             entryDiv.className = 'dictionary-entry';
             
+            // Make Wiktionary links clickable
+            let displayDefinition = definition;
+            if (definition.includes('wiktionary.org')) {
+                displayDefinition = definition.replace(
+                    /(https?:\/\/[^\s]+)/g, 
+                    '<a href="$1" target="_blank" style="color: var(--highlight);">Wiktionary link</a>'
+                );
+            }
+            
             entryDiv.innerHTML = `
                 <strong>${word}</strong><br>
-                ${definition}
+                ${displayDefinition}
+                <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-secondary)">
+                    Click to use as translation
+                </div>
             `;
             
             entryDiv.addEventListener('click', () => {
-                // Extract first line of definition for translation field
-                const firstLine = definition.split('\n')[0];
+                // Use the first line of the definition
+                const firstLine = definition.split('\n')[0].replace(/\(Wiktionary.*/, '').trim();
                 document.getElementById('vocab-translation').value = firstLine;
                 document.getElementById('dictionary-results').style.display = 'none';
             });
             
             entriesContainer.appendChild(entryDiv);
-            document.getElementById('dictionary-results').style.display = 'block';
         } else {
+            entriesContainer.innerHTML = '<div class="dictionary-entry">No definition found</div>';
             showToast('No dictionary results found', 'error');
         }
     } catch (error) {
         console.error('Dictionary error:', error);
+        entriesContainer.innerHTML = '<div class="dictionary-entry">Error fetching definition</div>';
         showToast('Dictionary lookup failed. Try again later.', 'error');
     } finally {
         document.getElementById('lookup-word').innerHTML = 'Lookup in Dictionary';
