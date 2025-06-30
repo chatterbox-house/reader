@@ -3032,26 +3032,48 @@ function displayTooltip(text, x, y) {
 
 async function lookupWordInDictionary(word) {
     try {
-const apiUrl = `https://api.dictionaryapi.dev/api/v2/entries/es/${encodeURIComponent(word)}`;
-        
-        let response;
-        try {
-            response = await fetch(apiUrl);
-            if (!response.ok) throw new Error('Direct API failed');
-        } catch (directError) {
-            const proxyUrl = 'https://api.allorigins.win/raw?url=';
-            response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
-            if (!response.ok) throw new Error('API request failed');
+        // First try Jisho API (Spanish-Japanese)
+        const jishoResponse = await fetch(`https://jisho.org/api/v1/search/words?keyword=${encodeURIComponent(word)}`);
+        if (jishoResponse.ok) {
+            const jishoData = await jishoResponse.json();
+            if (jishoData.data && jishoData.data.length > 0) {
+                const japanese = jishoData.data[0].japanese[0]?.word || jishoData.data[0].japanese[0]?.reading || '';
+                const english = jishoData.data[0].senses[0]?.english_definitions?.join(', ') || '';
+                return `🇯🇵 ${japanese}\n🇬🇧 ${english}`;
+            }
         }
 
-        const data = await response.json();
-        if (data.data && data.data.length > 0) {
-            return data.data[0].senses[0]?.english_definitions?.join(', ') || 'No definition found';
+        // Fallback to SpanishDict (Spanish-English)
+        try {
+            const spanishDictResponse = await fetch(`https://www.spanishdict.com/translate/${encodeURIComponent(word)}`);
+            if (spanishDictResponse.ok) {
+                const text = await spanishDictResponse.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                const translation = doc.querySelector('[data-type="translation"]')?.textContent?.trim();
+                if (translation) {
+                    return `🇬🇧 ${translation}`;
+                }
+            }
+        } catch (e) {
+            console.log('SpanishDict fallback failed:', e);
         }
-        return null;
+
+        // Final fallback to MyMemory (Spanish-Japanese)
+        const myMemoryResponse = await fetch(
+            `https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=es|ja`
+        );
+        if (myMemoryResponse.ok) {
+            const myMemoryData = await myMemoryResponse.json();
+            if (myMemoryData.responseData && myMemoryData.responseData.translatedText) {
+                return `🇯🇵 ${myMemoryData.responseData.translatedText}`;
+            }
+        }
+
+        return '翻訳が見つかりませんでした (Translation not found)';
     } catch (error) {
         console.error('Dictionary lookup error:', error);
-        return null;
+        return 'エラー: 辞書に接続できません (Error: Could not connect to dictionary)';
     }
 }
 
@@ -3984,56 +4006,31 @@ function handleTextSelection() {
 
         try {
             document.getElementById('lookup-word').innerHTML = 'Searching...';
-            
-            // Try using a different CORS proxy or direct API call
-            const apiUrl = `https://www.weblio.jp/content/${encodeURIComponent(word)}`;
-            
-            // First try direct fetch (might work if deployed)
-            let response;
-            try {
-                response = await fetch(apiUrl);
-                if (!response.ok) throw new Error('Direct API failed');
-            } catch (directError) {
-                // If direct fails, try with a CORS proxy
-                const proxyUrl = 'https://api.allorigins.win/raw?url='; // Alternative proxy
-                response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
-                if (!response.ok) throw new Error('API request failed');
-            }
-
-            const data = await response.json();
-
             const entriesContainer = document.getElementById('dictionary-entries');
             entriesContainer.innerHTML = '';
 
-            if (data.data && data.data.length > 0) {
-                data.data.slice(0, 5).forEach(entry => {
-                    const entryDiv = document.createElement('div');
-                    entryDiv.className = 'dictionary-entry';
-                    
-                    // Get the best display form of the word
-const spanishDisplay = word;
-let englishDefinition = 'No definition found';
-if (entry[0]?.meanings) {
-    englishDefinition = entry[0].meanings[0]?.definitions[0]?.definition || englishDefinition;
-}
-                    
-                    entryDiv.innerHTML = `
-                        <strong>${spanishDisplay}</strong><br>
-                        ${englishDefinition}
-                    `;
-                    
-                    entryDiv.addEventListener('click', () => {
-                        document.getElementById('vocab-translation').value = 
-                            entry.senses[0]?.english_definitions[0] || englishDefinition.split(',')[0];
-                        document.getElementById('dictionary-results').style.display = 'none';
-                    });
-                    
-                    entriesContainer.appendChild(entryDiv);
+            const translation = await lookupWordInDictionary(word);
+            
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'dictionary-entry';
+            entryDiv.innerHTML = `
+                <strong>${word}</strong><br>
+                ${translation.replace(/\n/g, '<br>')}
+            `;
+            
+            // Auto-fill the first translation if available
+            const firstTranslation = translation.split('\n')[0];
+            if (firstTranslation) {
+                entryDiv.addEventListener('click', () => {
+                    document.getElementById('vocab-translation').value = 
+                        firstTranslation.replace(/^🇯🇵\s*/, '').replace(/^🇬🇧\s*/, '');
+                    document.getElementById('dictionary-results').style.display = 'none';
                 });
-                document.getElementById('dictionary-results').style.display = 'block';
-            } else {
-                showToast('No dictionary results found', 'error');
             }
+            
+            entriesContainer.appendChild(entryDiv);
+            document.getElementById('dictionary-results').style.display = 'block';
+            showToast('Dictionary results loaded', 'success');
         } catch (error) {
             console.error('Dictionary error:', error);
             showToast('Dictionary lookup failed. Try again later.', 'error');
