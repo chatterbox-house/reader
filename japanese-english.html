@@ -1425,71 +1425,67 @@ header.hidden {
         
         <div class="settings-overlay" id="settings-overlay"></div>
         <div class="settings-panel" id="settings-panel">
-            <div class="settings-title">
-                <span>Settings</span>
-                <button class="settings-btn" id="close-settings" aria-label="Close settings">✕</button>
-            </div>
-            
-            <div class="settings-group">
-                <h3>Reading Settings</h3>
-
-
-                
-                <div class="settings-toggle">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="auto-translate-toggle">
-                        <span class="toggle-slider"></span>
-                    </label>
-                    <span class="toggle-label">Auto-show Translations</span>
-                </div>
-            </div>
-            
-            <div class="settings-group">
-                <h3>Appearance</h3>
-                <label class="settings-label">Font Family</label>
-                <select class="settings-select" id="font-select">
-                    <option value="system">System UI</option>
-                    <option value="serif">Serif</option>
-                    <option value="sans-serif">Sans-serif</option>
-                </select>
-                
-                <label class="settings-label">Font Size</label>
-                <input type="range" class="settings-range" id="font-size-range" min="12" max="24" step="1" value="16">
-                
-                <label class="settings-label">Line Height</label>
-                <input type="range" class="settings-range" id="line-height-range" min="1.2" max="2.5" step="0.1" value="1.6">
-                
-                <label class="settings-label">Theme</label>
-                <select class="settings-select" id="theme-select">
-                    <option value="dark">Dark</option>
-                    <option value="light">Light</option>
-                    <option value="high-contrast">High Contrast</option>
-                </select>
-            </div>
-            
-            <div class="settings-group">
-                <h3>Progress</h3>
-<div class="streak-display">
-  <span class="streak-count" id="streak-count">0</span>
-  <span class="streak-label">Day Streak</span>
-  <span class="streak-count" id="daily-goal-count">0</span>
-  <span class="streak-label">/5 today</span>
+<div class="settings-title">
+    <span>設定</span>
+    <button class="settings-btn" id="close-settings" aria-label="設定を閉じる">✕</button>
 </div>
-                
-                <div class="stat-item">
-                    <span class="stat-label">Words Learned:</span>
-                    <span class="stat-value" id="words-learned-count">0</span>
-                </div>
-                
-                <div class="stat-item">
-                    <span class="stat-label">Time Spent:</span>
-                    <span class="stat-value" id="time-spent-count">0 min</span>
-                </div>
-                
-                <button class="btn" id="view-progress-btn" style="width: 100%; margin-top: 1rem;">
-                    View Detailed Progress
-                </button>
-            </div>
+            <div class="settings-group">
+    <h3>読書設定</h3>
+    <div class="settings-toggle">
+        <label class="toggle-switch">
+            <input type="checkbox" id="auto-translate-toggle">
+            <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label">自動翻訳を表示</span>
+    </div>
+</div>
+            
+<div class="settings-group">
+    <h3>表示設定</h3>
+    <label class="settings-label">フォント種類</label>
+    <select class="settings-select" id="font-select">
+        <option value="system">システムUI</option>
+        <option value="serif">セリフ体</option>
+        <option value="sans-serif">サンセリフ体</option>
+    </select>
+    
+    <label class="settings-label">文字サイズ</label>
+    <input type="range" class="settings-range" id="font-size-range" min="12" max="24" step="1" value="16">
+    
+    <label class="settings-label">行間</label>
+    <input type="range" class="settings-range" id="line-height-range" min="1.2" max="2.5" step="0.1" value="1.6">
+    
+    <label class="settings-label">テーマ</label>
+    <select class="settings-select" id="theme-select">
+        <option value="dark">ダーク</option>
+        <option value="light">ライト</option>
+        <option value="high-contrast">ハイコントラスト</option>
+    </select>
+</div>
+            
+<div class="settings-group">
+    <h3>進捗状況</h3>
+    <div class="streak-display">
+        <span class="streak-count" id="streak-count">0</span>
+        <span class="streak-label">日連続</span>
+        <span class="streak-count" id="daily-goal-count">0</span>
+        <span class="streak-label">/今日の目標5</span>
+    </div>
+    
+    <div class="stat-item">
+        <span class="stat-label">学習単語数:</span>
+        <span class="stat-value" id="words-learned-count">0</span>
+    </div>
+    
+    <div class="stat-item">
+        <span class="stat-label">学習時間:</span>
+        <span class="stat-value" id="time-spent-count">0 分</span>
+    </div>
+    
+    <button class="btn" id="view-progress-btn" style="width: 100%; margin-top: 1rem;">
+        詳細な進捗を見る
+    </button>
+</div>
         </div>
         
         <div class="offline-warning" id="offline-warning">You are offline - some features may not work</div>
