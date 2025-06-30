@@ -2696,10 +2696,10 @@ function detectLanguage(text) {
 }
 
 
+<!-- NEW CODE -->
 async function translateToenglish(text, sourceLang) {
     try {
-        // Check cache first
-        const cachedTranslation = await getCachedTranslation(text, sourceLang, 'es');
+        const cachedTranslation = await getCachedTranslation(text, sourceLang, 'en');
         if (cachedTranslation) {
             return cachedTranslation;
         }
@@ -2709,7 +2709,7 @@ async function translateToenglish(text, sourceLang) {
         }
 
         const response = await fetch(
-`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|es`
+`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|en`
         );
 
         if (!response.ok) throw new Error('Translation failed');
@@ -2824,6 +2824,7 @@ async function translateSentence(sentence) {
 }
 
 // TTS functionality
+<!-- NEW CODE -->
 function 音声入力Text(text) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
@@ -2837,7 +2838,7 @@ function 音声入力Text(text) {
             speechSynthesis.onvoiceschanged = () => {
                 const voices = speechSynthesis.getVoices();
                 const englishVoice = voices.find(voice => 
-                    voice.lang === 'es' || voice.lang.startsWith('es')
+                    voice.lang === 'en-US' || voice.lang.startsWith('en')
                 );
                 
                 if (englishVoice) {
@@ -3140,21 +3141,22 @@ function setupMatchingGame() {
     }
 
     if (state.reviewMode === 'new' || state.reviewMode === '簡単') {
-        // English cards on left (translations)
-        const englishCards = shuffleArray([...wordsToShow]).map(word => ({
-            id: word.id,
-            type: 'english',
-            text: word.translation,
-            streak: word.streak || 0
-        }));
-        
-        // english cards on right (words)
-        const englishCards = shuffleArray([...wordsToShow]).map(word => ({
-            id: word.id,
-            type: 'english',
-            text: word.word,
-            streak: word.streak || 0
-        }));
+<!-- NEW CODE -->
+// English cards on left (translations)
+const englishCards = shuffleArray([...wordsToShow]).map(word => ({
+    id: word.id,
+    type: 'english',
+    text: word.translation,
+    streak: word.streak || 0
+}));
+
+// Japanese cards on right (words)
+const japaneseCards = shuffleArray([...wordsToShow]).map(word => ({
+    id: word.id,
+    type: 'japanese',
+    text: word.word,
+    streak: word.streak || 0
+}));
         
         // Add cards to columns
         englishCards.forEach(word => {
@@ -3578,9 +3580,12 @@ document.getElementById('貼り付け-btn-translate').addEventListener('click', 
 });
 
 // Translate section: Voice input button
+document.getElementById('voice-input-btn').addEventListener('click', function() {
+    startVoiceInput('ja-JP', 'text-input', this); // For Japanese input
+});
+
 document.getElementById('voice-input-btn-translate').addEventListener('click', function() {
-    const lang = navigator.language || 'en-US';
-    startVoiceInput('en-US', 'text-input', this);
+    startVoiceInput('en-US', 'translate-input', this); // For English input
 });
 
 // Translate section: クリア button
@@ -3989,21 +3994,38 @@ function handleTextSelection() {
             document.getElementById('lookup-word').innerHTML = 'Searching...';
             
             // Try using a different CORS proxy or direct API call
-            const apiUrl = `https://www.weblio.jp/content/${encodeURIComponent(word)}`;
+<!-- NEW CODE -->
+const apiUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`;
             
-            // First try direct fetch (might work if deployed)
-            let response;
-            try {
-                response = await fetch(apiUrl);
-                if (!response.ok) throw new Error('Direct API failed');
-            } catch (directError) {
-                // If direct fails, try with a CORS proxy
-                const proxyUrl = 'https://api.allorigins.win/raw?url='; // Alternative proxy
-                response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
-                if (!response.ok) throw new Error('API request failed');
-            }
-
-            const data = await response.json();
+try {
+    const response = await fetch(apiUrl);
+    if (!response.ok) throw new Error('API request failed');
+    const data = await response.json();
+    
+    const entriesContainer = document.getElementById('dictionary-entries');
+    entriesContainer.innerHTML = '';
+    
+    if (data && data.length > 0) {
+        data.forEach(entry => {
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'dictionary-entry';
+            
+            const definition = entry.meanings[0]?.definitions[0]?.definition || 'No definition found';
+            
+            entryDiv.innerHTML = `
+                <strong>${entry.word}</strong><br>
+                ${definition}
+            `;
+            
+            entryDiv.addEventListener('click', () => {
+                document.getElementById('vocab-translation').value = definition;
+                document.getElementById('dictionary-results').style.display = 'none';
+            });
+            
+            entriesContainer.appendChild(entryDiv);
+        });
+        document.getElementById('dictionary-results').style.display = 'block';
+    }
 
             const entriesContainer = document.getElementById('dictionary-entries');
             entriesContainer.innerHTML = '';
