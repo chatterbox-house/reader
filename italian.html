@@ -2666,15 +2666,17 @@ function countVocabByBucket() {
 
 // Text processing
 function splitSentences(text) {
-    const roughSentences = text.split(/(?<=[。！？\n])/);
+    // Split on sentence terminators: . ? ! followed by space or newline
+    const roughSentences = text.split(/(?<=[.?!])\s+/);
     const sentences = [];
     
     roughSentences.forEach(roughSentence => {
         const trimmed = roughSentence.trim();
         if (trimmed.length === 0) return;
         
-        if (trimmed.includes('。') || trimmed.includes('！') || trimmed.includes('？')) {
-            const subSentences = trimmed.split(/(?<=[。！？])/);
+        // Handle cases where multiple punctuation marks appear together
+        if (trimmed.match(/[.?!][.?!]/)) {
+            const subSentences = trimmed.split(/(?<=[.?!])\s+/);
             subSentences.forEach(sub => {
                 const subTrimmed = sub.trim();
                 if (subTrimmed.length > 0) sentences.push(subTrimmed);
