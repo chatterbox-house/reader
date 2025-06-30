@@ -3048,29 +3048,40 @@ function displayTooltip(text, x, y) {
 
 async function lookupWordInDictionary(word) {
     try {
-        // First try Dicollecte API
-        const response = await fetch(`https://dicollecte.fr/api/v1/search?q=${encodeURIComponent(word)}`);
+        // First try DictinaryAPI (free and reliable)
+        const dictResponse = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/fr/${encodeURIComponent(word.toLowerCase())}`);
         
-        if (!response.ok) throw new Error('API request failed');
-        
-        const data = await response.json();
-        
-        if (data.results && data.results.length > 0) {
-            // Format the definition
-            const firstResult = data.results[0];
-            let definition = firstResult.definition;
-            
-            // Add grammatical information if available
-            if (firstResult.grammar) {
-                definition = `${firstResult.grammar}: ${definition}`;
+        if (dictResponse.ok) {
+            const dictData = await dictResponse.json();
+            if (Array.isArray(dictData) && dictData.length > 0) {
+                // Format the first definition we find
+                const firstEntry = dictData[0];
+                if (firstEntry.meanings && firstEntry.meanings.length > 0) {
+                    const firstMeaning = firstEntry.meanings[0];
+                    const firstDefinition = firstMeaning.definitions[0].definition;
+                    return `${firstMeaning.partOfSpeech || ''}: ${firstDefinition}`;
+                }
             }
-            
-            return definition;
         }
         
-        // Fallback to Larousse scraping if Dicollecte fails
-        return await fallbackLarousseLookup(word);
+        // Fallback to WordReference API (needs CORS proxy)
+        const proxyUrl = 'https://api.allorigins.win/raw?url=';
+        const wordRefUrl = `https://www.wordreference.com/fren/${encodeURIComponent(word.toLowerCase())}`;
+        const wordRefResponse = await fetch(proxyUrl + encodeURIComponent(wordRefUrl));
         
+        if (wordRefResponse.ok) {
+            const html = await wordRefResponse.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Try to extract the first translation
+            const translationElement = doc.querySelector('.ToWrd');
+            if (translationElement) {
+                return translationElement.textContent.trim();
+            }
+        }
+        
+        return null;
     } catch (error) {
         console.error('Dictionary error:', error);
         return null;
@@ -4020,82 +4031,89 @@ document.getElementById('lookup-word').addEventListener('click', async () => {
 
     try {
         document.getElementById('lookup-word').innerHTML = 'Searching...';
-        
-        // Try Dicollecte API first (French dictionary)
-        let definitions = [];
-        
-        // First try: Dicollecte API
-        try {
-            const dicollecteResponse = await fetch(`https://api.dicollecte.org/v1/words/fr/${encodeURIComponent(word.toLowerCase())}`);
-            if (dicollecteResponse.ok) {
-                const dicollecteData = await dicollecteResponse.json();
-                if (dicollecteData.results && dicollecteData.results.length > 0) {
-                    definitions = dicollecteData.results.map(result => {
-                        return {
-                            word: result.word,
-                            type: result.grammar || '',
-                            definition: result.definition || 'No definition available'
-                        };
-                    });
-                }
-            }
-        } catch (dicollecteError) {
-            console.log('Dicollecte API failed, trying fallback');
-        }
-        
-        // Fallback: Larousse scraping via CORS proxy
-        if (definitions.length === 0) {
-            try {
-                const proxyUrl = 'https://api.allorigins.win/raw?url=';
-                const larousseUrl = `https://www.larousse.fr/dictionnaires/francais/${encodeURIComponent(word)}`;
-                const larousseResponse = await fetch(proxyUrl + encodeURIComponent(larousseUrl));
-                
-                if (larousseResponse.ok) {
-                    const html = await larousseResponse.text();
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    
-                    // Try to extract definitions from Larousse page
-                    const definitionElements = doc.querySelectorAll('.DivisionDefinition');
-                    if (definitionElements.length > 0) {
-                        definitions = Array.from(definitionElements).slice(0, 3).map(el => ({
-                            word: word,
-                            type: '',
-                            definition: el.textContent.trim()
-                        }));
-                    }
-                }
-            } catch (larousseError) {
-                console.log('Larousse fallback failed');
-            }
-        }
-        
         const entriesContainer = document.getElementById('dictionary-entries');
         entriesContainer.innerHTML = '';
-
-        if (definitions.length > 0) {
-            definitions.forEach(entry => {
-                const entryDiv = document.createElement('div');
-                entryDiv.className = 'dictionary-entry';
-                
-                entryDiv.innerHTML = `
-                    <strong>${entry.word}</strong>
-                    ${entry.type ? `<span class="word-type">${entry.type}</span>` : ''}
-                    <div class="dict-definition">${entry.definition}</div>
-                `;
-                
-                entryDiv.addEventListener('click', () => {
-                    document.getElementById('vocab-translation').value = 
-                        entry.definition.split(/[;,.]/)[0].trim();
-                    document.getElementById('dictionary-results').style.display = 'none';
+        
+        // Try DictionaryAPI first
+        const dictResponse = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/fr/${encodeURIComponent(word.toLowerCase())}`);
+        
+        if (dictResponse.ok) {
+            const dictData = await dictResponse.json();
+            if (Array.isArray(dictData) && dictData.length > 0) {
+                dictData[0].meanings.forEach(meaning => {
+                    meaning.definitions.slice(0, 3).forEach((def, i) => {
+                        const entryDiv = document.createElement('div');
+                        entryDiv.className = 'dictionary-entry';
+                        
+                        entryDiv.innerHTML = `
+                            <strong>${word}</strong>
+                            <span class="word-type">${meaning.partOfSpeech || ''}</span>
+                            <div class="dict-definition">${i+1}. ${def.definition}</div>
+                            ${def.example ? `<div class="dict-example">Example: ${def.example}</div>` : ''}
+                        `;
+                        
+                        entryDiv.addEventListener('click', () => {
+                            document.getElementById('vocab-translation').value = 
+                                def.definition.split(/[;,.]/)[0].trim();
+                        });
+                        
+                        entriesContainer.appendChild(entryDiv);
+                    });
                 });
                 
-                entriesContainer.appendChild(entryDiv);
-            });
-            document.getElementById('dictionary-results').style.display = 'block';
-        } else {
-            showToast('No dictionary results found', 'error');
+                document.getElementById('dictionary-results').style.display = 'block';
+                return;
+            }
         }
+        
+        // Fallback to WordReference if DictionaryAPI fails
+        showToast('Trying alternative dictionary...', 'info');
+        const proxyUrl = 'https://api.allorigins.win/raw?url=';
+        const wordRefUrl = `https://www.wordreference.com/fren/${encodeURIComponent(word.toLowerCase())}`;
+        const wordRefResponse = await fetch(proxyUrl + encodeURIComponent(wordRefUrl));
+        
+        if (wordRefResponse.ok) {
+            const html = await wordRefResponse.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Extract translations from WordReference
+            const translations = Array.from(doc.querySelectorAll('.even, .odd'))
+                .filter(row => row.querySelector('.FrWrd'))
+                .slice(0, 5)
+                .map(row => {
+                    const french = row.querySelector('.FrWrd')?.textContent.trim() || '';
+                    const english = row.querySelector('.ToWrd')?.textContent.trim() || '';
+                    const pos = row.querySelector('.POS2')?.textContent.trim() || '';
+                    return { french, english, pos };
+                })
+                .filter(trans => trans.english);
+            
+            if (translations.length > 0) {
+                translations.forEach(trans => {
+                    const entryDiv = document.createElement('div');
+                    entryDiv.className = 'dictionary-entry';
+                    
+                    entryDiv.innerHTML = `
+                        <strong>${trans.french}</strong>
+                        <span class="word-type">${trans.pos}</span>
+                        <div class="dict-definition">${trans.english}</div>
+                    `;
+                    
+                    entryDiv.addEventListener('click', () => {
+                        document.getElementById('vocab-translation').value = 
+                            trans.english.split(/[;,.]/)[0].trim();
+                    });
+                    
+                    entriesContainer.appendChild(entryDiv);
+                });
+                
+                document.getElementById('dictionary-results').style.display = 'block';
+                return;
+            }
+        }
+        
+        showToast('No dictionary results found', 'error');
     } catch (error) {
         console.error('Dictionary error:', error);
         showToast('Dictionary lookup failed. Try again later.', 'error');
