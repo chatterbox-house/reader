@@ -4060,7 +4060,9 @@ document.getElementById('lookup-word').addEventListener('click', async () => {
         console.error('Dictionary error:', error);
         showToast('Dictionary lookup failed. Try again later.', 'error');
     } finally {
-        document.getElementById('lookup-word').innerHTML = 'Lookup in Dictio
+        document.getElementById('lookup-word').innerHTML = 'Lookup in Dictionary';
+    }
+});
 
     // Add to vocab handler
     elements.addToVocabBtn.addEventListener('click', async () => {
