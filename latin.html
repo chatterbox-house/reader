@@ -3027,26 +3027,51 @@ function displayTooltip(text, x, y) {
 
 async function lookupWordInDictionary(word) {
     try {
-const apiUrl = `https://archives.nd.edu/cgi-bin/wordz.pl?keyword=${encodeURIComponent(word)}`;
+        // Try first API (Whitaker's Words)
+        const wordsApiUrl = `https://archives.nd.edu/cgi-bin/wordz.pl?keyword=${encodeURIComponent(word)}`;
         
-        let response;
+        let response = await fetch(wordsApiUrl);
+        if (!response.ok) throw new Error('First API failed');
+        
+        const text = await response.text();
+        
+        // Parse the response from Whitaker's Words
+        if (text.includes("No such word")) {
+            throw new Error('Word not found in first dictionary');
+        }
+        
+        // Extract definition from the HTML response
+        const parser = new DOMParser();
+        const htmlDoc = parser.parseFromString(text, 'text/html');
+        const definition = htmlDoc.querySelector('pre')?.textContent || 'No definition found';
+        
+        // Clean up the definition
+        return definition.split('\n')
+            .filter(line => line.trim() && !line.includes("No such word"))
+            .join('\n')
+            .substring(0, 200); // Limit to 200 characters
+        
+    } catch (firstError) {
+        console.log('First dictionary failed, trying fallback:', firstError);
+        
         try {
-            response = await fetch(apiUrl);
-            if (!response.ok) throw new Error('Direct API failed');
-        } catch (directError) {
-            const proxyUrl = 'https://api.allorigins.win/raw?url=';
-            response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
-            if (!response.ok) throw new Error('API request failed');
+            // Fallback to Latin Dictionary API
+            const latinApiUrl = `https://latin-dictionary-api.vercel.app/api/${encodeURIComponent(word)}`;
+            const fallbackResponse = await fetch(latinApiUrl);
+            
+            if (!fallbackResponse.ok) throw new Error('Fallback API failed');
+            
+            const fallbackData = await fallbackResponse.json();
+            
+            if (fallbackData.definition) {
+                return fallbackData.definition;
+            }
+            
+            return 'No definition found in any dictionary';
+        } catch (fallbackError) {
+            console.error('Fallback dictionary error:', fallbackError);
+            return 'No definition available (offline)';
         }
-
-        const data = await response.json();
-        if (data.data && data.data.length > 0) {
-            return data.data[0].senses[0]?.english_definitions?.join(', ') || 'No definition found';
-        }
-        return null;
-    } catch (error) {
-        console.error('Dictionary lookup error:', error);
-        return null;
     }
 }
 
@@ -3969,73 +3994,49 @@ function handleTextSelection() {
     }
 }
 
-    // Dictionary lookup
-    document.getElementById('lookup-word').addEventListener('click', async () => {
-        const word = document.getElementById('selected-word').textContent;
-        if (!word) {
-            showToast('No word selected', 'error');
-            return;
-        }
+document.getElementById('lookup-word').addEventListener('click', async () => {
+    const word = document.getElementById('selected-word').textContent;
+    if (!word) {
+        showToast('No word selected', 'error');
+        return;
+    }
 
-        try {
-            document.getElementById('lookup-word').innerHTML = 'Searching...';
+    try {
+        document.getElementById('lookup-word').innerHTML = 'Searching...';
+        const entriesContainer = document.getElementById('dictionary-entries');
+        entriesContainer.innerHTML = '';
+
+        // Look up the word using our improved function
+        const definition = await lookupWordInDictionary(word);
+        
+        if (definition && definition !== 'No definition found') {
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'dictionary-entry';
             
-            // Try using a different CORS proxy or direct API call
-            const apiUrl = `https://jisho.org/api/v1/search/words?keyword=${encodeURIComponent(word)}`;
+            entryDiv.innerHTML = `
+                <strong>${word}</strong><br>
+                ${definition}
+            `;
             
-            // First try direct fetch (might work if deployed)
-            let response;
-            try {
-                response = await fetch(apiUrl);
-                if (!response.ok) throw new Error('Direct API failed');
-            } catch (directError) {
-                // If direct fails, try with a CORS proxy
-                const proxyUrl = 'https://api.allorigins.win/raw?url='; // Alternative proxy
-                response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
-                if (!response.ok) throw new Error('API request failed');
-            }
-
-            const data = await response.json();
-
-            const entriesContainer = document.getElementById('dictionary-entries');
-            entriesContainer.innerHTML = '';
-
-            if (data.data && data.data.length > 0) {
-                data.data.slice(0, 5).forEach(entry => {
-                    const entryDiv = document.createElement('div');
-                    entryDiv.className = 'dictionary-entry';
-                    
-                    // Get the best display form of the word
-const latinDisplay = word;
-let englishDefinition = 'No definition found';
-if (entry[0]?.meanings) {
-    englishDefinition = entry[0].meanings[0]?.definitions[0]?.definition || englishDefinition;
-}
-                    
-                    entryDiv.innerHTML = `
-                        <strong>${latinDisplay}</strong><br>
-                        ${englishDefinition}
-                    `;
-                    
-                    entryDiv.addEventListener('click', () => {
-                        document.getElementById('vocab-translation').value = 
-                            entry.senses[0]?.english_definitions[0] || englishDefinition.split(',')[0];
-                        document.getElementById('dictionary-results').style.display = 'none';
-                    });
-                    
-                    entriesContainer.appendChild(entryDiv);
-                });
-                document.getElementById('dictionary-results').style.display = 'block';
-            } else {
-                showToast('No dictionary results found', 'error');
-            }
-        } catch (error) {
-            console.error('Dictionary error:', error);
-            showToast('Dictionary lookup failed. Try again later.', 'error');
-        } finally {
-            document.getElementById('lookup-word').innerHTML = 'Lookup in Dictionary';
+            entryDiv.addEventListener('click', () => {
+                // Extract first line of definition for translation field
+                const firstLine = definition.split('\n')[0];
+                document.getElementById('vocab-translation').value = firstLine;
+                document.getElementById('dictionary-results').style.display = 'none';
+            });
+            
+            entriesContainer.appendChild(entryDiv);
+            document.getElementById('dictionary-results').style.display = 'block';
+        } else {
+            showToast('No dictionary results found', 'error');
         }
-    });
+    } catch (error) {
+        console.error('Dictionary error:', error);
+        showToast('Dictionary lookup failed. Try again later.', 'error');
+    } finally {
+        document.getElementById('lookup-word').innerHTML = 'Lookup in Dictionary';
+    }
+});
 
     // Add to vocab handler
     elements.addToVocabBtn.addEventListener('click', async () => {
