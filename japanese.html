@@ -1811,8 +1811,8 @@ const state = {
         correct: 0,
         incorrect: 0
     },
-    theme: localStorage.getItem('theme') || 'dark',
-    soundsEnabled: localStorage.getItem('soundsEnabled') !== 'false',
+    theme: localStorage.getItem('theme_ja') || 'dark',
+    soundsEnabled: localStorage.getItem('soundsEnabled_ja') !== 'false',
     audioContext: null,
     sounds: {},
     currentHardWord: null,
@@ -1820,17 +1820,17 @@ const state = {
     textHistory: [],
     isOnline: navigator.onLine,
     debounceTimer: null,
-    uiLanguage: localStorage.getItem('uiLanguage') || 'en',
-    newWordsToday: parseInt(localStorage.getItem('newWordsToday')) || 0,
-    lastWordAddedDate: localStorage.getItem('lastWordAddedDate') || '',
+    uiLanguage: localStorage.getItem('uiLanguage_ja') || 'en',
+    newWordsToday: parseInt(localStorage.getItem('newWordsToday_ja')) || 0,
+    lastWordAddedDate: localStorage.getItem('lastWordAddedDate_ja') || '',
 
 
-    currentFont: localStorage.getItem('font') || 'system',
-    currentFontSize: parseInt(localStorage.getItem('fontSize')) || 16,
-    currentLineHeight: parseFloat(localStorage.getItem('lineHeight')) || 1.6,
-    autoTranslate: localStorage.getItem('autoTranslate') === 'true',
+    currentFont: localStorage.getItem('font_ja') || 'system',
+    currentFontSize: parseInt(localStorage.getItem('fontSize_ja')) || 16,
+    currentLineHeight: parseFloat(localStorage.getItem('lineHeight_ja')) || 1.6,
+    autoTranslate: localStorage.getItem('autoTranslate_ja') === 'true',
 
-readingStats: JSON.parse(localStorage.getItem('readingStats')) || {
+readingStats: JSON.parse(localStorage.getItem('readingStats_ja')) || {
     streak: 0,
     lastActiveDate: '',
     wordsLearned: 0,
@@ -1843,7 +1843,7 @@ currentSessionStart: null,
 selectedCards: [],
 currentTtsUtterance: null,
 wordLookupCache: {},
-bookmarks: JSON.parse(localStorage.getItem('bookmarks')) || []
+bookmarks: JSON.parse(localStorage.getItem('bookmarks_ja')) || []
 };
 
 // Initialize audio context and sounds
@@ -1939,7 +1939,7 @@ function playSound(name) {
 // Toggle sound on/off
 function toggleSounds() {
     state.soundsEnabled = !state.soundsEnabled;
-    localStorage.setItem('soundsEnabled', state.soundsEnabled);
+    localStorage.setItem('soundsEnabled_ja', state.soundsEnabled);
     document.getElementById('sound-toggle').textContent = state.soundsEnabled ? '🔊' : '🔇';
     showToast(`Sounds ${state.soundsEnabled ? 'enabled' : 'disabled'}`);
 }
@@ -1966,7 +1966,7 @@ function toggleBookmark() {
         showToast('Removed from bookmarks', 'error');
     }
     
-    localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
+    localStorage.setItem('bookmarks_ja', JSON.stringify(state.bookmarks));
     renderBookmarks();
 }
 function renderBookmarks() {
@@ -1976,8 +1976,8 @@ function renderBookmarks() {
     container.innerHTML = '';
     
     // Load both bookmarks and history if not loaded
-    const savedBookmarks = localStorage.getItem('bookmarks');
-    const savedHistory = localStorage.getItem('textHistory');
+    const savedBookmarks = localStorage.getItem('bookmarks_ja');
+    const savedHistory = localStorage.getItem('textHistory_ja');
     
     if (savedBookmarks) {
         state.bookmarks = JSON.parse(savedBookmarks);
@@ -2096,7 +2096,7 @@ if (!displayText && bookmark.sentence) {
         btn.addEventListener('click', (e) => {
             const id = e.target.getAttribute('data-bookmark-id');
             state.bookmarks = state.bookmarks.filter(b => b.id !== id);
-            localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
+            localStorage.setItem('bookmarks_ja', JSON.stringify(state.bookmarks));
             renderBookmarks();
             showToast('Bookmark removed', 'success');
             e.stopPropagation();
@@ -2117,7 +2117,7 @@ if (!displayText && bookmark.sentence) {
 
 function clearBookmarks() {
     state.bookmarks = [];
-    localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
+    localStorage.setItem('bookmarks_ja', JSON.stringify(state.bookmarks));
     renderBookmarks();
     showToast('All bookmarks cleared', 'success');
 }
@@ -2253,7 +2253,7 @@ if (state.readingStats.streak > 3 && state.readingStats.lastActiveDate !== new D
     
     elements.autoTranslateToggle.addEventListener('change', (e) => {
         state.autoTranslate = e.target.checked;
-        localStorage.setItem('autoTranslate', state.autoTranslate);
+        localStorage.setItem('autoTranslate_ja', state.autoTranslate);
         if (state.autoTranslate && state.currentView === 'reading-view' && state.sentences.length > 0) {
             translateCurrentSentence();
         }
@@ -2261,13 +2261,13 @@ if (state.readingStats.streak > 3 && state.readingStats.lastActiveDate !== new D
     
     elements.fontSelect.addEventListener('change', (e) => {
         state.currentFont = e.target.value;
-        localStorage.setItem('font', state.currentFont);
+        localStorage.setItem('font_ja', state.currentFont);
         document.documentElement.setAttribute('data-font', state.currentFont);
     });
     
 elements.fontSizeRange.addEventListener('input', (e) => {
     state.currentFontSize = e.target.value;
-    localStorage.setItem('fontSize', state.currentFontSize);
+    localStorage.setItem('fontSize_ja', state.currentFontSize);
     document.documentElement.style.setProperty('--font-size', `${state.currentFontSize}px`);
     
     // Force redraw of cards if in matching game
@@ -2278,13 +2278,13 @@ elements.fontSizeRange.addEventListener('input', (e) => {
     
     elements.lineHeightRange.addEventListener('input', (e) => {
         state.currentLineHeight = e.target.value;
-        localStorage.setItem('lineHeight', state.currentLineHeight);
+        localStorage.setItem('lineHeight_ja', state.currentLineHeight);
         document.documentElement.style.setProperty('--line-height', state.currentLineHeight);
     });
     
     elements.themeSelect.addEventListener('change', (e) => {
         state.theme = e.target.value;
-        localStorage.setItem('theme', state.theme);
+        localStorage.setItem('theme_ja', state.theme);
         document.documentElement.setAttribute('data-theme', state.theme);
         elements.themeToggle.textContent = state.theme === 'dark' ? '🌙' : '☀️';
     });
@@ -2321,7 +2321,7 @@ function updateStatsDisplay() {
         state.readingStats.lastActiveDate = today;
         state.readingStats.dailyWords = 0;
         state.readingStats.dailyTime = 0;
-        localStorage.setItem('readingStats', JSON.stringify(state.readingStats));
+        localStorage.setItem('readingStats_ja', JSON.stringify(state.readingStats));
     }
     
     elements.streakCount.textContent = state.readingStats.streak;
@@ -2363,7 +2363,7 @@ function endReadingSession() {
         state.readingStats.timeSpent += timeSpent;
         state.readingStats.dailyTime += timeSpent;
         state.currentSessionStart = null;
-        localStorage.setItem('readingStats', JSON.stringify(state.readingStats));
+        localStorage.setItem('readingStats_ja', JSON.stringify(state.readingStats));
         updateStatsDisplay();
     }
 }
@@ -2373,7 +2373,7 @@ function endReadingSession() {
 // Database operations
 
 // Initialize IndexedDB
-const DB_NAME = 'JapaneseLearnerDB';
+const DB_NAME = 'JapaneseLearnerDB_ja';
 const DB_VERSION = 2; // Updated version for new schema
 const STORE_SENTENCES = 'sentences';
 const STORE_VOCAB = 'vocabulary';
@@ -2454,7 +2454,7 @@ function hideWipeConfirmation() {
 
 function showHistoryView() {
     // Load history from localStorage
-    const savedHistory = localStorage.getItem('textHistory');
+    const savedHistory = localStorage.getItem('textHistory_ja');
     if (savedHistory) {
         state.textHistory = JSON.parse(savedHistory);
     }
@@ -2522,14 +2522,14 @@ function loadHistoryItem(index) {
 
 function deleteHistoryItem(index) {
     state.textHistory.splice(index, 1);
-    localStorage.setItem('textHistory', JSON.stringify(state.textHistory));
+    localStorage.setItem('textHistory_ja', JSON.stringify(state.textHistory));
     showHistoryView();
     showToast('History item deleted');
 }
 
 function clearHistory() {
     state.textHistory = [];
-    localStorage.removeItem('textHistory');
+    localStorage.removeItem('textHistory_ja');
     showHistoryView();
     showToast('History cleared');
 }
@@ -2595,13 +2595,13 @@ function addVocabWord(word) {
                     state.lastWordAddedDate = today;
                 }
                 state.newWordsToday++;
-                localStorage.setItem('newWordsToday', state.newWordsToday.toString());
-                localStorage.setItem('lastWordAddedDate', state.lastWordAddedDate);
+                localStorage.setItem('newWordsToday_ja', state.newWordsToday.toString());
+                localStorage.setItem('lastWordAddedDate_ja', state.lastWordAddedDate);
                 
                 // Update reading stats
                 state.readingStats.wordsLearned++;
                 state.readingStats.dailyWords++;
-                localStorage.setItem('readingStats', JSON.stringify(state.readingStats));
+                localStorage.setItem('readingStats_ja', JSON.stringify(state.readingStats));
                 updateStatsDisplay();
                 
                 const addRequest = store.add(word);
@@ -3034,28 +3034,69 @@ function displayTooltip(text, x, y) {
     }, 2000);
 }
 
+// Basic Japanese-English dictionary (you can expand this list)
+const localDictionary = {
+    "気象庁": "Japan Meteorological Agency",
+    "天気": "weather",
+    "雨": "rain",
+    "晴れ": "sunny",
+    "雪": "snow",
+    "風": "wind",
+    "雲": "cloud",
+    "雷": "thunder",
+    "地震": "earthquake",
+    "台風": "typhoon",
+    "気温": "temperature",
+    "湿度": "humidity",
+    "予報": "forecast",
+    "警報": "warning",
+    "注意報": "advisory",
+    "猫": "cat",
+    "犬": "dog",
+    "本": "book",
+    "水": "water",
+    "食べ物": "food",
+    "学校": "school",
+    "先生": "teacher",
+    "学生": "student",
+    "日本語": "Japanese language",
+    "英語": "English",
+    "ありがとう": "thank you",
+    "こんにちは": "hello",
+    "さようなら": "goodbye"
+};
+
 async function lookupWordInDictionary(word) {
     try {
-        const apiUrl = `https://jisho.org/api/v1/search/words?keyword=${encodeURIComponent(word)}`;
-        
-        let response;
-        try {
-            response = await fetch(apiUrl);
-            if (!response.ok) throw new Error('Direct API failed');
-        } catch (directError) {
-            const proxyUrl = 'https://api.allorigins.win/raw?url=';
-            response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
-            if (!response.ok) throw new Error('API request failed');
+        // First try local dictionary
+        if (localDictionary[word]) {
+            return localDictionary[word];
         }
 
-        const data = await response.json();
-        if (data.data && data.data.length > 0) {
-            return data.data[0].senses[0]?.english_definitions?.join(', ') || 'No definition found';
+        // If online, try Jisho API
+        if (state.isOnline) {
+            const apiUrl = `https://jisho.org/api/v1/search/words?keyword=${encodeURIComponent(word)}`;
+            
+            let response;
+            try {
+                response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('Direct API failed');
+            } catch (directError) {
+                const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
+                if (!response.ok) throw new Error('API request failed');
+            }
+
+            const data = await response.json();
+            if (data.data && data.data.length > 0) {
+                return data.data[0].senses[0]?.english_definitions?.join(', ') || 'No definition found';
+            }
         }
-        return null;
+        
+        return localDictionary[word] || 'No definition found';
     } catch (error) {
         console.error('Dictionary lookup error:', error);
-        return null;
+        return localDictionary[word] || 'No definition found';
     }
 }
 
@@ -3555,7 +3596,7 @@ function generateUUID() {
 
 function toggleTheme() {
     state.theme = state.theme === 'dark' ? 'light' : 'dark';
-    localStorage.setItem('theme', state.theme);
+    localStorage.setItem('theme_ja', state.theme);
     document.documentElement.setAttribute('data-theme', state.theme);
     elements.themeToggle.textContent = state.theme === 'dark' ? '🌙' : '☀️';
 }
@@ -3604,7 +3645,7 @@ document.getElementById('bookmarks-list').addEventListener('click', (e) => {
     if (e.target.hasAttribute('data-bookmark-id')) {
         const id = e.target.getAttribute('data-bookmark-id');
         state.bookmarks = state.bookmarks.filter(b => b.id !== id);
-        localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
+        localStorage.setItem('bookmarks_ja', JSON.stringify(state.bookmarks));
         renderBookmarks();
 const undoId = generateUUID();
 showToast(`Bookmark removed <button onclick="undoDelete('${undoId}')" style="margin-left: 10px; background: none; border: none; color: var(--highlight); text-decoration: underline; cursor: pointer;">Undo</button>`, 'success');
@@ -3726,7 +3767,7 @@ function loadHistoryItem(index) {
             state.sentences = [];
             state.vocabWords = [];
             state.newWordsToday = 0;
-            localStorage.setItem('newWordsToday', '0');
+            localStorage.setItem('newWordsToday_ja', '0');
             await updateBucketCounts();
             showToast('All data has been deleted', 'success');
             document.querySelector('.nav-btn[data-view="text-import"]').classList.add('active');
@@ -3762,8 +3803,8 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
         // Special handling for bookmarks view
         if (btn.dataset.view === 'bookmarks') {
             // Load both bookmarks and history
-            const savedBookmarks = localStorage.getItem('bookmarks');
-            const savedHistory = localStorage.getItem('textHistory');
+            const savedBookmarks = localStorage.getItem('bookmarks_ja');
+            const savedHistory = localStorage.getItem('textHistory_ja');
             
             if (savedBookmarks) {
                 state.bookmarks = JSON.parse(savedBookmarks);
@@ -3846,14 +3887,14 @@ state.bookmarks.unshift({
     date: new Date().toISOString(),
     title: textTitle // Also store the title for display
 });
-localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
+localStorage.setItem('bookmarks_ja', JSON.stringify(state.bookmarks));
         
         // Keep only the last 10 items
         if (state.textHistory.length > 10) {
             state.textHistory = state.textHistory.slice(0, 10);
         }
         
-        localStorage.setItem('textHistory', JSON.stringify(state.textHistory));
+        localStorage.setItem('textHistory_ja', JSON.stringify(state.textHistory));
                     
         if (text.length > 5000) {
             showToast('Text exceeds 5000 characters', 'error');
@@ -3979,55 +4020,62 @@ function handleTextSelection() {
 }
 
     // Dictionary lookup
-    document.getElementById('lookup-word').addEventListener('click', async () => {
-        const word = document.getElementById('selected-word').textContent;
-        if (!word) {
-            showToast('No word selected', 'error');
+document.getElementById('lookup-word').addEventListener('click', async () => {
+    const word = document.getElementById('selected-word').textContent;
+    if (!word) {
+        showToast('No word selected', 'error');
+        return;
+    }
+
+    try {
+        document.getElementById('lookup-word').innerHTML = 'Searching...';
+        
+        const entriesContainer = document.getElementById('dictionary-entries');
+        entriesContainer.innerHTML = '';
+
+        // First check local dictionary
+        if (localDictionary[word]) {
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'dictionary-entry';
+            entryDiv.innerHTML = `<strong>${word}</strong><br>${localDictionary[word]}`;
+            entryDiv.addEventListener('click', () => {
+                document.getElementById('vocab-translation').value = localDictionary[word];
+                document.getElementById('dictionary-results').style.display = 'none';
+            });
+            entriesContainer.appendChild(entryDiv);
+            document.getElementById('dictionary-results').style.display = 'block';
             return;
         }
 
-        try {
-            document.getElementById('lookup-word').innerHTML = 'Searching...';
-            
-            // Try using a different CORS proxy or direct API call
+        // If online, try Jisho API
+        if (state.isOnline) {
             const apiUrl = `https://jisho.org/api/v1/search/words?keyword=${encodeURIComponent(word)}`;
             
-            // First try direct fetch (might work if deployed)
             let response;
             try {
                 response = await fetch(apiUrl);
                 if (!response.ok) throw new Error('Direct API failed');
             } catch (directError) {
-                // If direct fails, try with a CORS proxy
-                const proxyUrl = 'https://api.allorigins.win/raw?url='; // Alternative proxy
+                const proxyUrl = 'https://api.allorigins.win/raw?url=';
                 response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
                 if (!response.ok) throw new Error('API request failed');
             }
 
             const data = await response.json();
 
-            const entriesContainer = document.getElementById('dictionary-entries');
-            entriesContainer.innerHTML = '';
-
             if (data.data && data.data.length > 0) {
                 data.data.slice(0, 5).forEach(entry => {
                     const entryDiv = document.createElement('div');
                     entryDiv.className = 'dictionary-entry';
                     
-                    // Get the best display form of the word
-                    const japaneseDisplay = entry.japanese[0]?.word || entry.japanese[0]?.reading || word;
-                    
-                    // Get the first English definition or fallback
-                    const englishDefinition = entry.senses[0]?.english_definitions?.join(', ') || 'No definition found';
-                    
                     entryDiv.innerHTML = `
-                        <strong>${japaneseDisplay}</strong><br>
-                        ${englishDefinition}
+                        <strong>${entry.japanese[0]?.word || entry.japanese[0]?.reading || word}</strong><br>
+                        ${entry.senses[0]?.english_definitions?.join(', ') || 'No definition found'}
                     `;
                     
                     entryDiv.addEventListener('click', () => {
                         document.getElementById('vocab-translation').value = 
-                            entry.senses[0]?.english_definitions[0] || englishDefinition.split(',')[0];
+                            entry.senses[0]?.english_definitions[0] || 'No definition found';
                         document.getElementById('dictionary-results').style.display = 'none';
                     });
                     
@@ -4037,13 +4085,16 @@ function handleTextSelection() {
             } else {
                 showToast('No dictionary results found', 'error');
             }
-        } catch (error) {
-            console.error('Dictionary error:', error);
-            showToast('Dictionary lookup failed. Try again later.', 'error');
-        } finally {
-            document.getElementById('lookup-word').innerHTML = 'Lookup in Dictionary';
+        } else {
+            showToast('No local definition found (offline)', 'error');
         }
-    });
+    } catch (error) {
+        console.error('Dictionary error:', error);
+        showToast('Dictionary lookup failed. Try again later.', 'error');
+    } finally {
+        document.getElementById('lookup-word').innerHTML = 'Lookup in Dictionary';
+    }
+});
 
     // Add to vocab handler
     elements.addToVocabBtn.addEventListener('click', async () => {
@@ -4299,7 +4350,7 @@ function handleTouchEnd(e) {
 function undoDelete(id) {
   if (state.lastDeleted && state.lastDeleted.id === id) {
     state.bookmarks.push(state.lastDeleted.item);
-    localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
+    localStorage.setItem('bookmarks_ja', JSON.stringify(state.bookmarks));
     renderBookmarks();
     showToast('Bookmark restored!', 'success');
   }
