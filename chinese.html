@@ -3032,26 +3032,42 @@ function displayTooltip(text, x, y) {
 
 async function lookupWordInDictionary(word) {
     try {
-const apiUrl = `https://api.mojidict.com/parse/functions/union-api?text=${encodeURIComponent(word)}`;
-        
-        let response;
+        // Try HanziDB API first
         try {
-            response = await fetch(apiUrl);
-            if (!response.ok) throw new Error('Direct API failed');
-        } catch (directError) {
-            const proxyUrl = 'https://api.allorigins.win/raw?url=';
-            response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
-            if (!response.ok) throw new Error('API request failed');
+            const hanziResponse = await fetch(`https://hzdg.cn/api/v1/words?word=${encodeURIComponent(word)}`);
+            if (hanziResponse.ok) {
+                const hanziData = await hanziResponse.json();
+                if (hanziData.data && hanziData.data.length > 0) {
+                    return hanziData.data[0].english || 'No definition found';
+                }
+            }
+        } catch (hanziError) {
+            console.log('HanziDB API failed, trying fallback');
         }
 
-        const data = await response.json();
-        if (data.data && data.data.length > 0) {
-            return data.data[0].senses[0]?.english_definitions?.join(', ') || 'No definition found';
+        // Fallback to CC-CEDICT local search
+        const ccCedictResponse = await fetch('https://cc-cedict.org/editor/editor.php?action=search&q=' + encodeURIComponent(word));
+        if (ccCedictResponse.ok) {
+            const ccCedictData = await ccCedictResponse.json();
+            if (ccCedictData.results && ccCedictData.results.length > 0) {
+                return ccCedictData.results[0].definition || 'No definition found';
+            }
         }
-        return null;
+
+        // Final fallback - basic local dictionary
+        const localDict = {
+            '你好': 'Hello',
+            '谢谢': 'Thank you',
+            '再见': 'Goodbye',
+            '中国': 'China',
+            '美国': 'America'
+            // Add more common words as needed
+        };
+        
+        return localDict[word] || 'No definition found';
     } catch (error) {
         console.error('Dictionary lookup error:', error);
-        return null;
+        return 'Dictionary unavailable';
     }
 }
 
@@ -3984,59 +4000,91 @@ function handleTextSelection() {
 
         try {
             document.getElementById('lookup-word').innerHTML = 'Searching...';
-            
-            // Try using a different CORS proxy or direct API call
-const apiUrl = `https://api.mojidict.com/parse/functions/union-api?text=${encodeURIComponent(word)}`;
-            
-            // First try direct fetch (might work if deployed)
-            let response;
-            try {
-                response = await fetch(apiUrl);
-                if (!response.ok) throw new Error('Direct API failed');
-            } catch (directError) {
-                // If direct fails, try with a CORS proxy
-                const proxyUrl = 'https://api.allorigins.win/raw?url='; // Alternative proxy
-                response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
-                if (!response.ok) throw new Error('API request failed');
-            }
-
-            const data = await response.json();
-
             const entriesContainer = document.getElementById('dictionary-entries');
             entriesContainer.innerHTML = '';
+            
+            // Show loading indicator
+            const loadingDiv = document.createElement('div');
+            loadingDiv.innerHTML = 'Searching dictionaries...';
+            entriesContainer.appendChild(loadingDiv);
+            document.getElementById('dictionary-results').style.display = 'block';
 
-            if (data.data && data.data.length > 0) {
-                data.data.slice(0, 5).forEach(entry => {
+            // Try multiple dictionary sources
+            const definitions = [];
+            
+            // Try HanziDB API
+            try {
+                const hanziResponse = await fetch(`https://hzdg.cn/api/v1/words?word=${encodeURIComponent(word)}`);
+                if (hanziResponse.ok) {
+                    const hanziData = await hanziResponse.json();
+                    if (hanziData.data && hanziData.data.length > 0) {
+                        definitions.push(...hanziData.data.map(item => item.english));
+                    }
+                }
+            } catch (hanziError) {
+                console.log('HanziDB API failed');
+            }
+
+            // Try CC-CEDICT
+            try {
+                const ccResponse = await fetch(`https://cc-cedict.org/editor/editor.php?action=search&q=${encodeURIComponent(word)}`);
+                if (ccResponse.ok) {
+                    const ccData = await ccResponse.json();
+                    if (ccData.results && ccData.results.length > 0) {
+                        definitions.push(...ccData.results.map(item => item.definition));
+                    }
+                }
+            } catch (ccError) {
+                console.log('CC-CEDICT API failed');
+            }
+
+            // Check local dictionary if no results
+            if (definitions.length === 0) {
+                const localDict = {
+                    '你好': 'Hello',
+                    '谢谢': 'Thank you',
+                    '再见': 'Goodbye',
+                    '中国': 'China',
+                    '美国': 'America'
+                };
+                if (localDict[word]) {
+                    definitions.push(localDict[word]);
+                }
+            }
+
+            // Display results
+            entriesContainer.innerHTML = '';
+            
+            if (definitions.length > 0) {
+                // Remove duplicates and limit to 5 results
+                const uniqueDefinitions = [...new Set(definitions)].slice(0, 5);
+                
+                uniqueDefinitions.forEach(definition => {
                     const entryDiv = document.createElement('div');
                     entryDiv.className = 'dictionary-entry';
-                    
-                    // Get the best display form of the word
-const ChineseDisplay = word;
-let englishDefinition = 'No definition found';
-if (entry[0]?.meanings) {
-    englishDefinition = entry[0].meanings[0]?.definitions[0]?.definition || englishDefinition;
-}
-                    
                     entryDiv.innerHTML = `
-                        <strong>${ChineseDisplay}</strong><br>
-                        ${englishDefinition}
+                        <strong>${word}</strong><br>
+                        ${definition}
                     `;
                     
                     entryDiv.addEventListener('click', () => {
-                        document.getElementById('vocab-translation').value = 
-                            entry.senses[0]?.english_definitions[0] || englishDefinition.split(',')[0];
+                        document.getElementById('vocab-translation').value = definition.split(/[;,]/)[0];
                         document.getElementById('dictionary-results').style.display = 'none';
                     });
                     
                     entriesContainer.appendChild(entryDiv);
                 });
-                document.getElementById('dictionary-results').style.display = 'block';
+                
+                showToast('Dictionary results found', 'success');
             } else {
+                entriesContainer.innerHTML = '<div class="dictionary-entry">No definition found</div>';
                 showToast('No dictionary results found', 'error');
             }
         } catch (error) {
             console.error('Dictionary error:', error);
-            showToast('Dictionary lookup failed. Try again later.', 'error');
+            document.getElementById('dictionary-entries').innerHTML = 
+                '<div class="dictionary-entry">Dictionary unavailable</div>';
+            showToast('Dictionary lookup failed', 'error');
         } finally {
             document.getElementById('lookup-word').innerHTML = 'Lookup in Dictionary';
         }
