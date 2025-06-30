@@ -2685,8 +2685,21 @@ function splitSentences(text) {
 
 function detectLanguage(text) {
     const latinChars = /[āēīōūȳĀĒĪŌŪȲ]/;
-    const commonLatinWords = /\b(et|in|non|est|sum|es|sed|ad|per|pro)\b/i;
-    return latinChars.test(text) || commonLatinWords.test(text) ? 'la' : 'en';
+    const commonLatinWords = /\b(et|in|non|est|sum|es|sed|ad|per|pro|qui|quae|quod)\b/i;
+    
+    // More comprehensive Latin word detection
+    const latinPatterns = [
+        /\b(et|in|non|est|sum|es|sed|ad|per|pro|qui|quae|quod|hoc|ille|illa|illud|is|ea|id)\b/i,
+        /\b(cum|de|ab|ex|e|ad|in|sub|super|ante|post|inter)\b/i,
+        /\b(am[ao]s?|amatis?|amus|ant|bat|bant|bo|bor|bunt|eram|erant|erimus|eris|erit|erunt)\b/i,
+        /\b(vi|vī|vis|vit|vimus|vistis|verunt|veruntur)\b/i
+    ];
+    
+    const isLatin = latinChars.test(text) || 
+                   latinPatterns.some(pattern => pattern.test(text)) ||
+                   text.match(/\b([a-z]+us|[a-z]+a|[a-z]+um)\b/i); // Common Latin endings
+                   
+    return isLatin ? 'la' : 'en';
 }
 
 
@@ -2787,7 +2800,7 @@ async function translateSentence(sentence) {
 
         // Check cache first
         const targetLang = elements.translationLang.value;
-        const cachedTranslation = await getCachedTranslation(sentence, 'es', targetLang);
+        const cachedTranslation = await getCachedTranslation(sentence, 'la', targetLang);
         if (cachedTranslation) {
             return cachedTranslation;
         }
@@ -2797,7 +2810,7 @@ async function translateSentence(sentence) {
         }
 
         const response = await fetch(
-`https://api.mymemory.translated.net/get?q=${encodeURIComponent(sentence)}&langpair=es|${targetLang}`
+            `https://api.mymemory.translated.net/get?q=${encodeURIComponent(sentence)}&langpair=la|${targetLang}`
         );
 
         if (!response.ok) throw new Error('Translation failed');
@@ -2806,7 +2819,7 @@ async function translateSentence(sentence) {
         if (data.responseData && data.responseData.translatedText) {
             const translatedText = data.responseData.translatedText;
             // Cache the translation
-            await cacheTranslation(sentence, 'es', targetLang, translatedText);
+            await cacheTranslation(sentence, 'la', targetLang, translatedText);
             return translatedText;
         } else {
             throw new Error('No translation found');
@@ -2823,16 +2836,20 @@ function speakText(text) {
         window.speechSynthesis.cancel();
         
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'la';
-           
+        utterance.lang = 'la-Latn'; // More specific Latin language code
+        
         state.currentTtsUtterance = utterance;
         
         if (speechSynthesis.getVoices().length === 0) {
             speechSynthesis.onvoiceschanged = () => {
                 const voices = speechSynthesis.getVoices();
-const latinVoice = voices.find(voice => 
-    voice.lang === 'it' || voice.lang.startsWith('it') // Using Italian as closest available
-);
+                // Try to find a Latin voice, fallback to Italian or Spanish
+                const latinVoice = voices.find(voice => 
+                    voice.lang === 'la' || 
+                    voice.lang === 'la-Latn' ||
+                    voice.lang.startsWith('it') || 
+                    voice.lang.startsWith('es')
+                );
                 
                 if (latinVoice) {
                     utterance.voice = latinVoice;
@@ -2844,7 +2861,13 @@ const latinVoice = voices.find(voice =>
             speechSynthesis.getVoices();
         } else {
             const voices = speechSynthesis.getVoices();
-const latinVoice = voices.find(voice => voice.lang === 'la' || voice.lang.startsWith('es'));
+            // Try to find a Latin voice, fallback to Italian or Spanish
+            const latinVoice = voices.find(voice => 
+                voice.lang === 'la' || 
+                voice.lang === 'la-Latn' ||
+                voice.lang.startsWith('it') || 
+                voice.lang.startsWith('es')
+            );
             
             if (latinVoice) {
                 utterance.voice = latinVoice;
