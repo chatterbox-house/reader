@@ -3033,8 +3033,17 @@ function displayTooltip(text, x, y) {
 
 async function lookupWordInDictionary(word) {
     try {
-        // First try: Free Dictionary API (English)
-        let response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+        // First try: MyMemory Translation API (Italian to English)
+        let response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=it|en`);
+        if (response.ok) {
+            const data = await response.json();
+            if (data.responseData?.translatedText) {
+                return data.responseData.translatedText;
+            }
+        }
+
+        // Fallback: Free Dictionary API (English)
+        response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
         if (response.ok) {
             const data = await response.json();
             if (data[0]?.meanings) {
@@ -3042,20 +3051,12 @@ async function lookupWordInDictionary(word) {
             }
         }
 
-        // Fallback: MyMemory Translation API (Spanish to English)
-        response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=es|en`);
-        if (response.ok) {
-            const data = await response.json();
-            return data.responseData?.translatedText || 'No translation found';
-        }
-
-        return 'No definition available';
+        return 'No translation available';
     } catch (error) {
         console.error('Dictionary lookup error:', error);
         return 'Lookup failed';
     }
 }
-
 function translateCurrentSentence() {
     if (state.sentences.length === 0 || !elements.translationDisplay) return;
     
@@ -3989,9 +3990,29 @@ document.getElementById('lookup-word').addEventListener('click', async () => {
         const entriesContainer = document.getElementById('dictionary-entries');
         entriesContainer.innerHTML = '';
         
-        // First try the dictionary API
-        const dictResponse = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+        // First try the translation API (Italian to English)
+        const transResponse = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=it|en`);
         
+        if (transResponse.ok) {
+            const transData = await transResponse.json();
+            const translation = transData.responseData?.translatedText || 'No translation found';
+            
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'dictionary-entry';
+            entryDiv.innerHTML = `<strong>Translation:</strong><br>${translation}`;
+            
+            entryDiv.addEventListener('click', () => {
+                document.getElementById('vocab-translation').value = translation;
+                document.getElementById('dictionary-results').style.display = 'none';
+            });
+            
+            entriesContainer.appendChild(entryDiv);
+            document.getElementById('dictionary-results').style.display = 'block';
+            return;
+        }
+        
+        // Fallback to English dictionary API
+        const dictResponse = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
         if (dictResponse.ok) {
             const dictData = await dictResponse.json();
             
@@ -4016,29 +4037,9 @@ document.getElementById('lookup-word').addEventListener('click', async () => {
                     entriesContainer.appendChild(entryDiv);
                 });
                 document.getElementById('dictionary-results').style.display = 'block';
-                return;
+            } else {
+                showToast('No dictionary results found', 'error');
             }
-        }
-        
-        // Fallback to translation API
-        const transResponse = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=es|en`);
-        if (transResponse.ok) {
-            const transData = await transResponse.json();
-            const translation = transData.responseData?.translatedText || 'No translation found';
-            
-            const entryDiv = document.createElement('div');
-            entryDiv.className = 'dictionary-entry';
-            entryDiv.innerHTML = `<strong>Translation:</strong><br>${translation}`;
-            
-            entryDiv.addEventListener('click', () => {
-                document.getElementById('vocab-translation').value = translation;
-                document.getElementById('dictionary-results').style.display = 'none';
-            });
-            
-            entriesContainer.appendChild(entryDiv);
-            document.getElementById('dictionary-results').style.display = 'block';
-        } else {
-            showToast('No dictionary results found', 'error');
         }
     } catch (error) {
         console.error('Dictionary error:', error);
