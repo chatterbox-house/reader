@@ -3027,54 +3027,78 @@ function displayTooltip(text, x, y) {
     }, 2000);
 }
 
-async function lookupWordInDictionary(word) {
-    // First try: Free Dictionary API (English definitions)
+async function lookupWordInDictionary(englishWord) {
+    // 1. First try: Jisho.org API (English to Japanese)
     try {
-        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
-        if (!response.ok) throw new Error('Dictionary API failed');
-        
-        const data = await response.json();
-        if (data && data.length > 0) {
-            // Get the first definition from the first meaning
-            const definition = data[0]?.meanings[0]?.definitions[0]?.definition;
-            if (definition) return definition;
-        }
-    } catch (error) {
-        console.log('Dictionary API failed, trying fallback');
-    }
-
-    // Fallback: Jisho.org API (English-Japanese)
-    try {
-        const response = await fetch(`https://jisho.org/api/v1/search/words?keyword=${encodeURIComponent(word)}`);
+        const response = await fetch(`https://jisho.org/api/v1/search/words?keyword=${encodeURIComponent(englishWord)}`);
         if (!response.ok) throw new Error('Jisho API failed');
         
         const data = await response.json();
         if (data.data && data.data.length > 0) {
-            // Get the first Japanese definition
-            const japanese = data.data[0]?.japanese[0]?.word || data.data[0]?.japanese[0]?.reading;
-            const english = data.data[0]?.senses[0]?.english_definitions?.join(', ');
-            if (japanese && english) return `${japanese}: ${english}`;
-            if (english) return english;
-            if (japanese) return japanese;
+            const entry = data.data[0];
+            // Get all Japanese translations
+            const japaneseTranslations = entry.japanese?.map(j => 
+                `${j.word || ''}${j.word && j.reading ? ' (' + j.reading + ')' : j.reading || ''}`
+            ).filter(Boolean).join('、 ') || '';
+
+            // Get example sentences if available
+            const exampleSentence = entry.senses?.[0]?.example_english?.[0] || '';
+            const exampleTranslation = entry.senses?.[0]?.example_japanese?.[0] || '';
+
+            let result = `🇬🇧 ${englishWord}\n🇯🇵 ${japaneseTranslations || '翻訳が見つかりません'}`;
+            
+            if (exampleSentence && exampleTranslation) {
+                result += `\n\n例文 (Example):\n"${exampleSentence}"\n→ "${exampleTranslation}"`;
+            }
+            
+            return result;
         }
     } catch (error) {
-        console.log('Jisho API failed');
+        console.log('Jisho API failed:', error);
     }
 
-    // Final fallback: Use Google Translate (simple)
+    // 2. Fallback: Google Translate API (English to Japanese)
     try {
-        const response = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ja&dt=t&q=${encodeURIComponent(word)}`);
+        const response = await fetch(
+            `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ja&dt=t&q=${encodeURIComponent(englishWord)}`
+        );
         if (!response.ok) throw new Error('Translate API failed');
         
         const data = await response.json();
         if (data && data[0] && data[0][0] && data[0][0][0]) {
-            return data[0][0][0]; // Return the translation
+            return `🇬🇧 ${englishWord}\n🇯🇵 ${data[0][0][0]}`;
         }
     } catch (error) {
-        console.log('Translation API failed');
+        console.log('Google Translate API failed:', error);
     }
 
-    return 'No definition found';
+    // 3. Fallback: Local dictionary (common English words with Japanese explanations)
+    const commonWords = {
+        "hello": "こんにちは (挨拶)",
+        "goodbye": "さようなら (別れの挨拶)",
+        "thank you": "ありがとう (感謝の言葉)",
+        "please": "お願いします (丁寧な依頼)",
+        "sorry": "すみません (謝罪)",
+        "yes": "はい (肯定)",
+        "no": "いいえ (否定)",
+        "water": "水 (みず) - 透明な液体",
+        "food": "食べ物 (たべもの) - 栄養のための物質",
+        "book": "本 (ほん) - 読むための印刷物",
+        "computer": "コンピューター - 電子計算機",
+        "phone": "電話 (でんわ) - 通信装置",
+        "house": "家 (いえ) - 住居",
+        "car": "車 (くるま) - 自動車",
+        "money": "お金 (おかね) - 通貨",
+        "time": "時間 (じかん) - 時の経過",
+        // Add more words as needed
+    };
+
+    if (commonWords[englishWord.toLowerCase()]) {
+        return `🇬🇧 ${englishWord}\n🇯🇵 ${commonWords[englishWord.toLowerCase()]}`;
+    }
+
+    // 4. Ultimate fallback
+    return `🇬🇧 ${englishWord}\n🇯🇵 翻訳が見つかりませんでした\n(Translation not found)`;
 }
 
 function translateCurrentSentence() {
