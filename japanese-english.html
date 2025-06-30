@@ -2818,7 +2818,7 @@ async function translateSentence(sentence) {
 
 // TTS functionality
 <!-- NEW CODE -->
-function 音声入力Text(text) {
+function speakEnglishText(text) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         
@@ -2838,19 +2838,21 @@ function 音声入力Text(text) {
                     utterance.voice = englishVoice;
                 }
                 
-                speechSynthesis.音声入力(utterance);
+                speechSynthesis.speak(utterance);
             };
             // Force voices to load
             speechSynthesis.getVoices();
         } else {
             const voices = speechSynthesis.getVoices();
-const englishVoice = voices.find(voice => voice.lang === 'en-US' || voice.lang.startsWith('es'));
+            const englishVoice = voices.find(voice => 
+                voice.lang === 'en-US' || voice.lang.startsWith('en')
+            );
             
             if (englishVoice) {
                 utterance.voice = englishVoice;
             }
             
-            speechSynthesis.音声入力(utterance);
+            speechSynthesis.speak(utterance);
         }
     }
 }
@@ -3320,7 +3322,7 @@ function createWordCard(word) {
             (word.type === 'english' && (state.reviewMode === 'new' || state.reviewMode === '簡単'))) {
                 const matchingWord = state.reviewWords.find(w => w.id === word.id);
                 if (matchingWord) {
-                    音声入力Text(matchingWord.word);
+                    speakEnglishText(matchingWord.word);
                 }
             }
         
@@ -3624,8 +3626,8 @@ document.getElementById('voice-input-btn').addEventListener('click', function() 
     startVoiceInput('ja-JP', 'text-input', this); // For Japanese input
 });
 
-document.getElementById('voice-input-btn-translate').addEventListener('click', function() {
-    startVoiceInput('en-US', 'translate-input', this); // For English input
+document.getElementById('voice-input-btn').addEventListener('click', function() {
+    startVoiceInput('en-US', 'text-input', this); // For English input
 });
 
 // Translate section: クリア button
@@ -3998,7 +4000,7 @@ document.getElementById('translate-to-english').addEventListener('click', async 
     elements.ttsButton.addEventListener('click', () => {
         if (state.sentences.length > 0) {
             const sentence = state.sentences[state.currentSentenceIndex].original;
-            音声入力Text(sentence);
+            speakEnglishText(sentence);
         }
     });
 
