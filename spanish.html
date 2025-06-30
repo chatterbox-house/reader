@@ -1514,7 +1514,7 @@ header.hidden {
 
                     <p>Paste spanish text below to start learning (max 5,000 characters)</p>
 
-<textarea class="text-input" id="text-input" placeholder="Ejemplo: El gato está durmiendo. El perro está corriendo..." aria-label="spanish text input"></textarea>
+<textarea class="text-input" id="text-input" placeholder="Ejemplo: El gato está durmiendo. El perro está corriendo..." aria-label="Spanish text input"></textarea>
 <div class="char-count"><span id="char-count">0</span>/5000 characters</div>
 <div class="input-actions" style="gap: 0.5rem; margin-bottom: 1rem;">
     <button id="paste-btn" class="btn" style="background-color: var(--accent); flex: 1;" aria-label="Paste">
@@ -1574,7 +1574,7 @@ header.hidden {
 </div>
                 
                 <div class="resources-container">
-                    <h3 class="resources-title">📚 spanish Learning Resources</h3>
+                    <h3 class="resources-title">📚 Spanish Learning Resources</h3>
                     <div class="resources-list">
                         <a href="https://www.bbc.com/mundo" class="resource-link" target="_blank" rel="noopener" aria-label="BBC Mundo">
     <span>BBC Mundo</span>
@@ -2707,7 +2707,7 @@ async function translateTospanish(text, sourceLang) {
         }
 
         const response = await fetch(
-            `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|ja`
+`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|es`
         );
 
         if (!response.ok) throw new Error('Translation failed');
@@ -2801,7 +2801,7 @@ async function translateSentence(sentence) {
         }
 
         const response = await fetch(
-            `https://api.mymemory.translated.net/get?q=${encodeURIComponent(sentence)}&langpair=es|${targetLang}`
+`https://api.mymemory.translated.net/get?q=${encodeURIComponent(sentence)}&langpair=es|${targetLang}`
         );
 
         if (!response.ok) throw new Error('Translation failed');
@@ -3033,7 +3033,7 @@ function displayTooltip(text, x, y) {
 
 async function lookupWordInDictionary(word) {
     try {
-        const apiUrl = `https://api.dictionaryapi.dev/api/v2/entries/es/${encodeURIComponent(word)}`;
+const apiUrl = `https://api.dictionaryapi.dev/api/v2/entries/es/${encodeURIComponent(word)}`;
         
         let response;
         try {
