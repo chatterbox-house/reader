@@ -1810,8 +1810,8 @@ const state = {
         correct: 0,
         incorrect: 0
     },
-    theme: localStorage.getItem('theme') || 'dark',
-    soundsEnabled: localStorage.getItem('soundsEnabled') !== 'false',
+    theme: localStorage.getItem('theme_es') || 'dark',
+    soundsEnabled: localStorage.getItem('soundsEnabled_es') !== 'false',
     audioContext: null,
     sounds: {},
     currentHardWord: null,
@@ -1819,17 +1819,17 @@ const state = {
     textHistory: [],
     isOnline: navigator.onLine,
     debounceTimer: null,
-    uiLanguage: localStorage.getItem('uiLanguage') || 'en',
-    newWordsToday: parseInt(localStorage.getItem('newWordsToday')) || 0,
-    lastWordAddedDate: localStorage.getItem('lastWordAddedDate') || '',
+    uiLanguage: localStorage.getItem('uiLanguage_es') || 'en',
+    newWordsToday: parseInt(localStorage.getItem('newWordsToday_es')) || 0,
+    lastWordAddedDate: localStorage.getItem('lastWordAddedDate_es') || '',
 
 
-    currentFont: localStorage.getItem('font') || 'system',
-    currentFontSize: parseInt(localStorage.getItem('fontSize')) || 16,
-    currentLineHeight: parseFloat(localStorage.getItem('lineHeight')) || 1.6,
-    autoTranslate: localStorage.getItem('autoTranslate') === 'true',
+    currentFont: localStorage.getItem('font_es') || 'system',
+    currentFontSize: parseInt(localStorage.getItem('fontSize_es')) || 16,
+    currentLineHeight: parseFloat(localStorage.getItem('lineHeight_es')) || 1.6,
+    autoTranslate: localStorage.getItem('autoTranslate_es') === 'true',
 
-readingStats: JSON.parse(localStorage.getItem('readingStats')) || {
+readingStats: JSON.parse(localStorage.getItem('readingStats_es')) || {
     streak: 0,
     lastActiveDate: '',
     wordsLearned: 0,
@@ -1842,7 +1842,7 @@ currentSessionStart: null,
 selectedCards: [],
 currentTtsUtterance: null,
 wordLookupCache: {},
-bookmarks: JSON.parse(localStorage.getItem('bookmarks')) || []
+bookmarks: JSON.parse(localStorage.getItem('bookmarks_es')) || []
 };
 
 // Initialize audio context and sounds
@@ -1938,7 +1938,7 @@ function playSound(name) {
 // Toggle sound on/off
 function toggleSounds() {
     state.soundsEnabled = !state.soundsEnabled;
-    localStorage.setItem('soundsEnabled', state.soundsEnabled);
+    localStorage.setItem('soundsEnabled_es', state.soundsEnabled);
     document.getElementById('sound-toggle').textContent = state.soundsEnabled ? '🔊' : '🔇';
     showToast(`Sounds ${state.soundsEnabled ? 'enabled' : 'disabled'}`);
 }
@@ -1965,7 +1965,7 @@ function toggleBookmark() {
         showToast('Removed from bookmarks', 'error');
     }
     
-    localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
+    localStorage.setItem('bookmarks_es', JSON.stringify(state.bookmarks));
     renderBookmarks();
 }
 function renderBookmarks() {
@@ -1975,8 +1975,8 @@ function renderBookmarks() {
     container.innerHTML = '';
     
     // Load both bookmarks and history if not loaded
-    const savedBookmarks = localStorage.getItem('bookmarks');
-    const savedHistory = localStorage.getItem('textHistory');
+    const savedBookmarks = localStorage.getItem('bookmarks_es');
+    const savedHistory = localStorage.getItem('textHistory_es');
     
     if (savedBookmarks) {
         state.bookmarks = JSON.parse(savedBookmarks);
@@ -2095,7 +2095,7 @@ if (!displayText && bookmark.sentence) {
         btn.addEventListener('click', (e) => {
             const id = e.target.getAttribute('data-bookmark-id');
             state.bookmarks = state.bookmarks.filter(b => b.id !== id);
-            localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
+            localStorage.setItem('bookmarks_es', JSON.stringify(state.bookmarks));
             renderBookmarks();
             showToast('Bookmark removed', 'success');
             e.stopPropagation();
@@ -2116,7 +2116,7 @@ if (!displayText && bookmark.sentence) {
 
 function clearBookmarks() {
     state.bookmarks = [];
-    localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
+    localStorage.setItem('bookmarks_es', JSON.stringify(state.bookmarks));
     renderBookmarks();
     showToast('All bookmarks cleared', 'success');
 }
@@ -2252,7 +2252,7 @@ if (state.readingStats.streak > 3 && state.readingStats.lastActiveDate !== new D
     
     elements.autoTranslateToggle.addEventListener('change', (e) => {
         state.autoTranslate = e.target.checked;
-        localStorage.setItem('autoTranslate', state.autoTranslate);
+        localStorage.setItem('autoTranslate_es', state.autoTranslate);
         if (state.autoTranslate && state.currentView === 'reading-view' && state.sentences.length > 0) {
             translateCurrentSentence();
         }
@@ -2260,13 +2260,13 @@ if (state.readingStats.streak > 3 && state.readingStats.lastActiveDate !== new D
     
     elements.fontSelect.addEventListener('change', (e) => {
         state.currentFont = e.target.value;
-        localStorage.setItem('font', state.currentFont);
+        localStorage.setItem('font_es', state.currentFont);
         document.documentElement.setAttribute('data-font', state.currentFont);
     });
     
 elements.fontSizeRange.addEventListener('input', (e) => {
     state.currentFontSize = e.target.value;
-    localStorage.setItem('fontSize', state.currentFontSize);
+    localStorage.setItem('fontSize_es', state.currentFontSize);
     document.documentElement.style.setProperty('--font-size', `${state.currentFontSize}px`);
     
     // Force redraw of cards if in matching game
@@ -2277,13 +2277,13 @@ elements.fontSizeRange.addEventListener('input', (e) => {
     
     elements.lineHeightRange.addEventListener('input', (e) => {
         state.currentLineHeight = e.target.value;
-        localStorage.setItem('lineHeight', state.currentLineHeight);
+        localStorage.setItem('lineHeight_es', state.currentLineHeight);
         document.documentElement.style.setProperty('--line-height', state.currentLineHeight);
     });
     
     elements.themeSelect.addEventListener('change', (e) => {
         state.theme = e.target.value;
-        localStorage.setItem('theme', state.theme);
+        localStorage.setItem('theme_es', state.theme);
         document.documentElement.setAttribute('data-theme', state.theme);
         elements.themeToggle.textContent = state.theme === 'dark' ? '🌙' : '☀️';
     });
@@ -2320,7 +2320,7 @@ function updateStatsDisplay() {
         state.readingStats.lastActiveDate = today;
         state.readingStats.dailyWords = 0;
         state.readingStats.dailyTime = 0;
-        localStorage.setItem('readingStats', JSON.stringify(state.readingStats));
+        localStorage.setItem('readingStats_es', JSON.stringify(state.readingStats));
     }
     
     elements.streakCount.textContent = state.readingStats.streak;
@@ -2362,7 +2362,7 @@ function endReadingSession() {
         state.readingStats.timeSpent += timeSpent;
         state.readingStats.dailyTime += timeSpent;
         state.currentSessionStart = null;
-        localStorage.setItem('readingStats', JSON.stringify(state.readingStats));
+        localStorage.setItem('readingStats_es', JSON.stringify(state.readingStats));
         updateStatsDisplay();
     }
 }
@@ -2453,7 +2453,7 @@ function hideWipeConfirmation() {
 
 function showHistoryView() {
     // Load history from localStorage
-    const savedHistory = localStorage.getItem('textHistory');
+    const savedHistory = localStorage.getItem('textHistory_es');
     if (savedHistory) {
         state.textHistory = JSON.parse(savedHistory);
     }
@@ -2521,14 +2521,14 @@ function loadHistoryItem(index) {
 
 function deleteHistoryItem(index) {
     state.textHistory.splice(index, 1);
-    localStorage.setItem('textHistory', JSON.stringify(state.textHistory));
+    localStorage.setItem('textHistory_es', JSON.stringify(state.textHistory));
     showHistoryView();
     showToast('History item deleted');
 }
 
 function clearHistory() {
     state.textHistory = [];
-    localStorage.removeItem('textHistory');
+    localStorage.removeItem('textHistory_es');
     showHistoryView();
     showToast('History cleared');
 }
@@ -2594,13 +2594,13 @@ function addVocabWord(word) {
                     state.lastWordAddedDate = today;
                 }
                 state.newWordsToday++;
-                localStorage.setItem('newWordsToday', state.newWordsToday.toString());
-                localStorage.setItem('lastWordAddedDate', state.lastWordAddedDate);
+                localStorage.setItem('newWordsToday_es', state.newWordsToday.toString());
+                localStorage.setItem('lastWordAddedDate_es', state.lastWordAddedDate);
                 
                 // Update reading stats
                 state.readingStats.wordsLearned++;
                 state.readingStats.dailyWords++;
-                localStorage.setItem('readingStats', JSON.stringify(state.readingStats));
+                localStorage.setItem('readingStats_es', JSON.stringify(state.readingStats));
                 updateStatsDisplay();
                 
                 const addRequest = store.add(word);
@@ -3560,7 +3560,7 @@ function generateUUID() {
 
 function toggleTheme() {
     state.theme = state.theme === 'dark' ? 'light' : 'dark';
-    localStorage.setItem('theme', state.theme);
+    localStorage.setItem('theme_es', state.theme);
     document.documentElement.setAttribute('data-theme', state.theme);
     elements.themeToggle.textContent = state.theme === 'dark' ? '🌙' : '☀️';
 }
@@ -3609,7 +3609,7 @@ document.getElementById('bookmarks-list').addEventListener('click', (e) => {
     if (e.target.hasAttribute('data-bookmark-id')) {
         const id = e.target.getAttribute('data-bookmark-id');
         state.bookmarks = state.bookmarks.filter(b => b.id !== id);
-        localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
+        localStorage.setItem('bookmarks_es', JSON.stringify(state.bookmarks));
         renderBookmarks();
 const undoId = generateUUID();
 showToast(`Bookmark removed <button onclick="undoDelete('${undoId}')" style="margin-left: 10px; background: none; border: none; color: var(--highlight); text-decoration: underline; cursor: pointer;">Undo</button>`, 'success');
@@ -3731,7 +3731,7 @@ function loadHistoryItem(index) {
             state.sentences = [];
             state.vocabWords = [];
             state.newWordsToday = 0;
-            localStorage.setItem('newWordsToday', '0');
+            localStorage.setItem('newWordsToday_es', '0');
             await updateBucketCounts();
             showToast('All data has been deleted', 'success');
             document.querySelector('.nav-btn[data-view="text-import"]').classList.add('active');
@@ -3767,8 +3767,8 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
         // Special handling for bookmarks view
         if (btn.dataset.view === 'bookmarks') {
             // Load both bookmarks and history
-            const savedBookmarks = localStorage.getItem('bookmarks');
-            const savedHistory = localStorage.getItem('textHistory');
+            const savedBookmarks = localStorage.getItem('bookmarks_es');
+            const savedHistory = localStorage.getItem('textHistory_es');
             
             if (savedBookmarks) {
                 state.bookmarks = JSON.parse(savedBookmarks);
@@ -3851,14 +3851,14 @@ state.bookmarks.unshift({
     date: new Date().toISOString(),
     title: textTitle // Also store the title for display
 });
-localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
+localStorage.setItem('bookmarks_es', JSON.stringify(state.bookmarks));
         
         // Keep only the last 10 items
         if (state.textHistory.length > 10) {
             state.textHistory = state.textHistory.slice(0, 10);
         }
         
-        localStorage.setItem('textHistory', JSON.stringify(state.textHistory));
+        localStorage.setItem('textHistory_es', JSON.stringify(state.textHistory));
                     
         if (text.length > 5000) {
             showToast('Text exceeds 5000 characters', 'error');
@@ -4318,7 +4318,7 @@ function handleTouchEnd(e) {
 function undoDelete(id) {
   if (state.lastDeleted && state.lastDeleted.id === id) {
     state.bookmarks.push(state.lastDeleted.item);
-    localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
+    localStorage.setItem('bookmarks_es', JSON.stringify(state.bookmarks));
     renderBookmarks();
     showToast('Bookmark restored!', 'success');
   }
