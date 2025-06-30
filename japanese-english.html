@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="英語学習アプリ - 日本語話者向け">
     <meta name="theme-color" content="#1a1a2e">
-    <title>Sentence Mode - English Learning Tool</title>
-
+<title>センテンスモード - 英語学習ツール</title>
 <style>
 html {
     overflow-x: hidden;
@@ -1511,11 +1510,9 @@ header.hidden {
                 </div>
                 
 <div class="text-import-container">
-<h2>英語テキストを入力 <span role="img" aria-label="english">🇪🇸</span></h2>
-
-                    <p>貼り付け english text below to start learning (max 5,000 characters)</p>
-
-<textarea class="text-input" id="text-input" placeholder="例: The cat is sleeping. The dog is running..." aria-label="english text input"></textarea>
+<h2>英語テキストを入力 <span role="img" aria-label="english">🇬🇧</span></h2>
+<p>学習を始めるには英語テキストを貼り付けてください (最大5,000文字)</p>
+<textarea class="text-input" id="text-input" placeholder="例: 猫が寝ています。犬が走っています..." aria-label="英語テキスト入力"></textarea>
 <div class="char-count"><span id="char-count">0</span>/5000 characters</div>
 <div class="input-actions" style="gap: 0.5rem; margin-bottom: 1rem;">
     <button id="貼り付け-btn" class="btn" style="background-color: var(--accent); flex: 1;" aria-label="貼り付け">
@@ -1525,12 +1522,12 @@ header.hidden {
         <span>🎤 音声入力</span>
     </button>
 </div><div class="button-group" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;">
-    <button class="btn" id="process-text" aria-label="テキスト処理" style="flex: 1;">
-        <span>テキスト処理</span>
-    </button>
-    <button class="btn" id="clear-text" style="background-color: var(--danger); flex: 1;" aria-label="クリア">
-        クリア
-    </button>
+<button class="btn" id="process-text" aria-label="テキスト処理" style="flex: 1;">
+    <span>テキストを処理</span>
+</button>
+<button class="btn" id="clear-text" style="background-color: var(--danger); flex: 1;" aria-label="クリア">
+    クリア
+</button>
     <button class="btn" id="show-history-btn" style="background-color: var(--accent); width: 100%; margin-top: 0.5rem;" aria-label="履歴を表示">
         履歴を表示
     </button>
@@ -1575,7 +1572,7 @@ header.hidden {
 </div>
                 
                 <div class="resources-container">
-                    <h3 class="resources-title">📚 english Learning Resources</h3>
+                    <h3 class="resources-title">📚 英語学習リソース</h3>
                    <div class="resources-list">
     <a href="https://www.nhk.or.jp/lesson/english/" class="resource-link" target="_blank" rel="noopener" aria-label="NHK英語講座">
         <span>NHK英語講座</span>
@@ -1708,9 +1705,9 @@ header.hidden {
                     </div>
                     
                     <div id="難しい-mode-container" class="難しい-mode-buttons" style="display: none;">
-                        <button class="難しい-mode-btn knew-it" id="knew-it-btn" aria-label="I know this">I know this</button>
-                        <button class="難しい-mode-btn didnt-know" id="didnt-know-btn" aria-label="Don't know">Don't know</button>
-                        <button class="難しい-mode-btn skip-btn" id="skip-btn" aria-label="Skip word">Skip</button>
+                        <button class="難しい-mode-btn knew-it" id="knew-it-btn" aria-label="知っている">知っている</button>
+<button class="難しい-mode-btn didnt-know" id="didnt-know-btn" aria-label="知らない">知らない</button>
+<button class="難しい-mode-btn skip-btn" id="skip-btn" aria-label="スキップ">スキップ</button>
                     </div>
                 </div>
                 
@@ -1959,12 +1956,12 @@ function toggleBookmark() {
             date: new Date().toISOString()
         });
         document.getElementById('favorite-sentence-btn').classList.add('active');
-        showToast('Added to bookmarks!', 'success');
+showToast('ブックマークに追加しました！', 'success');
     } else {
         // Remove from bookmarks
         state.bookmarks.splice(index, 1);
         document.getElementById('favorite-sentence-btn').classList.remove('active');
-        showToast('Removed from bookmarks', 'error');
+showToast('ブックマークから削除しました', 'error');
     }
     
     localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
@@ -3165,63 +3162,62 @@ function setupMatchingGame() {
         return;
     }
 
-    if (state.reviewMode === 'new' || state.reviewMode === '簡単') {
-<!-- NEW CODE -->
-// english cards on left (words)
-const englishWordCards = shuffleArray([...wordsToShow]).map(word => ({
-    id: word.id,
-    type: 'english',
-    text: word.word,
-    streak: word.streak || 0
-}));
+if (state.reviewMode === 'new' || state.reviewMode === '簡単') {
+    // english cards on left (words)
+    const englishWordCards = shuffleArray([...wordsToShow]).map(word => ({
+        id: word.id,
+        type: 'english',
+        text: word.word,
+        streak: word.streak || 0
+    }));
 
-// English cards on right (translations)
-const englishTranslationCards = shuffleArray([...wordsToShow]).map(word => ({
-    id: word.id,
-    type: 'english',
-    text: word.translation,
-    streak: word.streak || 0
-}));
-        // Add cards to columns
-englishWordCards.forEach(word => {
-    const card = createWordCard(word);
-    elements.leftColumn.appendChild(card);
-});
-
-englishTranslationCards.forEach(word => {
-    const card = createWordCard(word);
-    elements.rightColumn.appendChild(card);
-});
-        
-    } else { // 中級 mode
-        // english cards on left (words)
-        const englishCards = shuffleArray([...wordsToShow]).map(word => ({
-            id: word.id,
-            type: 'english',
-            text: word.word,
-            streak: word.streak || 0
-        }));
-        
-        // English cards on right (translations)
-        const englishCards = shuffleArray([...wordsToShow]).map(word => ({
-            id: word.id,
-            type: 'english',
-            text: word.translation,
-            streak: word.streak || 0
-        }));
-        
-        // Add cards to columns
-        englishCards.forEach(word => {
-            const card = createWordCard(word);
-            elements.leftColumn.appendChild(card);
-        });
-        
-        englishCards.forEach(word => {
-            const card = createWordCard(word);
-            elements.rightColumn.appendChild(card);
-        });
-    }
+    // English cards on right (translations)
+    const englishTranslationCards = shuffleArray([...wordsToShow]).map(word => ({
+        id: word.id,
+        type: 'english',
+        text: word.translation,
+        streak: word.streak || 0
+    }));
     
+    // Add cards to columns
+    englishWordCards.forEach(word => {
+        const card = createWordCard(word);
+        elements.leftColumn.appendChild(card);
+    });
+
+    englishTranslationCards.forEach(word => {
+        const card = createWordCard(word);
+        elements.rightColumn.appendChild(card);
+    });
+    
+} else { // 中級 mode
+    // english cards on left (words)
+    const englishWordCards = shuffleArray([...wordsToShow]).map(word => ({
+        id: word.id,
+        type: 'english',
+        text: word.word,
+        streak: word.streak || 0
+    }));
+    
+    // English cards on right (translations)
+    const englishTranslationCards = shuffleArray([...wordsToShow]).map(word => ({
+        id: word.id,
+        type: 'english',
+        text: word.translation,
+        streak: word.streak || 0
+    }));
+    
+    // Add cards to columns
+    englishWordCards.forEach(word => {
+        const card = createWordCard(word);
+        elements.leftColumn.appendChild(card);
+    });
+    
+    englishTranslationCards.forEach(word => {
+        const card = createWordCard(word);
+        elements.rightColumn.appendChild(card);
+    });
+}
     // Update progress
     updateProgressDisplay();
 }
