@@ -1405,7 +1405,7 @@ header.hidden {
     margin-top: 1rem;
 }
     }
-</style
+</style>
 </head>
 <body>
     <div class="app-container">
@@ -2688,8 +2688,9 @@ function splitSentences(text) {
 }
 
 function detectLanguage(text) {
-const chineseChars = /[\u4e00-\u9fff]/;
-const commonChineseWords = /\b(的|是|在|不|有|我|你|他|我们|这|那)\b/;
+    // Simple Chinese character detection
+    const chineseRegex = /[\u4e00-\u9fff]/;
+    return chineseRegex.test(text) ? 'zh' : 'en';
 }
 
 
@@ -2706,7 +2707,7 @@ async function translateToChinese(text, sourceLang) {
         }
 
         const response = await fetch(
-`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|es`
+`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|zh`
         );
 
         if (!response.ok) throw new Error('Translation failed');
@@ -2826,7 +2827,7 @@ function speakText(text) {
         window.speechSynthesis.cancel();
         
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'es-ES';
+utterance.lang = 'zh-CN'; 
            
         state.currentTtsUtterance = utterance;
         
@@ -2842,18 +2843,30 @@ const chineseVoice = voices.find(voice =>
                 }
                 
                 speechSynthesis.speak(utterance);
+try {
+    speechSynthesis.speak(utterance);
+} catch (e) {
+    console.error("TTS Error:", e);
+    showToast("Text-to-speech failed", "error");
+}
             };
             // Force voices to load
             speechSynthesis.getVoices();
         } else {
             const voices = speechSynthesis.getVoices();
-const ChineseVoice = voices.find(voice => voice.lang === 'es-ES' || voice.lang.startsWith('es'));
+const ChineseVoice = voices.find(voice => voice.lang === 'zh-CN' || voice.lang.startsWith('zh'));
             
             if (ChineseVoice) {
                 utterance.voice = ChineseVoice;
             }
             
             speechSynthesis.speak(utterance);
+try {
+    speechSynthesis.speak(utterance);
+} catch (e) {
+    console.error("TTS Error:", e);
+    showToast("Text-to-speech failed", "error");
+}
         }
     }
 }
@@ -2921,7 +2934,10 @@ function displaySentence() {
         document.getElementById('sentence-counter').textContent = 'Sentence 0/0';
         return;
     }
-    
+    // Add these lines to ensure touch works when new sentences load:
+    const sentenceDisplay = document.getElementById('sentence-display');
+    sentenceDisplay.addEventListener('touchstart', handleTouchStart, false);
+    sentenceDisplay.addEventListener('touchend', handleTouchEnd, false);
     const sentence = state.sentences[state.currentSentenceIndex];
     elements.sentenceDisplay.textContent = sentence.original;
 
@@ -3034,7 +3050,7 @@ async function lookupWordInDictionary(word) {
     try {
         // Try HanziDB API first
         try {
-            const hanziResponse = await fetch(`https://hzdg.cn/api/v1/words?word=${encodeURIComponent(word)}`);
+            const hanziResponse = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/zh/${encodeURIComponent(word)}`);
             if (hanziResponse.ok) {
                 const hanziData = await hanziResponse.json();
                 if (hanziData.data && hanziData.data.length > 0) {
@@ -3694,7 +3710,7 @@ async function startVoiceInput(lang, targetId, buttonElement) {
     initSettingsPanel();
 // Voice input button
 document.getElementById('voice-input-btn').addEventListener('click', function() {
-    startVoiceInput('es-ES', 'text-input', this);
+startVoiceInput('zh-CN', 'text-input', this);
 });
   
     // How to use toggle
@@ -4014,7 +4030,7 @@ function handleTextSelection() {
             
             // Try HanziDB API
             try {
-                const hanziResponse = await fetch(`https://hzdg.cn/api/v1/words?word=${encodeURIComponent(word)}`);
+                const hanziResponse = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/zh/${encodeURIComponent(word)}`);
                 if (hanziResponse.ok) {
                     const hanziData = await hanziResponse.json();
                     if (hanziData.data && hanziData.data.length > 0) {
@@ -4287,7 +4303,8 @@ async function initApp() {
         state.isOnline = navigator.onLine;
         elements.offlineWarning.style.display = state.isOnline ? 'none' : 'block';
         
-
+ document.getElementById('sentence-display').addEventListener('touchstart', handleTouchStart, false);
+        document.getElementById('sentence-display').addEventListener('touchend', handleTouchEnd, false);
         
     } catch (error) {
         console.error('Initialization error:', error);
