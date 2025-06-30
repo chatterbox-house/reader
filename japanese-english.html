@@ -2661,7 +2661,10 @@ function countVocabByBucket() {
 
 // Text processing
 function splitSentences(text) {
-    const roughSentences = text.split(/(?<=[。！？\n])/);
+    // First normalize the text by ensuring spaces after punctuation
+    const normalizedText = text.replace(/([。！？])([^\s])/g, '$1 $2');
+    
+    const roughSentences = normalizedText.split(/(?<=[。！？\n])/);
     const sentences = [];
     
     roughSentences.forEach(roughSentence => {
