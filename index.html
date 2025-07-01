@@ -19,23 +19,23 @@
             --shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
             --font-size: 16px;
             --line-height: 1.6;
-            --font-family: 'Segoe UI', system-ui, sans-serif;
+            --font-family: 'Georgia', 'Times New Roman', Times, serif;
             --gradient: linear-gradient(135deg, #302b63 0%, #24243e 50%, #0f0c29 100%);
         }
 
-[data-theme="light"] {
-    --primary: #f8f9fa;
-    --secondary: #e9ecef;
-    --accent: #dee2e6;
-    --highlight: #ff6b35;
-    --text: #212529;
-    --text-secondary: #495057;
-    --success: #2a9d8f;
-    --warning: #e9c46a;
-    --danger: #e76f51;
-    --card-bg: rgba(255, 255, 255, 0.9);
-    --gradient: linear-gradient(135deg, #e9ecef 0%, #dee2e6 50%, #f8f9fa 100%);
-}
+        [data-theme="light"] {
+            --primary: #f8f9fa;
+            --secondary: #e9ecef;
+            --accent: #dee2e6;
+            --highlight: #ff6b35;
+            --text: #212529;
+            --text-secondary: #495057;
+            --success: #2a9d8f;
+            --warning: #e9c46a;
+            --danger: #e76f51;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --gradient: linear-gradient(135deg, #e9ecef 0%, #dee2e6 50%, #f8f9fa 100%);
+        }
 
         * {
             margin: 0;
@@ -54,12 +54,91 @@
             line-height: var(--line-height);
         }
 
+        /* Loading Screen Styles */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-content {
+            text-align: center;
+            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: 16px;
+            max-width: 80%;
+            box-shadow: var(--shadow);
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--text-secondary);
+            border-top-color: var(--highlight);
+            border-radius: 50%;
+            margin: 20px auto;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        #language-fact {
+            margin-top: 1rem;
+            font-style: italic;
+            color: var(--text-secondary);
+            max-width: 300px;
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
+            display: none; /* Hidden until loaded */
         }
 
+        /* Animation Classes */
+        .language-card {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .language-card.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .quick-start-card {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease 0.2s;
+        }
+
+        .quick-start-card.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .progress-section {
+            opacity: 0;
+            transition: all 0.5s ease 0.4s;
+        }
+
+        .progress-section.show {
+            opacity: 1;
+        }
+
+        /* Rest of your existing CSS... */
         .header {
             text-align: center;
             margin-bottom: 3rem;
@@ -119,44 +198,45 @@
             width: 28px;
             height: auto;
         }
-.theme-toggle-container {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 1rem;
-}
 
-.theme-toggle {
-    background: var(--secondary);
-    border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: var(--text);
-    font-size: 1.2rem;
-    box-shadow: var(--shadow);
-}
+        .theme-toggle-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
 
-.theme-toggle:hover {
-    transform: scale(1.1);
-    background: var(--accent);
-}
+        .theme-toggle {
+            background: var(--secondary);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text);
+            font-size: 1.2rem;
+            box-shadow: var(--shadow);
+        }
 
-[data-theme="light"] .toggle-icon {
-    display: none;
-}
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            background: var(--accent);
+        }
 
-[data-theme="light"] .theme-toggle::after {
-    content: "☀️";
-}
+        [data-theme="light"] .toggle-icon {
+            display: none;
+        }
 
-[data-theme="dark"] .theme-toggle::after {
-    display: none;
-}
+        [data-theme="light"] .theme-toggle::after {
+            content: "☀️";
+        }
+
+        [data-theme="dark"] .theme-toggle::after {
+            display: none;
+        }
 
         .language-grid {
             display: grid;
@@ -388,16 +468,6 @@
             font-size: 0.9rem;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.8; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        .loading {
-            animation: pulse 1.5s infinite ease-in-out;
-        }
-
         @media (max-width: 768px) {
             .logo {
                 font-size: 2rem;
@@ -425,8 +495,16 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-content">
+            <h2>Loading SentenceMODE...</h2>
+            <div class="spinner"></div>
+            <p id="language-fact">Did you know: Japanese has three writing systems?</p>
+        </div>
+    </div>
 
+    <div class="container">
         <header class="header">
             <h1 class="logo">
                 SentenceMODE
@@ -439,11 +517,11 @@
                 </span>
             </h1>
             <p class="tagline">Learn languages through sentences and context</p>
-<div class="theme-toggle-container">
-    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
-        <span class="toggle-icon">🌙</span>
-    </button>
-</div>
+            <div class="theme-toggle-container">
+                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+                    <span class="toggle-icon">🌙</span>
+                </button>
+            </div>
         </header>
 
         <!-- For English Speakers -->
@@ -567,201 +645,264 @@
         <footer class="footer">
             <p>SentenceMODE © 2025 - Learn languages through immersive sentence practice</p>
         </footer>
-
-        <script>
-            // Load progress stats from localStorage
-            function loadProgressStats() {
-                // Get stats from Japanese page
-                const jpStats = JSON.parse(localStorage.getItem('readingStats_ja') || '{}');
-                
-                // Update the display
-                document.getElementById('total-words').textContent = jpStats.wordsLearned || '0';
-                document.getElementById('current-streak').textContent = (jpStats.streak || '0') + ' days';
-                
-                // Get recently studied languages
-                const recentLangs = JSON.parse(localStorage.getItem('recentLanguages') || '[]');
-                document.getElementById('recent-languages').textContent = 
-                    recentLangs.length > 0 ? recentLangs.join(', ') : 'None yet';
-            }
-
-            const quotes = [
-                {
-                    text: "Learning another language is not only learning different words for the same things, but learning another way to think about things.",
-                    author: "Flora Lewis"
-                },
-                {
-                    text: "To have another language is to possess a second soul.",
-                    author: "Charlemagne"
-                },
-                {
-                    text: "Language is the road map of a culture. It tells you where its people come from and where they are going.",
-                    author: "Rita Mae Brown"
-                },
-                {
-                    text: "One language sets you in a corridor for life. Two languages open every door along the way.",
-                    author: "Frank Smith"
-                }
-            ];
-
-            function showDailyQuote() {
-                const today = new Date().getDate();
-                const quoteIndex = today % quotes.length;
-                const quote = quotes[quoteIndex];
-                document.getElementById('daily-quote').textContent = `"${quote.text}"`;
-                document.querySelector('.motivation-author').textContent = `- ${quote.author}`;
-            }
-
-            window.addEventListener('DOMContentLoaded', showDailyQuote);
-            
-            // Continue learning button
-            document.getElementById('continue-learning').addEventListener('click', () => {
-                const recentLangs = JSON.parse(localStorage.getItem('recentLanguages') || '[]');
-                if (recentLangs.length > 0) {
-                    // Redirect to the most recent language
-                    window.location.href = recentLangs[0].toLowerCase() + '.html';
-                } else {
-                    // Default to Japanese if no recent languages
-                    window.location.href = 'japanese.html';
-                }
-            });
-            
-            // Load stats when page loads
-            window.addEventListener('DOMContentLoaded', loadProgressStats);
-        </script>
     </div>
 
-<script>
-    // ==================== THEME TOGGLE ====================
-    const themeToggle = document.getElementById('theme-toggle');
+    <script>
+        // ==================== LOADING SCREEN ====================
+        const languageFacts = [
+            "Did you know: Japanese has three writing systems?",
+            "Spanish is spoken by over 500 million people worldwide!",
+            "French was the official language of England for 300 years.",
+            "Chinese is the most spoken language in the world.",
+            "Latin is the ancestor of all Romance languages.",
+            "Italian has the most words for describing food!"
+        ];
 
-    // 1. Check saved theme or use dark mode as default
-    const currentTheme = localStorage.getItem('theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', currentTheme);
-
-    // 2. Set the correct icon on page load
-    if (currentTheme === 'light') {
-        themeToggle.innerHTML = '<span class="toggle-icon">☀️</span>';
-    } else {
-        themeToggle.innerHTML = '<span class="toggle-icon">🌙</span>';
-    }
-
-    // 3. Toggle theme when button clicked
-    themeToggle.addEventListener('click', () => {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        
-        // Update the theme and save preference
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-        
-        // Update the icon
-        themeToggle.innerHTML = newTheme === 'light' 
-            ? '<span class="toggle-icon">☀️</span>' 
-            : '<span class="toggle-icon">🌙</span>';
-    });
-    // ======================================================
-    
-    // Add animation to language cards
-    document.querySelectorAll('.language-card').forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        card.style.transition = `all 0.3s ease ${index * 0.1}s`;
-        
-        setTimeout(() => {
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
-        }, 100);
-    });
-
-    // ==================== SOUND EFFECTS ====================
-    let audioContext;
-    let audioInitialized = false;
-
-    // Initialize audio on first user interaction
-    function initAudio() {
-        if (audioInitialized) return;
-        audioInitialized = true;
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        
-        // Now we can play the ripple sound
-        playRippleSound();
-    }
-
-    // Set up audio initialization on any user interaction
-    document.addEventListener('click', initAudio);
-    document.addEventListener('keydown', initAudio);
-    document.addEventListener('touchstart', initAudio);
-
-    // Generate a simple ripple sound
-    function playRippleSound() {
-        if (!audioContext) return;
-        
-        try {
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.5);
-            
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.start();
-            oscillator.stop(audioContext.currentTime + 0.5);
-        } catch (e) {
-            console.log("Audio error:", e);
+        function showRandomFact() {
+            const fact = languageFacts[Math.floor(Math.random() * languageFacts.length)];
+            document.getElementById('language-fact').textContent = fact;
         }
-    }
 
-    // Play sound when page loads (only after user interaction)
-    window.addEventListener('load', () => {
-        if (audioInitialized) playRippleSound();
-    });
+        function animateElements() {
+            document.querySelectorAll('.language-card').forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('show');
+                }, index * 100);
+            });
 
-    // Language hover sounds with TTS
-    const languageVoices = {
-        'Japanese': { text: '日本語', lang: 'ja-JP' },
-        'English': { text: 'English', lang: 'en-US' },
-        'Spanish': { text: 'Español', lang: 'es-ES' },
-        'French': { text: 'Français', lang: 'fr-FR' },
-        'Chinese': { text: '中文', lang: 'zh-CN' },
-        'Latin': { text: 'Latina', lang: 'la' },
-        'Italian': { text: 'Italiano', lang: 'it-IT' },
-        'Vatican City': { text: 'Latina', lang: 'la' }
-    };
+            document.querySelectorAll('.quick-start-card').forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('show');
+                }, index * 100 + 200);
+            });
 
-    let currentSpeech = null;
+            setTimeout(() => {
+                document.querySelector('.progress-section').classList.add('show');
+            }, 600);
+        }
 
-    function speakLanguage(language) {
-        if (!window.speechSynthesis) return;
-        
-        window.speechSynthesis.cancel();
-        
-        const voiceInfo = languageVoices[language];
-        if (!voiceInfo) return;
-
-        const utterance = new SpeechSynthesisUtterance(voiceInfo.text);
-        utterance.lang = voiceInfo.lang;
-        utterance.rate = 0.9;
-        utterance.pitch = 1.2;
-        
-        window.speechSynthesis.speak(utterance);
-    }
-
-    // Add hover events to all flags (will work immediately for TTS)
-    document.querySelectorAll('.flag, .language-flag img').forEach(flag => {
-        const language = flag.title || flag.alt;
-        if (!language) return;
-
-        flag.addEventListener('mouseenter', () => {
-            speakLanguage(language);
+        // Show loading screen initially
+        document.addEventListener('DOMContentLoaded', () => {
+            showRandomFact();
+            
+            // Change fact every few seconds while loading
+            const factInterval = setInterval(showRandomFact, 3000);
+            
+            // Simulate loading (replace with actual loading logic)
+            setTimeout(() => {
+                // Hide loading screen
+                document.getElementById('loading-screen').style.opacity = '0';
+                document.querySelector('.container').style.display = 'block';
+                
+                // Remove loading screen after fade out
+                setTimeout(() => {
+                    document.getElementById('loading-screen').remove();
+                    clearInterval(factInterval);
+                    animateElements();
+                }, 500);
+            }, 2000); // Adjust this timeout as needed
         });
-    });
-    // ======================================================
-</script>
+
+        // ==================== THEME TOGGLE ====================
+        const themeToggle = document.getElementById('theme-toggle');
+
+        // 1. Check saved theme or use dark mode as default
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+
+        // 2. Set the correct icon on page load
+        if (currentTheme === 'light') {
+            themeToggle.innerHTML = '<span class="toggle-icon">☀️</span>';
+        } else {
+            themeToggle.innerHTML = '<span class="toggle-icon">🌙</span>';
+        }
+
+        // 3. Toggle theme when button clicked
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            // Update the theme and save preference
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            // Update the icon
+            themeToggle.innerHTML = newTheme === 'light' 
+                ? '<span class="toggle-icon">☀️</span>' 
+                : '<span class="toggle-icon">🌙</span>';
+        });
+
+        // ==================== AUDIO CONTEXT ====================
+        let audioContext;
+        let audioInitialized = false;
+
+        function initAudio() {
+            if (audioInitialized) return;
+            audioInitialized = true;
+            
+            // Create suspended audio context
+            audioContext = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
+            
+            // Resume the context on first user interaction
+            document.addEventListener('click', function resumeAudio() {
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume().then(() => {
+                        console.log('AudioContext ready');
+                        playRippleSound();
+                    });
+                }
+                document.removeEventListener('click', resumeAudio);
+            }, { once: true });
+        }
+
+        function playRippleSound() {
+            if (!audioContext || audioContext.state !== 'running') return;
+            
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.5);
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.5);
+            } catch (e) {
+                console.log("Audio error:", e);
+            }
+        }
+
+        // Initialize audio on any user interaction
+        document.addEventListener('click', initAudio);
+        document.addEventListener('keydown', initAudio);
+        document.addEventListener('touchstart', initAudio, { passive: true });
+
+        // ==================== TTS FUNCTIONALITY ====================
+        const languageVoices = {
+            'Japanese': { text: '日本語', lang: 'ja-JP' },
+            'English': { text: 'English', lang: 'en-US' },
+            'Spanish': { text: 'Español', lang: 'es-ES' },
+            'French': { text: 'Français', lang: 'fr-FR' },
+            'Chinese': { text: '中文', lang: 'zh-CN' },
+            'Latin': { text: 'Latina', lang: 'la' },
+            'Italian': { text: 'Italiano', lang: 'it-IT' },
+            'Vatican City': { text: 'Latina', lang: 'la' }
+        };
+
+        function speakLanguage(language) {
+            if (!('speechSynthesis' in window)) {
+                console.log("Text-to-speech not supported");
+                return;
+            }
+            
+            window.speechSynthesis.cancel();
+            
+            const voiceInfo = languageVoices[language];
+            if (!voiceInfo) return;
+
+            const utterance = new SpeechSynthesisUtterance(voiceInfo.text);
+            utterance.lang = voiceInfo.lang;
+            utterance.rate = 0.9;
+            utterance.pitch = 1.2;
+            
+            utterance.onerror = function(event) {
+                console.log('Speech error:', event.error);
+            };
+            
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Header flags - only speak when clicked
+        document.querySelectorAll('.header .flag').forEach(flag => {
+            const language = flag.title || flag.alt;
+            if (!language) return;
+
+            flag.addEventListener('click', (e) => {
+                e.stopPropagation();
+                speakLanguage(language.trim());
+            });
+        });
+
+        // Language cards - speak when flag clicked, navigate otherwise
+        document.querySelectorAll('.language-card').forEach(card => {
+            const language = card.querySelector('.language-name')?.textContent;
+            if (!language) return;
+
+            card.addEventListener('click', (e) => {
+                if (e.target.closest('.language-flag')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    speakLanguage(language.trim());
+                }
+            });
+        });
+
+        // ==================== PROGRESS STATS ====================
+        function loadProgressStats() {
+            // Get stats from Japanese page
+            const jpStats = JSON.parse(localStorage.getItem('readingStats_ja') || '{}');
+            
+            // Update the display
+            document.getElementById('total-words').textContent = jpStats.wordsLearned || '0';
+            document.getElementById('current-streak').textContent = (jpStats.streak || '0') + ' days';
+            
+            // Get recently studied languages
+            const recentLangs = JSON.parse(localStorage.getItem('recentLanguages') || '[]');
+            document.getElementById('recent-languages').textContent = 
+                recentLangs.length > 0 ? recentLangs.join(', ') : 'None yet';
+        }
+
+        const quotes = [
+            {
+                text: "Learning another language is not only learning different words for the same things, but learning another way to think about things.",
+                author: "Flora Lewis"
+            },
+            {
+                text: "To have another language is to possess a second soul.",
+                author: "Charlemagne"
+            },
+            {
+                text: "Language is the road map of a culture. It tells you where its people come from and where they are going.",
+                author: "Rita Mae Brown"
+            },
+            {
+                text: "One language sets you in a corridor for life. Two languages open every door along the way.",
+                author: "Frank Smith"
+            }
+        ];
+
+        function showDailyQuote() {
+            const today = new Date().getDate();
+            const quoteIndex = today % quotes.length;
+            const quote = quotes[quoteIndex];
+            document.getElementById('daily-quote').textContent = `"${quote.text}"`;
+            document.querySelector('.motivation-author').textContent = `- ${quote.author}`;
+        }
+
+        // Continue learning button
+        document.getElementById('continue-learning').addEventListener('click', () => {
+            const recentLangs = JSON.parse(localStorage.getItem('recentLanguages') || '[]');
+            if (recentLangs.length > 0) {
+                // Redirect to the most recent language
+                window.location.href = recentLangs[0].toLowerCase() + '.html';
+            } else {
+                // Default to Japanese if no recent languages
+                window.location.href = 'japanese.html';
+            }
+        });
+        
+        // Load stats when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            loadProgressStats();
+            showDailyQuote();
+        });
+    </script>
 </body>
 </html>
