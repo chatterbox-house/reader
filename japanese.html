@@ -4704,11 +4704,16 @@ async function initApp() {
         
         state.sentences = await getAllSentences();
         
-        if (state.sentences.length > 0) {
-            document.querySelector('.nav-btn[data-view="text-import"]').classList.remove('active');
-            document.querySelector('.nav-btn[data-view="vocab-review"]').classList.add('active');
-            showView('vocab-review-view');
-        }
+// Always show reader tab first
+document.querySelector('.nav-btn[data-view="text-import"]').classList.add('active');
+document.querySelector('.nav-btn[data-view="vocab-review"]').classList.remove('active');
+showView('text-import-view');
+
+// Optional: Still load sentences if they exist
+if (state.sentences.length > 0) {
+    // You can keep this if you want to do something with existing sentences
+    // But we won't switch to vocab view automatically
+}
         
         await updateBucketCounts();
         setupEventListeners();
