@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" translate="no">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SentenceMODE - Language Learning</title>
+    <link rel="icon" href="https://flagcdn.com/favicon.ico" type="image/x-icon">
     <style>
         :root {
             --primary: #0f0c29;
@@ -509,16 +510,16 @@
             <h1 class="logo">
                 SentenceMODE
                 <span class="logo-flags">
-                    <span class="flag" title="Japanese"><img src="https://flagcdn.com/jp.svg" alt="Japanese"></span>
-                    <span class="flag" title="English"><img src="https://flagcdn.com/gb.svg" alt="English"></span>
-                    <span class="flag" title="Spanish"><img src="https://flagcdn.com/es.svg" alt="Spanish"></span>
-                    <span class="flag" title="French"><img src="https://flagcdn.com/fr.svg" alt="French"></span>
-                    <span class="flag" title="Chinese"><img src="https://flagcdn.com/cn.svg" alt="Chinese"></span>
+                    <span class="flag" title="Japanese"><img src="https://flagcdn.com/jp.svg" alt="Japanese" width="40" height="30" loading="lazy"></span>
+                    <span class="flag" title="English"><img src="https://flagcdn.com/gb.svg" alt="English" width="40" height="30" loading="lazy"></span>
+                    <span class="flag" title="Spanish"><img src="https://flagcdn.com/es.svg" alt="Spanish" width="40" height="30" loading="lazy"></span>
+                    <span class="flag" title="French"><img src="https://flagcdn.com/fr.svg" alt="French" width="40" height="30" loading="lazy"></span>
+                    <span class="flag" title="Chinese"><img src="https://flagcdn.com/cn.svg" alt="Chinese" width="40" height="30" loading="lazy"></span>
                 </span>
             </h1>
             <p class="tagline">Learn languages through sentences and context</p>
             <div class="theme-toggle-container">
-                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode" aria-pressed="false">
                     <span class="toggle-icon">🌙</span>
                 </button>
             </div>
@@ -526,10 +527,10 @@
 
         <!-- For English Speakers -->
         <section class="language-section">
-            <h2 class="section-title">
+            <h1 class="section-title">
                 <img src="https://flagcdn.com/gb.svg" alt="English">
                 For English Speakers
-            </h2>
+            </h1>
             <div class="language-grid">
                 <a href="japanese.html" class="language-card">
                     <div class="language-flag"><img src="https://flagcdn.com/jp.svg" alt="Japanese"></div>
@@ -694,13 +695,12 @@
                 document.getElementById('loading-screen').style.opacity = '0';
                 document.querySelector('.container').style.display = 'block';
                 
-                // Remove loading screen after fade out
                 setTimeout(() => {
                     document.getElementById('loading-screen').remove();
                     clearInterval(factInterval);
                     animateElements();
                 }, 500);
-            }, 2000); // Adjust this timeout as needed
+            }, 2000);
         });
 
         // ==================== THEME TOGGLE ====================
@@ -845,13 +845,26 @@
         });
 
         // ==================== PROGRESS STATS ====================
+        function getCombinedStats() {
+            const languages = ['ja', 'es', 'fr', 'zh', 'la', 'it'];
+            let totalWords = 0;
+            let maxStreak = 0;
+            
+            languages.forEach(lang => {
+                const stats = JSON.parse(localStorage.getItem(`readingStats_${lang}`) || '{}');
+                totalWords += parseInt(stats.wordsLearned || 0);
+                maxStreak = Math.max(maxStreak, parseInt(stats.streak || 0));
+            });
+            
+            return { wordsLearned: totalWords, streak: maxStreak };
+        }
+
         function loadProgressStats() {
-            // Get stats from Japanese page
-            const jpStats = JSON.parse(localStorage.getItem('readingStats_ja') || '{}');
+            const stats = getCombinedStats();
             
             // Update the display
-            document.getElementById('total-words').textContent = jpStats.wordsLearned || '0';
-            document.getElementById('current-streak').textContent = (jpStats.streak || '0') + ' days';
+            document.getElementById('total-words').textContent = stats.wordsLearned || '0';
+            document.getElementById('current-streak').textContent = (stats.streak || '0') + ' days';
             
             // Get recently studied languages
             const recentLangs = JSON.parse(localStorage.getItem('recentLanguages') || '[]');
