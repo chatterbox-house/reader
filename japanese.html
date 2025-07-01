@@ -3801,56 +3801,70 @@ function checkRoundCompletion() {
 
 
 function setupHardMode() {
+    // Hide matching game and show hard mode buttons
     elements.matchingGameContainer.style.display = 'none';
     elements.hardModeContainer.style.display = 'flex';
     
+    // Check if review is complete
     if (state.currentReviewIndex >= state.reviewWords.length) {
         elements.reviewQuestion.textContent = "Review complete!";
         elements.hardModeContainer.style.display = 'none';
         return;
     }
     
+    // Get current word
     state.currentHardWord = state.reviewWords[state.currentReviewIndex];
     
-    // Create question with streak indicator
-    const questionDiv = document.createElement('div');
-    questionDiv.style.textAlign = 'center';
-    
-    const wordElement = document.createElement('div');
-    wordElement.textContent = state.currentHardWord.word;
-    wordElement.style.fontSize = '2rem';
-    wordElement.style.marginBottom = '1rem';
-    
-    const streakElement = document.createElement('div');
-    streakElement.textContent = `Streak: ${state.currentHardWord.streak || 0}/3`;
-    streakElement.style.fontSize = '0.9rem';
-    streakElement.style.color = 'var(--text-secondary)';
-    
-    const progressBar = document.createElement('div');
-    progressBar.style.height = '4px';
-    progressBar.style.width = '100%';
-    progressBar.style.backgroundColor = 'var(--secondary)';
-    progressBar.style.borderRadius = '2px';
-    progressBar.style.margin = '0.5rem auto';
-    
-    const progressFill = document.createElement('div');
-    progressFill.style.height = '100%';
-    progressFill.style.width = `${(state.currentHardWord.streak || 0) * 33.33}%`;
-    progressFill.style.backgroundColor = 'var(--highlight)';
-    progressFill.style.borderRadius = '2px';
-    
-    progressBar.appendChild(progressFill);
-    
-    questionDiv.appendChild(wordElement);
-    questionDiv.appendChild(streakElement);
-    questionDiv.appendChild(progressBar);
-    
+    // Clear previous content
     elements.reviewQuestion.innerHTML = '';
-    elements.reviewQuestion.appendChild(questionDiv);
     
-    // Update progress
-    elements.progressText.textContent = `Word ${state.currentReviewIndex + 1}/${state.reviewWords.length}`;
-    elements.progressFill.style.width = `${((state.currentReviewIndex + 1) / state.reviewWords.length) * 100}%`;
+    // Create container for the word and translation
+    const container = document.createElement('div');
+    container.style.textAlign = 'center';
+    container.style.padding = '1rem';
+    
+    // Display Japanese word
+    const japaneseWord = document.createElement('div');
+    japaneseWord.textContent = state.currentHardWord.word;
+    japaneseWord.style.fontSize = '2.5rem';
+    japaneseWord.style.marginBottom = '1.5rem';
+    japaneseWord.style.fontWeight = 'bold';
+    
+    // Display translation (hidden by default)
+    const translation = document.createElement('div');
+    translation.textContent = state.currentHardWord.translation;
+    translation.style.fontSize = '1.5rem';
+    translation.style.color = 'var(--text-secondary)';
+    translation.style.marginBottom = '1.5rem';
+    translation.style.display = 'none';
+    
+    // Show translation button
+    const showTranslationBtn = document.createElement('button');
+    showTranslationBtn.textContent = 'Show Translation';
+    showTranslationBtn.className = 'btn';
+    showTranslationBtn.style.marginBottom = '1rem';
+    showTranslationBtn.style.backgroundColor = 'var(--accent)';
+    showTranslationBtn.addEventListener('click', () => {
+        translation.style.display = 'block';
+        showTranslationBtn.style.display = 'none';
+    });
+    
+    // Add elements to container
+    container.appendChild(japaneseWord);
+    container.appendChild(showTranslationBtn);
+    container.appendChild(translation);
+    
+    // Add container to review question
+    elements.reviewQuestion.appendChild(container);
+    
+    // Update progress display
+    const progressText = `Word ${state.currentReviewIndex + 1}/${state.reviewWords.length}`;
+    document.getElementById('sentence-counter').textContent = progressText;
+    
+    // Set up hard mode buttons
+    elements.knewItBtn.textContent = 'I Know This';
+    elements.didntKnowBtn.textContent = "Don't Know";
+    elements.skipBtn.textContent = 'Skip';
 }
 
 // Track selected cards
@@ -3893,31 +3907,16 @@ function handleHardModeResponse(knewIt) {
     if (!state.currentHardWord) return;
     
     if (knewIt) {
-        state.currentHardStreak++;
+        // If user knows the word, delete it (retire it)
+        const transaction = db.transaction([STORE_VOCAB], 'readwrite');
+        const store = transaction.objectStore(STORE_VOCAB);
+        store.delete(state.currentHardWord.id);
         
-        if (state.currentHardStreak >= 3) {
-            // Remove word from vocabulary (retired)
-            const transaction = db.transaction([STORE_VOCAB], 'readwrite');
-            const store = transaction.objectStore(STORE_VOCAB);
-            store.delete(state.currentHardWord.id);
-            
-            showToast('Word retired!', 'success');
-        } else {
-            // Move to next bucket
-            if (state.currentHardWord.bucket === 'hard') {
-                state.currentHardWord.bucket = 'medium';
-            } else if (state.currentHardWord.bucket === 'medium') {
-                state.currentHardWord.bucket = 'easy';
-            } else if (state.currentHardWord.bucket === 'easy') {
-                state.currentHardWord.bucket = 'new';
-            }
-            
-            updateVocabWord(state.currentHardWord);
-            showToast('Word moved to easier bucket', 'success');
-        }
+        showToast('Word retired! Great job!', 'success');
     } else {
-        state.currentHardStreak = 0;
+        // If user doesn't know the word, move it back to "new" bucket
         state.currentHardWord.bucket = 'new';
+        state.currentHardWord.streak = 0; // Reset streak
         updateVocabWord(state.currentHardWord);
         showToast('Word moved back to new words', 'error');
     }
