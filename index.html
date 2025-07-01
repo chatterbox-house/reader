@@ -70,6 +70,30 @@ body::before {
     will-change: transform;
 }
 
+body::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, 
+        rgba(255, 123, 37, 0.05) 0%, 
+        rgba(56, 176, 0, 0.05) 20%, 
+        rgba(0, 204, 255, 0.05) 40%, 
+        rgba(255, 0, 204, 0.05) 60%, 
+        rgba(233, 196, 106, 0.05) 80%);
+    background-size: 300% 300%;
+    animation: gradientBG 15s ease infinite;
+    z-index: -2;
+}
+
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
 /* Add this new rule */
 body {
     background-attachment: fixed;
@@ -310,8 +334,16 @@ document.addEventListener('mousemove', (e) => {
 .language-card:hover {
     transform: translateY(-8px) scale(1.02) rotateY(15deg);
     background-color: var(--accent);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3), 
+                0 0 0 3px var(--highlight);
     border-color: rgba(255, 255, 255, 0.2);
+    animation: pulseGlow 2s infinite;
+}
+
+@keyframes pulseGlow {
+    0% { box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3), 0 0 0 3px var(--highlight); }
+    50% { box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3), 0 0 0 6px rgba(255, 123, 37, 0.5); }
+    100% { box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3), 0 0 0 3px var(--highlight); }
 }
 
         .language-flag img {
@@ -642,6 +674,21 @@ document.addEventListener('mousemove', (e) => {
 }
         }
     </style>
+<style>
+    .new-feature {
+        position: absolute;
+        top: 10px;
+        right: -30px;
+        background: var(--highlight);
+        color: white;
+        padding: 5px 30px;
+        transform: rotate(45deg);
+        font-size: 12px;
+        font-weight: bold;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        z-index: 10;
+    }
+</style>
 </head>
 <body>
 <div class="page-loader">
@@ -669,6 +716,7 @@ document.addEventListener('mousemove', (e) => {
 
         <!-- For English Speakers -->
         <section class="language-section">
+<div class="new-feature">New!</div>
             <h1 class="section-title">
                 <img src="https://flagcdn.com/gb.svg" alt="English">
                 For English Speakers
@@ -777,14 +825,60 @@ document.addEventListener('mousemove', (e) => {
             </div>
         </section>
 
-        <section class="motivation-section">
-            <div class="motivation-card">
-                <h3 class="motivation-title">Daily Language Motivation</h3>
-                <p class="motivation-quote" id="daily-quote">"The limits of my language mean the limits of my world."</p>
-                <p class="motivation-author">- Ludwig Wittgenstein</p>
-            </div>
-        </section>
+<section class="motivation-section">
+    <div class="motivation-card">
+        <h3 class="motivation-title">Daily Language Motivation</h3>
+        <p class="motivation-quote" id="daily-quote">"The limits of my language mean the limits of my world."</p>
+        <p class="motivation-author">- Ludwig Wittgenstein</p>
+    </div>
+    <div class="tip-card">
+        <h4 class="tip-title">💡 Daily Learning Tip</h4>
+        <p class="tip-text" id="daily-tip">"Practice new words in sentences to remember them better!"</p>
+    </div>
+</section>
 
+<style>
+    .tip-card {
+        background: var(--secondary);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .tip-title {
+        color: var(--highlight);
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+    }
+    
+    .tip-text {
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+</style>
+
+<script>
+    const tips = [
+        "Try learning 5 new words every day - small consistent steps lead to big results!",
+        "Listen to music in your target language - it helps with pronunciation and rhythm.",
+        "Label objects around your house with their names in the language you're learning.",
+        "Practice speaking out loud, even if it's just to yourself - it builds confidence.",
+        "Watch movies with subtitles in your target language to improve listening skills."
+    ];
+    
+    function showDailyTip() {
+        const today = new Date().getDate();
+        const tipIndex = today % tips.length;
+        document.getElementById('daily-tip').textContent = tips[tipIndex];
+    }
+    
+    // Add this to your existing DOMContentLoaded event
+    document.addEventListener('DOMContentLoaded', () => {
+        loadProgressStats();
+        showDailyQuote();
+        showDailyTip(); // Add this line
+    });
+</script>
         <footer class="footer">
             <p>SentenceMODE © 2025 - Learn languages through immersive sentence practice</p>
         </footer>
@@ -1078,5 +1172,73 @@ document.addEventListener('DOMContentLoaded', setupSmartButton);
         <span class="button-text">Start Learning</span>
     </button>
 </div>
+<script>
+    // Simple achievement system
+    function checkAchievements() {
+        const wordsLearned = parseInt(document.getElementById('total-words').textContent);
+        
+        if (wordsLearned >= 100) {
+            showBadge("100 Words Master");
+        } else if (wordsLearned >= 50) {
+            showBadge("50 Words Expert");
+        } else if (wordsLearned >= 10) {
+            showBadge("10 Words Starter");
+        }
+    }
+
+    function showBadge(title) {
+        const badge = document.createElement('div');
+        badge.className = 'achievement-badge';
+        badge.innerHTML = `
+            <span>🏆 ${title}</span>
+            <span class="close-badge">×</span>
+        `;
+        document.body.appendChild(badge);
+        
+        setTimeout(() => {
+            badge.classList.add('show');
+        }, 1000);
+        
+        badge.querySelector('.close-badge').addEventListener('click', () => {
+            badge.remove();
+        });
+    }
+
+    // Add this to your existing DOMContentLoaded event
+    document.addEventListener('DOMContentLoaded', () => {
+        loadProgressStats();
+        showDailyQuote();
+        checkAchievements(); // Add this line
+    });
+</script>
+
+<style>
+    .achievement-badge {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background: var(--secondary);
+        color: var(--text);
+        padding: 10px 15px;
+        border-radius: 20px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transform: translateX(-150%);
+        transition: transform 0.5s ease;
+        z-index: 1000;
+    }
+    
+    .achievement-badge.show {
+        transform: translateX(0);
+    }
+    
+    .close-badge {
+        cursor: pointer;
+        font-size: 18px;
+        margin-left: 5px;
+    }
+</style>
 </body>
 </html>
