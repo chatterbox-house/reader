@@ -3046,17 +3046,7 @@ async function lookupWordInDictionary(englishWord) {
                 `${j.word || ''}${j.word && j.reading ? ' (' + j.reading + ')' : j.reading || ''}`
             ).filter(Boolean).join('、 ') || '';
 
-            // Get example sentences if available
-            const exampleSentence = entry.senses?.[0]?.example_english?.[0] || '';
-            const exampleTranslation = entry.senses?.[0]?.example_japanese?.[0] || '';
-
-            let result = `🇬🇧 ${englishWord}\n🇯🇵 ${japaneseTranslations || '翻訳が見つかりません'}`;
-            
-            if (exampleSentence && exampleTranslation) {
-                result += `\n\n例文 (Example):\n"${exampleSentence}"\n→ "${exampleTranslation}"`;
-            }
-            
-            return result;
+            return japaneseTranslations || '翻訳が見つかりません';
         }
     } catch (error) {
         console.log('Jisho API failed:', error);
@@ -3071,7 +3061,7 @@ async function lookupWordInDictionary(englishWord) {
         
         const data = await response.json();
         if (data && data[0] && data[0][0] && data[0][0][0]) {
-            return `🇬🇧 ${englishWord}\n🇯🇵 ${data[0][0][0]}`;
+            return data[0][0][0];
         }
     } catch (error) {
         console.log('Google Translate API failed:', error);
@@ -3079,31 +3069,30 @@ async function lookupWordInDictionary(englishWord) {
 
     // 3. Fallback: Local dictionary (common English words with Japanese explanations)
     const commonWords = {
-        "hello": "こんにちは (挨拶)",
-        "goodbye": "さようなら (別れの挨拶)",
-        "thank you": "ありがとう (感謝の言葉)",
-        "please": "お願いします (丁寧な依頼)",
-        "sorry": "すみません (謝罪)",
-        "yes": "はい (肯定)",
-        "no": "いいえ (否定)",
-        "water": "水 (みず) - 透明な液体",
-        "food": "食べ物 (たべもの) - 栄養のための物質",
-        "book": "本 (ほん) - 読むための印刷物",
-        "computer": "コンピューター - 電子計算機",
-        "phone": "電話 (でんわ) - 通信装置",
-        "house": "家 (いえ) - 住居",
-        "car": "車 (くるま) - 自動車",
-        "money": "お金 (おかね) - 通貨",
-        "time": "時間 (じかん) - 時の経過",
-        // Add more words as needed
+        "hello": "こんにちは",
+        "goodbye": "さようなら",
+        "thank you": "ありがとう",
+        "please": "お願いします",
+        "sorry": "すみません",
+        "yes": "はい",
+        "no": "いいえ",
+        "water": "水",
+        "food": "食べ物",
+        "book": "本",
+        "computer": "コンピューター",
+        "phone": "電話",
+        "house": "家",
+        "car": "車",
+        "money": "お金",
+        "time": "時間",
     };
 
     if (commonWords[englishWord.toLowerCase()]) {
-        return `🇬🇧 ${englishWord}\n🇯🇵 ${commonWords[englishWord.toLowerCase()]}`;
+        return commonWords[englishWord.toLowerCase()];
     }
 
     // 4. Ultimate fallback
-    return `🇬🇧 ${englishWord}\n🇯🇵 翻訳が見つかりませんでした\n(Translation not found)`;
+    return "翻訳が見つかりませんでした";
 }
 
 function translateCurrentSentence() {
