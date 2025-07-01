@@ -2665,25 +2665,34 @@ function countVocabByBucket() {
 
 // Text processing
 function splitSentences(text) {
-    const roughSentences = text.split(/(?<=[。！？\n])/);
-    const sentences = [];
+    // First normalize all whitespace and clean up the text
+    text = text.replace(/\s+/g, ' ').trim();
     
-    roughSentences.forEach(roughSentence => {
-        const trimmed = roughSentence.trim();
-        if (trimmed.length === 0) return;
-        
-        if (trimmed.includes('。') || trimmed.includes('！') || trimmed.includes('？')) {
-            const subSentences = trimmed.split(/(?<=[。！？])/);
-            subSentences.forEach(sub => {
-                const subTrimmed = sub.trim();
-                if (subTrimmed.length > 0) sentences.push(subTrimmed);
-            });
+    // Split on Spanish sentence endings (.!?) followed by space or newline
+    const sentences = text.split(/(?<=[.!?])\s+/);
+    
+    // Further split sentences that contain line breaks but no punctuation
+    const finalSentences = [];
+    sentences.forEach(sentence => {
+        // If sentence has line breaks but no ending punctuation, split on line breaks
+        if (sentence.includes('\n') && !/[.!?]$/.test(sentence)) {
+            const lines = sentence.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+            finalSentences.push(...lines);
         } else {
-            sentences.push(trimmed);
+            finalSentences.push(sentence.trim());
         }
     });
     
-    return sentences;
+    // Filter out any empty sentences and ensure proper capitalization
+    return finalSentences
+        .filter(s => s.length > 0)
+        .map(s => {
+            // Capitalize first letter of each sentence
+            if (s.length > 0) {
+                return s.charAt(0).toUpperCase() + s.slice(1);
+            }
+            return s;
+        });
 }
 
 function detectLanguage(text) {
