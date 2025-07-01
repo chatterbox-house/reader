@@ -2666,30 +2666,28 @@ function countVocabByBucket() {
 
 // Text processing
 function splitSentences(text) {
-    const roughSentences = text.split(/(?<=[。！？\n])/);
-    const sentences = [];
+    // Split on sentence boundaries (.!?) followed by space or newline
+    const sentences = text.split(/(?<=[.!?])\s+/);
+    const filtered = [];
     
-    roughSentences.forEach(roughSentence => {
-        const trimmed = roughSentence.trim();
-        if (trimmed.length === 0) return;
-        
-        if (trimmed.includes('。') || trimmed.includes('！') || trimmed.includes('？')) {
-            const subSentences = trimmed.split(/(?<=[。！？])/);
-            subSentences.forEach(sub => {
-                const subTrimmed = sub.trim();
-                if (subTrimmed.length > 0) sentences.push(subTrimmed);
-            });
-        } else {
-            sentences.push(trimmed);
+    sentences.forEach(sentence => {
+        const trimmed = sentence.trim();
+        if (trimmed.length > 0) {
+            // Ensure sentence ends with punctuation
+            if (!/[.!?]$/.test(trimmed)) {
+                filtered.push(trimmed + '.'); // Add period if missing
+            } else {
+                filtered.push(trimmed);
+            }
         }
     });
     
-    return sentences;
+    return filtered;
 }
 
 function detectLanguage(text) {
-    const spanishChars = /[áéíóúüñÁÉÍÓÚÜÑ]/;
-    const commonSpanishWords = /\b(el|la|los|las|un|una|y|o|pero|es|son|soy|eres|se)\b/i;
+    const spanishChars = /[áéíóúüñÁÉÍÓÚÜÑ¿¡]/;
+    const commonSpanishWords = /\b(el|la|los|las|un|una|y|o|pero|es|son|soy|eres|se|que|en|de|a)\b/i;
     return spanishChars.test(text) || commonSpanishWords.test(text) ? 'es' : 'en';
 }
 
