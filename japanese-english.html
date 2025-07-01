@@ -24,17 +24,17 @@ body {
 .theme-toggle, .settings-btn {
     display: flex !important;
 }
-    :root {
-        --primary: #1a1a2e;
-        --secondary: #16213e;
-        --accent: #0f3460;
-        --highlight: #e94560;
-        --text: #f1f1f1;
-        --text-secondary: #b8b8b8;
-        --success: #4ade80;
-        --warning: #fbbf24;
-        --danger: #ef4444;
-        --card-bg: rgba(255, 255, 255, 0.05);
+:root {
+    --primary: #2a2d45; /* Darker blue */
+    --secondary: #1e2138; /* Dark blue */
+    --accent: #3a4f7a; /* Soft blue */
+    --highlight: #ff6b6b; /* Soft red - more appealing than bright pink */
+    --text: #f8f9fa; /* Brighter white */
+    --text-secondary: #adb5bd; /* Softer gray */
+    --success: #51cf66; /* Softer green */
+    --warning: #fcc419; /* Softer yellow */
+    --danger: #ff8787; /* Softer red */
+    --card-bg: rgba(255, 255, 255, 0.08); /* Slightly more visible */
         --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         --font-size: 16px;
         --line-height: 1.6;
@@ -149,6 +149,22 @@ header.hidden {
 
 .hide-header-btn.visible {
     opacity: 1;
+}
+.welcome-banner {
+    position: absolute;
+    top: -30px;
+    left: 0;
+    right: 0;
+    background-color: var(--highlight);
+    color: white;
+    text-align: center;
+    padding: 5px;
+    font-size: 0.8rem;
+    animation: slideDown 0.5s forwards;
+}
+
+@keyframes slideDown {
+    to { top: 0; }
 }
 
         .logo {
@@ -910,15 +926,24 @@ header.hidden {
         }
 
 .loading-spinner {
+    width: 20px;
+    height: 20px;
     border: 3px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
     border-top: 3px solid var(--highlight);
-    width: 20px;
-    height: 20px;
     animation: spin 1s linear infinite;
     display: inline-block;
     margin-left: 10px;
     vertical-align: middle;
+    position: relative;
+}
+
+.loading-spinner:after {
+    content: "⌛";
+    position: absolute;
+    left: -5px;
+    top: -5px;
+    font-size: 12px;
 }
 
         @keyframes spin {
@@ -1132,9 +1157,32 @@ header.hidden {
 
 @media (max-width: 600px) {
     .review-container {
-        height: calc(100vh - 100px); /* Even more compact */
-        border-radius: 0;
+        height: calc(100vh - 80px); /* More compact */
+        padding: 0.5rem;
     }
+    
+    .sentence-display {
+        min-height: 120px;
+        padding: 0.8rem;
+        font-size: 1.1rem;
+    }
+    
+    .control-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .nav-btn {
+        padding: 0.3rem 0.5rem !important;
+        font-size: 0.7rem !important;
+    }
+    
+    .welcome-banner {
+        font-size: 0.7rem;
+        padding: 3px;
+    }
+}
     
     .matching-game-columns {
         gap: 0.3rem;
@@ -1410,12 +1458,13 @@ header.hidden {
 <body>
     <div class="app-container">
 <header>
+    <div class="welcome-banner">今日も英語を勉強しましょう！ (Let's study English today!)</div>
     <div class="logo">Sentence Mode</div>
     <div class="nav-tabs">
-        <button class="nav-btn" data-view="home" aria-label="Home">🏠 Home</button>
-        <button class="nav-btn active" data-view="text-import" aria-label="Reader">Reader</button>
-        <button class="nav-btn" data-view="vocab-review" aria-label="Vocab">Vocab</button>
-        <button class="nav-btn" data-view="bookmarks-view" aria-label="Library">Library</button> 
+<button class="nav-btn" data-view="home" aria-label="Home">🏠 ホーム</button>
+<button class="nav-btn active" data-view="text-import" aria-label="Reader">📖 リーダー</button>
+<button class="nav-btn" data-view="vocab-review" aria-label="Vocab">📚 単語</button>
+<button class="nav-btn" data-view="bookmarks-view" aria-label="Library">⭐ お気に入り</button>  
     </div>
     <div>
         <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">🌙</button>
