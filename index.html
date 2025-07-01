@@ -426,6 +426,7 @@
 </head>
 <body>
     <div class="container">
+
         <header class="header">
             <h1 class="logo">
                 SentenceMODE
@@ -629,48 +630,138 @@
         </script>
     </div>
 
-    <script>
-        // ==================== THEME TOGGLE ====================
-const themeToggle = document.getElementById('theme-toggle');
+<script>
+    // ==================== THEME TOGGLE ====================
+    const themeToggle = document.getElementById('theme-toggle');
 
-// 1. Check saved theme or use dark mode as default
-const currentTheme = localStorage.getItem('theme') || 'dark';
-document.documentElement.setAttribute('data-theme', currentTheme);
+    // 1. Check saved theme or use dark mode as default
+    const currentTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', currentTheme);
 
-// 2. Set the correct icon on page load
-if (currentTheme === 'light') {
-    themeToggle.innerHTML = '<span class="toggle-icon">☀️</span>';
-} else {
-    themeToggle.innerHTML = '<span class="toggle-icon">🌙</span>';
-}
+    // 2. Set the correct icon on page load
+    if (currentTheme === 'light') {
+        themeToggle.innerHTML = '<span class="toggle-icon">☀️</span>';
+    } else {
+        themeToggle.innerHTML = '<span class="toggle-icon">🌙</span>';
+    }
 
-// 3. Toggle theme when button clicked
-themeToggle.addEventListener('click', () => {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    
-    // Update the theme and save preference
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-    
-    // Update the icon
-    themeToggle.innerHTML = newTheme === 'light' 
-        ? '<span class="toggle-icon">☀️</span>' 
-        : '<span class="toggle-icon">🌙</span>';
-});
-// ======================================================
+    // 3. Toggle theme when button clicked
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
         
-        // Add animation to language cards
-        document.querySelectorAll('.language-card').forEach((card, index) => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(20px)';
-            card.style.transition = `all 0.3s ease ${index * 0.1}s`;
+        // Update the theme and save preference
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        
+        // Update the icon
+        themeToggle.innerHTML = newTheme === 'light' 
+            ? '<span class="toggle-icon">☀️</span>' 
+            : '<span class="toggle-icon">🌙</span>';
+    });
+    // ======================================================
+    
+    // Add animation to language cards
+    document.querySelectorAll('.language-card').forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = `all 0.3s ease ${index * 0.1}s`;
+        
+        setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 100);
+    });
+
+    // ==================== SOUND EFFECTS ====================
+    let audioContext;
+    let audioInitialized = false;
+
+    // Initialize audio on first user interaction
+    function initAudio() {
+        if (audioInitialized) return;
+        audioInitialized = true;
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Now we can play the ripple sound
+        playRippleSound();
+    }
+
+    // Set up audio initialization on any user interaction
+    document.addEventListener('click', initAudio);
+    document.addEventListener('keydown', initAudio);
+    document.addEventListener('touchstart', initAudio);
+
+    // Generate a simple ripple sound
+    function playRippleSound() {
+        if (!audioContext) return;
+        
+        try {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
             
-            setTimeout(() => {
-                card.style.opacity = '1';
-                card.style.transform = 'translateY(0)';
-            }, 100);
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.5);
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.5);
+        } catch (e) {
+            console.log("Audio error:", e);
+        }
+    }
+
+    // Play sound when page loads (only after user interaction)
+    window.addEventListener('load', () => {
+        if (audioInitialized) playRippleSound();
+    });
+
+    // Language hover sounds with TTS
+    const languageVoices = {
+        'Japanese': { text: '日本語', lang: 'ja-JP' },
+        'English': { text: 'English', lang: 'en-US' },
+        'Spanish': { text: 'Español', lang: 'es-ES' },
+        'French': { text: 'Français', lang: 'fr-FR' },
+        'Chinese': { text: '中文', lang: 'zh-CN' },
+        'Latin': { text: 'Latina', lang: 'la' },
+        'Italian': { text: 'Italiano', lang: 'it-IT' },
+        'Vatican City': { text: 'Latina', lang: 'la' }
+    };
+
+    let currentSpeech = null;
+
+    function speakLanguage(language) {
+        if (!window.speechSynthesis) return;
+        
+        window.speechSynthesis.cancel();
+        
+        const voiceInfo = languageVoices[language];
+        if (!voiceInfo) return;
+
+        const utterance = new SpeechSynthesisUtterance(voiceInfo.text);
+        utterance.lang = voiceInfo.lang;
+        utterance.rate = 0.9;
+        utterance.pitch = 1.2;
+        
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // Add hover events to all flags (will work immediately for TTS)
+    document.querySelectorAll('.flag, .language-flag img').forEach(flag => {
+        const language = flag.title || flag.alt;
+        if (!language) return;
+
+        flag.addEventListener('mouseenter', () => {
+            speakLanguage(language);
         });
-    </script>
+    });
+    // ======================================================
+</script>
 </body>
 </html>
