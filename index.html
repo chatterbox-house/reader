@@ -6,31 +6,36 @@
     <title>SentenceMODE - Language Learning</title>
     <style>
         :root {
-            --primary: #1a1a2e;
-            --secondary: #16213e;
-            --accent: #0f3460;
-            --highlight: #e94560;
-            --text: #f1f1f1;
-            --text-secondary: #b8b8b8;
-            --success: #4ade80;
-            --warning: #fbbf24;
-            --danger: #ef4444;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --primary: #0f0c29;
+            --secondary: #302b63;
+            --accent: #24243e;
+            --highlight: #ff7b25;
+            --text: #f8f9fa;
+            --text-secondary: #adb5bd;
+            --success: #38b000;
+            --warning: #ffaa00;
+            --danger: #d00000;
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
             --font-size: 16px;
             --line-height: 1.6;
             --font-family: 'Segoe UI', system-ui, sans-serif;
+            --gradient: linear-gradient(135deg, #302b63 0%, #24243e 50%, #0f0c29 100%);
         }
 
-        [data-theme="light"] {
-            --primary: #f8f9fa;
-            --secondary: #e9ecef;
-            --accent: #dee2e6;
-            --highlight: #e94560;
-            --text: #212529;
-            --text-secondary: #495057;
-            --card-bg: rgba(255, 255, 255, 0.8);
-        }
+[data-theme="light"] {
+    --primary: #f8f9fa;
+    --secondary: #e9ecef;
+    --accent: #dee2e6;
+    --highlight: #ff6b35;
+    --text: #212529;
+    --text-secondary: #495057;
+    --success: #2a9d8f;
+    --warning: #e9c46a;
+    --danger: #e76f51;
+    --card-bg: rgba(255, 255, 255, 0.9);
+    --gradient: linear-gradient(135deg, #e9ecef 0%, #dee2e6 50%, #f8f9fa 100%);
+}
 
         * {
             margin: 0;
@@ -40,10 +45,11 @@
         }
 
         body {
-            background-color: var(--primary);
+            background: var(--gradient);
+            background-attachment: fixed;
             color: var(--text);
             min-height: 100vh;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
             font-size: var(--font-size);
             line-height: var(--line-height);
         }
@@ -74,6 +80,14 @@
         .logo-flags {
             display: flex;
             gap: 0.5rem;
+            align-items: center;
+        }
+
+        .logo-flags img {
+            width: 30px;
+            height: auto;
+            border-radius: 2px;
+            transition: all 0.3s ease;
         }
 
         .tagline {
@@ -88,6 +102,8 @@
             padding: 2rem;
             margin-bottom: 2rem;
             box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .section-title {
@@ -99,6 +115,49 @@
             gap: 0.5rem;
         }
 
+        .section-title img {
+            width: 28px;
+            height: auto;
+        }
+.theme-toggle-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.theme-toggle {
+    background: var(--secondary);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text);
+    font-size: 1.2rem;
+    box-shadow: var(--shadow);
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+    background: var(--accent);
+}
+
+[data-theme="light"] .toggle-icon {
+    display: none;
+}
+
+[data-theme="light"] .theme-toggle::after {
+    content: "☀️";
+}
+
+[data-theme="dark"] .theme-toggle::after {
+    display: none;
+}
+
         .language-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -107,7 +166,7 @@
 
         .language-card {
             background-color: var(--secondary);
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 1.5rem;
             text-align: center;
             transition: all 0.3s ease;
@@ -116,17 +175,27 @@
             flex-direction: column;
             align-items: center;
             gap: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
         }
 
         .language-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px) scale(1.02);
             background-color: var(--accent);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
-        .language-flag {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
+        .language-flag img {
+            width: 40px;
+            height: auto;
+            object-fit: contain;
+            border-radius: 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .language-name {
@@ -147,57 +216,64 @@
             color: var(--text-secondary);
             font-size: 0.9rem;
         }
-.motivation-section {
-    background-color: var(--card-bg);
-    border-radius: 16px;
-    padding: 1.5rem;
-    margin: 2rem 0;
-    box-shadow: var(--shadow);
-    text-align: center;
-}
 
-.motivation-title {
-    color: var(--highlight);
-    margin-bottom: 1rem;
-    font-size: 1.2rem;
-}
+        .motivation-section {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow);
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-.motivation-quote {
-    font-style: italic;
-    margin-bottom: 0.5rem;
-    font-size: 1.1rem;
-    line-height: 1.5;
-}
+        .motivation-title {
+            color: var(--highlight);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
 
-.motivation-author {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-}
-.difficulty-meter {
-    display: flex;
-    gap: 4px;
-    margin-top: 0.5rem;
-    justify-content: center;
-}
+        .motivation-quote {
+            font-style: italic;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
 
-.difficulty-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: var(--text-secondary);
-    opacity: 0.3;
-}
+        .motivation-author {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
 
-.difficulty-dot.active {
-    opacity: 1;
-    background-color: var(--highlight);
-}
+        .difficulty-meter {
+            display: flex;
+            gap: 4px;
+            margin-top: 0.5rem;
+            justify-content: center;
+        }
+
+        .difficulty-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--text-secondary);
+            opacity: 0.3;
+        }
+
+        .difficulty-dot.active {
+            opacity: 1;
+            background-color: var(--highlight);
+        }
+
         .progress-section {
             background-color: var(--card-bg);
             border-radius: 16px;
             padding: 2rem;
             margin-bottom: 2rem;
             box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .progress-stats {
@@ -230,72 +306,98 @@
         .quick-access .btn {
             padding: 1rem 2rem;
             font-size: 1.1rem;
+            background-color: var(--highlight);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
-.flag {
-    transition: all 0.3s ease;
-    display: inline-block;
-    cursor: pointer;
-}
 
-.flag:hover {
-    transform: scale(1.5) rotate(10deg);
-    filter: drop-shadow(0 0 5px rgba(255,255,255,0.5));
-}
-.quick-start-section {
-    background-color: var(--card-bg);
-    border-radius: 16px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    box-shadow: var(--shadow);
-}
+        .quick-access .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
 
-.quick-start-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-}
+        .flag {
+            transition: all 0.3s ease;
+            display: inline-block;
+            cursor: pointer;
+        }
 
-.quick-start-card {
-    background-color: var(--secondary);
-    border-radius: 12px;
-    padding: 1.5rem;
-    text-align: center;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    text-decoration: none;
-    color: var(--text);
-}
+        .flag:hover {
+            transform: scale(1.5) rotate(10deg);
+            filter: drop-shadow(0 0 5px rgba(255,255,255,0.5));
+        }
 
-.quick-start-card:hover {
-    transform: translateY(-5px);
-    background-color: var(--accent);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-}
+        .quick-start-section {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-.quick-start-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-}
+        .quick-start-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
 
-.quick-start-title {
-    font-weight: 600;
-    font-size: 1.2rem;
-    margin-bottom: 0.5rem;
-}
+        .quick-start-card {
+            background-color: var(--secondary);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
 
-.quick-start-desc {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-}
-@keyframes pulse {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.05); opacity: 0.8; }
-    100% { transform: scale(1); opacity: 1; }
-}
+        .quick-start-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
 
-.loading {
-    animation: pulse 1.5s infinite ease-in-out;
-}
+        .quick-start-icon img {
+            width: 60px;
+            height: auto;
+            border-radius: 2px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .quick-start-card:hover .quick-start-icon img {
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 8px rgba(255,255,255,0.3));
+        }
+
+        .quick-start-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .quick-start-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .loading {
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
         @media (max-width: 768px) {
             .logo {
                 font-size: 2rem;
@@ -325,55 +427,59 @@
 <body>
     <div class="container">
         <header class="header">
-<h1 class="logo">
-    SentenceMODE
-    <span class="logo-flags">
-        <span class="flag" title="Japanese">🇯🇵</span>
-        <span class="flag" title="English">🇺🇸</span>
-        <span class="flag" title="Spanish">🇪🇸</span>
-        <span class="flag" title="French">🇫🇷</span>
-        <span class="flag" title="Chinese">🇨🇳</span>
-    </span>
-</h1>
+            <h1 class="logo">
+                SentenceMODE
+                <span class="logo-flags">
+                    <span class="flag" title="Japanese"><img src="https://flagcdn.com/jp.svg" alt="Japanese"></span>
+                    <span class="flag" title="English"><img src="https://flagcdn.com/gb.svg" alt="English"></span>
+                    <span class="flag" title="Spanish"><img src="https://flagcdn.com/es.svg" alt="Spanish"></span>
+                    <span class="flag" title="French"><img src="https://flagcdn.com/fr.svg" alt="French"></span>
+                    <span class="flag" title="Chinese"><img src="https://flagcdn.com/cn.svg" alt="Chinese"></span>
+                </span>
+            </h1>
             <p class="tagline">Learn languages through sentences and context</p>
+<div class="theme-toggle-container">
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+        <span class="toggle-icon">🌙</span>
+    </button>
+</div>
         </header>
 
         <!-- For English Speakers -->
         <section class="language-section">
             <h2 class="section-title">
-                <span>🇺🇸</span>
+                <img src="https://flagcdn.com/gb.svg" alt="English">
                 For English Speakers
             </h2>
             <div class="language-grid">
-
-<a href="japanese.html" class="language-card">
-    <div class="language-flag">🇯🇵</div>
-    <div class="language-name">Japanese</div>
-    <div class="difficulty-meter">
-        <span class="difficulty-dot active"></span>
-        <span class="difficulty-dot active"></span>
-        <span class="difficulty-dot"></span>
-        <span class="difficulty-dot"></span>
-    </div>
-</a>
+                <a href="japanese.html" class="language-card">
+                    <div class="language-flag"><img src="https://flagcdn.com/jp.svg" alt="Japanese"></div>
+                    <div class="language-name">Japanese</div>
+                    <div class="difficulty-meter">
+                        <span class="difficulty-dot active"></span>
+                        <span class="difficulty-dot active"></span>
+                        <span class="difficulty-dot"></span>
+                        <span class="difficulty-dot"></span>
+                    </div>
+                </a>
                 <a href="spanish.html" class="language-card">
-                    <div class="language-flag">🇪🇸</div>
+                    <div class="language-flag"><img src="https://flagcdn.com/es.svg" alt="Spanish"></div>
                     <div class="language-name">Spanish</div>
                 </a>
                 <a href="french.html" class="language-card">
-                    <div class="language-flag">🇫🇷</div>
+                    <div class="language-flag"><img src="https://flagcdn.com/fr.svg" alt="French"></div>
                     <div class="language-name">French</div>
                 </a>
                 <a href="chinese.html" class="language-card">
-                    <div class="language-flag">🇨🇳</div>
+                    <div class="language-flag"><img src="https://flagcdn.com/cn.svg" alt="Chinese"></div>
                     <div class="language-name">Chinese</div>
                 </a>
                 <a href="latin.html" class="language-card">
-                    <div class="language-flag">🏛️</div>
+                    <div class="language-flag"><img src="https://flagcdn.com/w20/va.png" srcset="https://flagcdn.com/w40/va.png 2x" alt="Vatican City"></div>
                     <div class="language-name">Latin</div>
                 </a>
                 <a href="italian.html" class="language-card">
-                    <div class="language-flag">🇮🇹</div>
+                    <div class="language-flag"><img src="https://flagcdn.com/it.svg" alt="Italian"></div>
                     <div class="language-name">Italian</div>
                 </a>
             </div>
@@ -384,16 +490,16 @@
         <!-- For Japanese Speakers -->
         <section class="language-section">
             <h2 class="section-title">
-                <span>🇯🇵</span>
+                <img src="https://flagcdn.com/jp.svg" alt="Japanese">
                 日本語話者の方へ
             </h2>
             <div class="language-grid">
                 <a href="japanese-english.html" class="language-card">
-                    <div class="language-flag">🇺🇸</div>
+                    <div class="language-flag"><img src="https://flagcdn.com/gb.svg" alt="English"></div>
                     <div class="language-name">英語 (English)</div>
                 </a>
                 <a href="japanese-spanish.html" class="language-card">
-                    <div class="language-flag">🇪🇸</div>
+                    <div class="language-flag"><img src="https://flagcdn.com/es.svg" alt="Spanish"></div>
                     <div class="language-name">スペイン語 (Spanish)</div>
                 </a>
             </div>
@@ -419,110 +525,140 @@
                 </div>
             </div>
             <div class="quick-access">
-                <button class="btn" id="continue-learning" style="background-color: var(--highlight);">
+                <button class="btn" id="continue-learning">
                     Continue Learning
                 </button>
             </div>
         </section>
-<section class="quick-start-section">
-    <h2 class="section-title">
-        <span>⚡</span>
-        Quick Start
-    </h2>
-    <div class="quick-start-grid">
-        <a href="spanish.html" class="quick-start-card">
-            <div class="quick-start-icon">🇪🇸</div>
-            <div class="quick-start-title">Start with Spanish</div>
-            <div class="quick-start-desc">Most popular choice</div>
-        </a>
-        <a href="japanese.html" class="quick-start-card">
-            <div class="quick-start-icon">🇯🇵</div>
-            <div class="quick-start-title">Try Japanese</div>
-            <div class="quick-start-desc">Great for beginners</div>
-        </a>
-        <a href="french.html" class="quick-start-card">
-            <div class="quick-start-icon">🇫🇷</div>
-            <div class="quick-start-title">Learn French</div>
-            <div class="quick-start-desc">Romance language</div>
-        </a>
-    </div>
-</section>
-<section class="motivation-section">
-    <div class="motivation-card">
-        <h3 class="motivation-title">Daily Language Motivation</h3>
-        <p class="motivation-quote" id="daily-quote">"The limits of my language mean the limits of my world."</p>
-        <p class="motivation-author">- Ludwig Wittgenstein</p>
-    </div>
-</section>
 
-<footer class="footer">
-    <p>SentenceMODE © 2025 - Learn languages through immersive sentence practice</p>
-</footer>
-<script>
-    // Load progress stats from localStorage
-    function loadProgressStats() {
-        // Get stats from Japanese page
-        const jpStats = JSON.parse(localStorage.getItem('readingStats_ja') || '{}');
-        
-        // Update the display
-        document.getElementById('total-words').textContent = jpStats.wordsLearned || '0';
-        document.getElementById('current-streak').textContent = (jpStats.streak || '0') + ' days';
-        
-        // Get recently studied languages
-        const recentLangs = JSON.parse(localStorage.getItem('recentLanguages') || '[]');
-        document.getElementById('recent-languages').textContent = 
-            recentLangs.length > 0 ? recentLangs.join(', ') : 'None yet';
-    }
-const quotes = [
-    {
-        text: "Learning another language is not only learning different words for the same things, but learning another way to think about things.",
-        author: "Flora Lewis"
-    },
-    {
-        text: "To have another language is to possess a second soul.",
-        author: "Charlemagne"
-    },
-    {
-        text: "Language is the road map of a culture. It tells you where its people come from and where they are going.",
-        author: "Rita Mae Brown"
-    },
-    {
-        text: "One language sets you in a corridor for life. Two languages open every door along the way.",
-        author: "Frank Smith"
-    }
-];
+        <section class="quick-start-section">
+            <h2 class="section-title">
+                <span>⚡</span>
+                Quick Start
+            </h2>
+            <div class="quick-start-grid">
+                <a href="spanish.html" class="quick-start-card">
+                    <div class="quick-start-icon"><img src="https://flagcdn.com/es.svg" alt="Spanish"></div>
+                    <div class="quick-start-title">Start with Spanish</div>
+                    <div class="quick-start-desc">Most popular choice</div>
+                </a>
+                <a href="japanese.html" class="quick-start-card">
+                    <div class="quick-start-icon"><img src="https://flagcdn.com/jp.svg" alt="Japanese"></div>
+                    <div class="quick-start-title">Try Japanese</div>
+                    <div class="quick-start-desc">Great for beginners</div>
+                </a>
+                <a href="french.html" class="quick-start-card">
+                    <div class="quick-start-icon"><img src="https://flagcdn.com/fr.svg" alt="French"></div>
+                    <div class="quick-start-title">Learn French</div>
+                    <div class="quick-start-desc">Romance language</div>
+                </a>
+            </div>
+        </section>
 
-function showDailyQuote() {
-    const today = new Date().getDate();
-    const quoteIndex = today % quotes.length;
-    const quote = quotes[quoteIndex];
-    document.getElementById('daily-quote').textContent = `"${quote.text}"`;
-    document.querySelector('.motivation-author').textContent = `- ${quote.author}`;
-}
+        <section class="motivation-section">
+            <div class="motivation-card">
+                <h3 class="motivation-title">Daily Language Motivation</h3>
+                <p class="motivation-quote" id="daily-quote">"The limits of my language mean the limits of my world."</p>
+                <p class="motivation-author">- Ludwig Wittgenstein</p>
+            </div>
+        </section>
 
-window.addEventListener('DOMContentLoaded', showDailyQuote);
-    
-    // Continue learning button
-    document.getElementById('continue-learning').addEventListener('click', () => {
-        const recentLangs = JSON.parse(localStorage.getItem('recentLanguages') || '[]');
-        if (recentLangs.length > 0) {
-            // Redirect to the most recent language
-            window.location.href = recentLangs[0].toLowerCase() + '.html';
-        } else {
-            // Default to Japanese if no recent languages
-            window.location.href = 'japanese.html';
-        }
-    });
-    
-    // Load stats when page loads
-    window.addEventListener('DOMContentLoaded', loadProgressStats);
-</script>
+        <footer class="footer">
+            <p>SentenceMODE © 2025 - Learn languages through immersive sentence practice</p>
+        </footer>
+
+        <script>
+            // Load progress stats from localStorage
+            function loadProgressStats() {
+                // Get stats from Japanese page
+                const jpStats = JSON.parse(localStorage.getItem('readingStats_ja') || '{}');
+                
+                // Update the display
+                document.getElementById('total-words').textContent = jpStats.wordsLearned || '0';
+                document.getElementById('current-streak').textContent = (jpStats.streak || '0') + ' days';
+                
+                // Get recently studied languages
+                const recentLangs = JSON.parse(localStorage.getItem('recentLanguages') || '[]');
+                document.getElementById('recent-languages').textContent = 
+                    recentLangs.length > 0 ? recentLangs.join(', ') : 'None yet';
+            }
+
+            const quotes = [
+                {
+                    text: "Learning another language is not only learning different words for the same things, but learning another way to think about things.",
+                    author: "Flora Lewis"
+                },
+                {
+                    text: "To have another language is to possess a second soul.",
+                    author: "Charlemagne"
+                },
+                {
+                    text: "Language is the road map of a culture. It tells you where its people come from and where they are going.",
+                    author: "Rita Mae Brown"
+                },
+                {
+                    text: "One language sets you in a corridor for life. Two languages open every door along the way.",
+                    author: "Frank Smith"
+                }
+            ];
+
+            function showDailyQuote() {
+                const today = new Date().getDate();
+                const quoteIndex = today % quotes.length;
+                const quote = quotes[quoteIndex];
+                document.getElementById('daily-quote').textContent = `"${quote.text}"`;
+                document.querySelector('.motivation-author').textContent = `- ${quote.author}`;
+            }
+
+            window.addEventListener('DOMContentLoaded', showDailyQuote);
+            
+            // Continue learning button
+            document.getElementById('continue-learning').addEventListener('click', () => {
+                const recentLangs = JSON.parse(localStorage.getItem('recentLanguages') || '[]');
+                if (recentLangs.length > 0) {
+                    // Redirect to the most recent language
+                    window.location.href = recentLangs[0].toLowerCase() + '.html';
+                } else {
+                    // Default to Japanese if no recent languages
+                    window.location.href = 'japanese.html';
+                }
+            });
+            
+            // Load stats when page loads
+            window.addEventListener('DOMContentLoaded', loadProgressStats);
+        </script>
     </div>
 
     <script>
-        // Apply saved theme preference
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', savedTheme);
+        // ==================== THEME TOGGLE ====================
+const themeToggle = document.getElementById('theme-toggle');
+
+// 1. Check saved theme or use dark mode as default
+const currentTheme = localStorage.getItem('theme') || 'dark';
+document.documentElement.setAttribute('data-theme', currentTheme);
+
+// 2. Set the correct icon on page load
+if (currentTheme === 'light') {
+    themeToggle.innerHTML = '<span class="toggle-icon">☀️</span>';
+} else {
+    themeToggle.innerHTML = '<span class="toggle-icon">🌙</span>';
+}
+
+// 3. Toggle theme when button clicked
+themeToggle.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    // Update the theme and save preference
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    
+    // Update the icon
+    themeToggle.innerHTML = newTheme === 'light' 
+        ? '<span class="toggle-icon">☀️</span>' 
+        : '<span class="toggle-icon">🌙</span>';
+});
+// ======================================================
         
         // Add animation to language cards
         document.querySelectorAll('.language-card').forEach((card, index) => {
