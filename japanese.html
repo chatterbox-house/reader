@@ -1568,6 +1568,36 @@ header.hidden {
         .hard-mode-btn {
             width: 100%;
         }
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background-color: var(--secondary);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.review-progress {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: bold;
+}
+
+@media (max-width: 600px) {
+    .review-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+    }
+    
+    .review-container {
+        margin-top: 50px; /* Make space for fixed header */
+    }
+}
 @media (max-width: 600px) {
     .input-actions .btn {
         background-color: var(--highlight) !important;
@@ -1993,13 +2023,16 @@ header.hidden {
             </section>
             
             <section id="review-mode-view" class="view">
+    <div class="review-header">
+        <button class="btn" id="exit-review" aria-label="Exit review" style="background-color: var(--danger); margin: 0.5rem;">Exit Review</button>
+        <div class="review-progress" id="review-progress">0/0</div>
+    </div>
+    
     <button id="hide-header-btn" class="hide-header-btn" onclick="toggleHeaderVisibility()">↑</button>
-                <div class="review-container">
- 
-                    
-                    <div class="review-question" id="review-question"></div>
-                    
-                    <div id="matching-game-container" class="matching-game-container" style="display: none;">
+    <div class="review-container">
+        <div class="review-question" id="review-question"></div>
+        
+        <div id="matching-game-container" class="matching-game-container" style="display: none;">
                         <div class="matching-game-columns">
                             <div class="matching-column" id="left-column">
           
@@ -2018,7 +2051,6 @@ header.hidden {
                     </div>
                 </div>
                 
-                <button class="btn" id="exit-review" aria-label="Exit review">Exit Review</button>
             </section>
             
             <section id="manage-vocab-view" class="view">
@@ -3601,12 +3633,35 @@ function setupMatchingGame() {
     }
     
     // Update progress
+updateReviewProgress();
     updateProgressDisplay();
 }
      // Add scroll synchronization
     elements.leftColumn.addEventListener('scroll', syncScroll);
     elements.rightColumn.addEventListener('scroll', syncScroll);
+function updateReviewProgress() {
+    if (!state.reviewWords || state.reviewWords.length === 0) return;
+    
+    const total = state.reviewWords.length;
+    const remaining = total - state.currentReviewIndex;
+    
+    const progressElement = document.getElementById('review-progress');
+    if (progressElement) {
+        progressElement.textContent = `${total - remaining}/${total}`;
+        
+        // Add visual indicator when nearing completion
+        if (remaining <= 3) {
+            progressElement.style.color = 'var(--highlight)';
+            progressElement.style.fontWeight = 'bold';
+        } else {
+            progressElement.style.color = 'var(--text-secondary)';
+            progressElement.style.fontWeight = 'normal';
+        }
+    }
+}
 
+// Call this function whenever you update state.currentReviewIndex
+// For example, in startReview(), setupMatchingGame(), handleHardModeResponse(), etc.
 // New function to add
 function syncScroll(e) {
     // Determine which column was scrolled
@@ -3833,12 +3888,32 @@ function setupHardMode() {
     container.style.flexDirection = 'column';
     container.style.alignItems = 'center';
     
-    // Display Japanese word
+    // Display Japanese word with play button
+    const wordContainer = document.createElement('div');
+    wordContainer.style.display = 'flex';
+    wordContainer.style.alignItems = 'center';
+    wordContainer.style.marginBottom = '1.5rem';
+    
     const japaneseWord = document.createElement('div');
     japaneseWord.textContent = state.currentHardWord.word;
     japaneseWord.style.fontSize = '2.5rem';
-    japaneseWord.style.marginBottom = '1.5rem';
     japaneseWord.style.fontWeight = 'bold';
+    
+    // Add play button
+    const playButton = document.createElement('button');
+    playButton.innerHTML = '🔊';
+    playButton.style.marginLeft = '1rem';
+    playButton.style.background = 'none';
+    playButton.style.border = 'none';
+    playButton.style.fontSize = '1.5rem';
+    playButton.style.cursor = 'pointer';
+    playButton.title = 'Play pronunciation';
+    playButton.addEventListener('click', () => {
+        speakText(state.currentHardWord.word);
+    });
+    
+    wordContainer.appendChild(japaneseWord);
+    wordContainer.appendChild(playButton);
     
     // Display translation (hidden by default)
     const translation = document.createElement('div');
@@ -3860,7 +3935,7 @@ function setupHardMode() {
     });
     
     // Add elements to container
-    container.appendChild(japaneseWord);
+    container.appendChild(wordContainer);
     container.appendChild(showTranslationBtn);
     container.appendChild(translation);
     
@@ -3871,6 +3946,7 @@ function setupHardMode() {
     elements.reviewQuestion.style.display = 'flex';
     
     // Update progress display
+updateReviewProgress();
     const progressText = `Word ${state.currentReviewIndex + 1}/${state.reviewWords.length}`;
     document.getElementById('sentence-counter').textContent = progressText;
     document.getElementById('sentence-counter').style.display = 'block';
