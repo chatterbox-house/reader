@@ -10,6 +10,7 @@
 <style>
 html {
     overflow-x: hidden;
+    scroll-behavior: smooth;
 }
 
 body {
@@ -17,6 +18,43 @@ body {
     position: relative;
 }
 
+/* Animation classes */
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.slide-up {
+    animation: slideUp 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Animation Delays */
+.hero-section.fade-in {
+    animation-delay: 0.1s;
+}
+
+.text-import-container.slide-up {
+    animation-delay: 0.3s;
+}
+
+.testimonials-container.fade-in {
+    animation-delay: 0.5s;
+}
 .app-container {
     width: 100%;
     overflow-x: hidden;
@@ -386,6 +424,44 @@ header.hidden {
             to { opacity: 1; transform: translateY(0); }
         }
 
+.hero-section {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--highlight) 100%);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: white;
+  box-shadow: var(--shadow);
+}
+
+.hero-content h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.9;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.hero-btn {
+  padding: 0.8rem 1.8rem;
+  font-size: 1.1rem;
+}
+
+.hero-btn.outline {
+  background: transparent;
+  border: 2px solid white;
+}
+
 .text-import-container {
     background-color: var(--card-bg);
     border-radius: 12px;
@@ -393,7 +469,7 @@ header.hidden {
     box-shadow: var(--shadow);
     margin-bottom: 1rem;
     position: relative;
-    overflow: hidden; /* Add this line */
+    overflow: hidden;
 }
 
         h2 {
@@ -501,6 +577,15 @@ header.hidden {
             background-color: var(--highlight);
             color: white;
         }
+/* SVG Tutorial Placeholders */
+.tutorial-svg {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  border-radius: 8px;
+  margin-top: 1rem;
+  border: 1px solid var(--accent);
+}
 
 .sentence-display {
     background-color: var(--card-bg);
@@ -847,13 +932,51 @@ header.hidden {
             100% { transform: scale(1); }
         }
 
-        .resources-container {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-top: 1rem;
-            box-shadow: var(--shadow);
-        }
+.testimonials-container {
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+  box-shadow: var(--shadow);
+}
+
+.testimonials-container h3 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--highlight);
+}
+
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.testimonial-card {
+  background-color: var(--secondary);
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid var(--highlight);
+}
+
+.testimonial-text {
+  font-style: italic;
+  margin-bottom: 0.5rem;
+}
+
+.testimonial-author {
+  text-align: right;
+  font-weight: bold;
+  color: var(--text-secondary);
+}
+
+.resources-container {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+    box-shadow: var(--shadow);
+}
 
         .resources-title {
             font-size: 1.2rem;
@@ -1024,13 +1147,61 @@ header.hidden {
             color: #6c757d;
         }
 
-        .progress-stats {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            box-shadow: var(--shadow);
-        }
+.progress-stats {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow);
+}
+
+.progress-visualization {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.progress-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.progress-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--highlight);
+    border: 3px solid var(--highlight);
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 10px;
+    background: var(--secondary);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: var(--highlight);
+    transition: width 0.3s ease;
+}
+
+.progress-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
 
         .stat-item {
             display: flex;
@@ -1406,6 +1577,95 @@ header.hidden {
     margin-top: 1rem;
 }
     }
+/* Tutorial Modal */
+.tutorial-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.tutorial-modal.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal-content {
+  background-color: var(--primary);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 800px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: var(--shadow);
+}
+
+.close-modal {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.tutorial-steps {
+  margin: 2rem 0;
+}
+
+.tutorial-step {
+  display: none;
+  text-align: center;
+}
+
+.tutorial-step.active {
+  display: block;
+  animation: fadeIn 0.5s ease;
+}
+
+.tutorial-step img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin-top: 1rem;
+  border: 1px solid var(--accent);
+}
+
+.tutorial-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+}
+
+.step-indicators {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.indicator.active {
+  background-color: var(--highlight);
+}
 </style
 </head>
 <body>
@@ -1510,10 +1770,20 @@ header.hidden {
                     </div>
                 </div>
                 
-<div class="text-import-container">
-<h2>Import Japanese Text <span role="img" aria-label="Japanese">🇯🇵</span></h2>
+<div class="hero-section fade-in">
+  <div class="hero-content">
+    <h1>Master Japanese Through Reading</h1>
+    <p class="hero-subtitle">Paste any Japanese text and instantly get vocabulary help, translations, and flashcards</p>
+    <div class="hero-buttons">
+      <button class="btn hero-btn" id="try-demo-btn">Try Demo Text</button>
+      <button class="btn hero-btn outline" id="how-it-works-btn">How It Works</button>
+    </div>
+  </div>
+</div>
 
-                    <p>Paste Japanese text below to start learning (max 5,000 characters)</p>
+<div class="text-import-container slide-up">
+<h2>Import Japanese Text <span role="img" aria-label="Japanese">🇯🇵</span></h2>
+<p>Paste Japanese text below to start learning (max 5,000 characters)</p>
 
 <textarea class="text-input" id="text-input" placeholder="例: 猫が寝ている。犬が走っている。..." aria-label="Japanese text input"></textarea>
 <div class="char-count"><span id="char-count">0</span>/5000 characters</div>
@@ -1573,8 +1843,26 @@ header.hidden {
         </button>
     </div>
 </div>
-                
-                <div class="resources-container">
+
+<div class="testimonials-container fade-in">
+  <h3>What Our Learners Say</h3>
+  <div class="testimonials-grid">
+    <div class="testimonial-card">
+      <div class="testimonial-text">"This tool helped me go from N5 to N3 in just 3 months!"</div>
+      <div class="testimonial-author">- Sarah, USA</div>
+    </div>
+    <div class="testimonial-card">
+      <div class="testimonial-text">"Finally a tool that makes reading real Japanese texts manageable!"</div>
+      <div class="testimonial-author">- Tom, UK</div>
+    </div>
+    <div class="testimonial-card">
+      <div class="testimonial-text">"The vocabulary review system is incredibly effective."</div>
+      <div class="testimonial-author">- Aiko, Japan</div>
+    </div>
+  </div>
+</div>
+
+<div class="resources-container">
                     <h3 class="resources-title">📚 Japanese Learning Resources</h3>
                     <div class="resources-list">
                         <a href="https://www3.nhk.or.jp/news/easy/" class="resource-link" target="_blank" rel="noopener" aria-label="NHK Easy News">
@@ -1670,21 +1958,29 @@ header.hidden {
     Wipe All Data
 </button>
                 
-                <div class="progress-stats">
-                    <h3>Today's Progress</h3>
-                    <div class="streak-display">
-                        <span class="streak-count" id="daily-streak">0</span>
-                        <span class="streak-label">Day Streak</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Words Learned:</span>
-                        <span class="stat-value" id="daily-words-learned">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Time Spent:</span>
-                        <span class="stat-value" id="daily-time-spent">0 min</span>
-                    </div>
-                </div>
+<div class="progress-stats">
+    <h3>Today's Progress</h3>
+    <div class="progress-visualization">
+        <div class="progress-item">
+            <div class="progress-circle" id="streak-circle">
+                <span id="daily-streak">0</span>
+            </div>
+            <div class="progress-label">Day Streak</div>
+        </div>
+        <div class="progress-item">
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="words-progress" style="width: 0%"></div>
+            </div>
+            <div class="progress-label"><span id="daily-words-learned">0</span>/10 words</div>
+        </div>
+        <div class="progress-item">
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="time-progress" style="width: 0%"></div>
+            </div>
+            <div class="progress-label"><span id="daily-time-spent">0</span>/15 min</div>
+        </div>
+    </div>
+</div>
             </section>
             
             <section id="review-mode-view" class="view">
@@ -1793,8 +2089,51 @@ header.hidden {
         <div class="toast" id="toast"></div>
         <div class="sound-toggle" id="sound-toggle" aria-label="Toggle sound">🔊</div>
 
-        <div class="tooltip" id="word-tooltip"></div>
+<!-- How It Works Modal -->
+<div class="tutorial-modal" id="tutorial-modal">
+  <div class="modal-content">
+    <button class="close-modal" id="close-modal">&times;</button>
+    <h2>How JapLearner Works</h2>
+    <div class="tutorial-steps">
+      <div class="tutorial-step active">
+        <h3>Step 1: Add Japanese Text</h3>
+        <p>Paste any Japanese text or use our demo text to get started.</p>
+        <svg class="tutorial-svg" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="200" fill="var(--secondary)"/>
+  <text x="200" y="100" text-anchor="middle" fill="var(--text)" font-size="16" font-family="var(--font-family)">Paste Japanese Text</text>
+</svg>
+      </div>
+      <div class="tutorial-step">
+        <h3>Step 2: Read & Learn Words</h3>
+        <p>Click any word to see its translation and add it to your vocabulary.</p>
+        <svg class="tutorial-svg" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="200" fill="var(--secondary)"/>
+  <text x="200" y="100" text-anchor="middle" fill="var(--text)" font-size="16" font-family="var(--font-family)">Click Words to Learn</text>
+</svg>
+      </div>
+      <div class="tutorial-step">
+        <h3>Step 3: Review with Flashcards</h3>
+        <p>Practice your saved words with our smart flashcard system.</p>
+        <svg class="tutorial-svg" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="200" fill="var(--secondary)"/>
+  <text x="200" y="100" text-anchor="middle" fill="var(--text)" font-size="16" font-family="var(--font-family)">Flashcard Review</text>
+</svg>
+      </div>
     </div>
+    <div class="tutorial-nav">
+      <button class="btn tutorial-prev">Previous</button>
+      <div class="step-indicators">
+        <span class="indicator active"></span>
+        <span class="indicator"></span>
+        <span class="indicator"></span>
+      </div>
+      <button class="btn tutorial-next">Next</button>
+    </div>
+  </div>
+</div>
+
+<div class="tooltip" id="word-tooltip"></div>
+</div>
 
     <script>
 // App state
@@ -3622,6 +3961,33 @@ function toggleTheme() {
 
 
 function setupEventListeners() {
+// 1. First declare modal variables
+  const tutorialModal = document.getElementById('tutorial-modal');
+  const closeModal = document.getElementById('close-modal');
+  const tutorialSteps = document.querySelectorAll('.tutorial-step');
+  const indicators = document.querySelectorAll('.indicator');
+  const prevBtn = document.querySelector('.tutorial-prev');
+  const nextBtn = document.querySelector('.tutorial-next');
+  let currentStep = 0;
+
+  function showStep(stepIndex) {
+    tutorialSteps.forEach((step, index) => {
+      step.classList.toggle('active', index === stepIndex);
+    });
+    
+    indicators.forEach((indicator, index) => {
+      indicator.classList.toggle('active', index === stepIndex);
+    });
+    
+    prevBtn.disabled = stepIndex === 0;
+    nextBtn.disabled = stepIndex === tutorialSteps.length - 1;
+  }
+
+  // 2. Then add all other event listeners
+  document.getElementById('how-it-works-btn').addEventListener('click', () => {
+    tutorialModal.classList.add('active');
+    showStep(currentStep);
+  });
 // Translate section: Paste button
 document.getElementById('paste-btn-translate').addEventListener('click', async () => {
     try {
@@ -3671,6 +4037,12 @@ showToast(`Bookmark removed <button onclick="undoDelete('${undoId}')" style="mar
 state.lastDeleted = { id: id, item: state.bookmarks.find(b => b.id === id) };
 setTimeout(() => delete state.lastDeleted, 5000); // Clear after 5 sec
     }
+});
+// Close modal when clicking outside
+tutorialModal.addEventListener('click', (e) => {
+  if (e.target === tutorialModal) {
+    tutorialModal.classList.remove('active');
+  }
 });
 async function startVoiceInput(lang, targetId, buttonElement) {
     try {
@@ -3878,8 +4250,67 @@ document.getElementById('paste-btn').addEventListener('click', async () => {
         showToast('Paste failed. Please try again.', 'error');
     }
 });
-    // Process text button event listener
-    elements.processTextBtn.addEventListener('click', async () => {
+
+
+// Open modal
+document.getElementById('how-it-works-btn').addEventListener('click', () => {
+  tutorialModal.classList.add('active');
+  showStep(currentStep);
+});
+
+// Close modal
+closeModal.addEventListener('click', () => {
+  tutorialModal.classList.remove('active');
+});
+
+// Navigation
+prevBtn.addEventListener('click', () => {
+  if (currentStep > 0) {
+    currentStep--;
+    showStep(currentStep);
+  }
+});
+
+nextBtn.addEventListener('click', () => {
+  if (currentStep < tutorialSteps.length - 1) {
+    currentStep++;
+    showStep(currentStep);
+  }
+});
+
+// Indicator clicks
+indicators.forEach((indicator, index) => {
+  indicator.addEventListener('click', () => {
+    currentStep = index;
+    showStep(currentStep);
+  });
+});
+
+function showStep(stepIndex) {
+  tutorialSteps.forEach((step, index) => {
+    step.classList.toggle('active', index === stepIndex);
+  });
+  
+  indicators.forEach((indicator, index) => {
+    indicator.classList.toggle('active', index === stepIndex);
+  });
+  
+  prevBtn.disabled = stepIndex === 0;
+  nextBtn.disabled = stepIndex === tutorialSteps.length - 1;
+}
+
+// Demo text button
+document.getElementById('try-demo-btn').addEventListener('click', () => {
+  const demoText = `日本の文化は世界的に有名です。寿司やアニメ、桜などが特に人気があります。
+東京は日本の首都で、多くの観光客が訪れます。日本語を学ぶことは楽しいですよ！`;
+  
+  elements.textInput.value = demoText;
+  elements.charCount.textContent = demoText.length;
+  showToast('Demo text loaded! Click "Process Text" to start', 'success');
+});
+
+// Process text button event listener
+elements.processTextBtn.addEventListener('click', async () => {
         const text = elements.textInput.value.trim();
         if (text.length === 0) {
             showToast('Please enter some text', 'error');
