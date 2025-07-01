@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="英語学習アプリ - 日本語話者向け">
+<meta name="description" content="英語の文章を読んで単語を学べるアプリ。日本語対応の英語学習ツールです。">
     <meta name="theme-color" content="#1a1a2e">
-<title>センテンスモード - 英語学習ツール</title>
+<title>英文リーダー - 日本語ユーザー向け英語学習ツール</title>
 <style>
 html {
     overflow-x: hidden;
@@ -25,10 +25,10 @@ body {
     display: flex !important;
 }
 :root {
-    --primary: #2a2d45; /* Darker blue */
-    --secondary: #1e2138; /* Dark blue */
-    --accent: #3a4f7a; /* Soft blue */
-    --highlight: #ff6b6b; /* Soft red - more appealing than bright pink */
+    --primary: #2a3447; /* Softer navy blue */
+    --secondary: #3a5169; /* Muted blue */
+    --accent: #4a6b8a; /* Soft sky blue */
+    --highlight: #e67e7e; /* Cherry blossom pink */
     --text: #f8f9fa; /* Brighter white */
     --text-secondary: #adb5bd; /* Softer gray */
     --success: #51cf66; /* Softer green */
@@ -36,7 +36,7 @@ body {
     --danger: #ff8787; /* Softer red */
     --card-bg: rgba(255, 255, 255, 0.08); /* Slightly more visible */
         --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        --font-size: 16px;
+        --font-size: 18px; /* Slightly larger for Japanese */
         --line-height: 1.6;
         --font-family: 'Segoe UI', system-ui, sans-serif;
     }
@@ -111,13 +111,15 @@ html, body {
         font-size: var(--font-size);
         line-height: var(--line-height);
     }
-     header {
+header {
     background-color: var(--secondary);
     padding: 1rem;
     position: sticky;
     top: 0;
     z-index: 100;
     box-shadow: var(--shadow);
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.1"><path fill="%23e67e7e" d="M50 10Q55 25 70 25Q85 25 90 10Q85 15 70 15Q55 15 50 10M30 30Q35 45 50 45Q65 45 70 30Q65 35 50 35Q35 35 30 30"/></svg>');
+    background-size: 100px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -151,8 +153,8 @@ header.hidden {
     opacity: 1;
 }
 .welcome-banner {
-    position: absolute;
-    top: -30px;
+    position: fixed;
+    top: 0;
     left: 0;
     right: 0;
     background-color: var(--highlight);
@@ -160,7 +162,13 @@ header.hidden {
     text-align: center;
     padding: 5px;
     font-size: 0.8rem;
+    z-index: 102; /* Above header */
     animation: slideDown 0.5s forwards;
+}
+
+/* Add this new rule */
+header {
+    margin-top: 30px; /* Make space for banner */
 }
 
 @keyframes slideDown {
@@ -928,10 +936,8 @@ header.hidden {
 .loading-spinner {
     width: 20px;
     height: 20px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    border-top: 3px solid var(--highlight);
-    animation: spin 1s linear infinite;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" stroke="%23e67e7e" stroke-width="8" fill="none" stroke-dasharray="60 188"><animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="1s" repeatCount="indefinite"/></circle></svg>') no-repeat center;
+    background-size: contain;
     display: inline-block;
     margin-left: 10px;
     vertical-align: middle;
@@ -1453,89 +1459,116 @@ header.hidden {
     margin-top: 1rem;
 }
     }
+/* Cherry blossom season (March-April) */
+[data-season="spring"] {
+    --highlight: #e67e7e; /* Cherry blossom pink */
+}
+
+/* Summer festival (July-August) */
+[data-season="summer"] {
+    --highlight: #ff6b6b; /* Vibrant red */
+}
+
+/* Autumn leaves (October-November) */
+[data-season="autumn"] {
+    --highlight: #e67e22; /* Maple leaf orange */
+}
+
+/* Winter (December-February) */
+[data-season="winter"] {
+    --highlight: #7eb8e6; /* Ice blue */
+}
 </style
 </head>
 <body>
     <div class="app-container">
 <header>
-    <div class="welcome-banner">今日も英語を勉強しましょう！ (Let's study English today!)</div>
-    <div class="logo">Sentence Mode</div>
+    <div class="welcome-banner">英語学習アプリへようこそ！毎日少しずつ上達しましょう 🌸</div>
+    <div class="logo">英文リーダー</div>
     <div class="nav-tabs">
-<button class="nav-btn" data-view="home" aria-label="Home">🏠 ホーム</button>
-<button class="nav-btn active" data-view="text-import" aria-label="Reader">📖 リーダー</button>
-<button class="nav-btn" data-view="vocab-review" aria-label="Vocab">📚 単語</button>
-<button class="nav-btn" data-view="bookmarks-view" aria-label="Library">⭐ お気に入り</button>  
+        <button class="nav-btn" data-view="home" aria-label="ホーム">🏠 ホーム</button>
+        <button class="nav-btn active" data-view="text-import" aria-label="英文リーダー">📖 英文リーダー</button>
+        <button class="nav-btn" data-view="vocab-review" aria-label="単語学習">📚 単語学習</button>
+        <button class="nav-btn" data-view="bookmarks-view" aria-label="お気に入り">⭐ お気に入り</button>  
     </div>
     <div>
-        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">🌙</button>
-        <button class="settings-btn" id="settings-btn" aria-label="Settings">⚙️</button>
+        <button class="theme-toggle" id="theme-toggle" aria-label="テーマ変更">🌙</button>
+        <button class="settings-btn" id="settings-btn" aria-label="設定">⚙️</button>
     </div>
 </header>
         
         <div class="settings-overlay" id="settings-overlay"></div>
-        <div class="settings-panel" id="settings-panel">
+
+  <div class="settings-panel" id="settings-panel">
 <div class="settings-title">
-    <span>設定</span>
+    <span>アプリ設定</span>
     <button class="settings-btn" id="close-settings" aria-label="設定を閉じる">✕</button>
 </div>
-            <div class="settings-group">
-    <h3>読書設定</h3>
-    <div class="settings-toggle">
-        <label class="toggle-switch">
-            <input type="checkbox" id="auto-translate-toggle">
-            <span class="toggle-slider"></span>
-        </label>
-        <span class="toggle-label">自動翻訳を表示</span>
-    </div>
-</div>
-            
-<div class="settings-group">
-    <h3>表示設定</h3>
-    <label class="settings-label">フォント種類</label>
-    <select class="settings-select" id="font-select">
-        <option value="system">システムUI</option>
-        <option value="serif">セリフ体</option>
-        <option value="sans-serif">サンセリフ体</option>
-    </select>
-    
-    <label class="settings-label">文字サイズ</label>
-    <input type="range" class="settings-range" id="font-size-range" min="12" max="24" step="1" value="16">
-    
-    <label class="settings-label">行間</label>
-    <input type="range" class="settings-range" id="line-height-range" min="1.2" max="2.5" step="0.1" value="1.6">
-    
-    <label class="settings-label">テーマ</label>
-    <select class="settings-select" id="theme-select">
-        <option value="dark">ダーク</option>
-        <option value="light">ライト</option>
-        <option value="high-contrast">ハイコントラスト</option>
-    </select>
-</div>
-            
-<div class="settings-group">
-    <h3>進捗状況</h3>
-    <div class="streak-display">
-        <span class="streak-count" id="streak-count">0</span>
-        <span class="streak-label">日連続</span>
-        <span class="streak-count" id="daily-goal-count">0</span>
-        <span class="streak-label">/今日の目標5</span>
-    </div>
-    
-    <div class="stat-item">
-        <span class="stat-label">学習単語数:</span>
-        <span class="stat-value" id="words-learned-count">0</span>
-    </div>
-    
-    <div class="stat-item">
-        <span class="stat-label">学習時間:</span>
-        <span class="stat-value" id="time-spent-count">0 分</span>
-    </div>
-    
-    <button class="btn" id="view-progress-btn" style="width: 100%; margin-top: 1rem;">
-        詳細な進捗を見る
-    </button>
-</div>
+    <div class="settings-group">
+        <h3>読書設定</h3>
+        <div class="settings-toggle">
+            <label class="toggle-switch">
+                <input type="checkbox" id="auto-translate-toggle">
+                <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-label">自動で翻訳を表示</span>
         </div>
+        <div class="settings-toggle">
+            <label class="toggle-switch">
+                <input type="checkbox" id="auto-speak-toggle">
+                <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-label">自動で音声読み上げ</span>
+        </div>
+    </div>
+    
+    <div class="settings-group">
+        <h3>表示設定</h3>
+        <label class="settings-label">フォントの種類</label>
+        <select class="settings-select" id="font-select">
+            <option value="system">システム標準</option>
+            <option value="serif">明朝体</option>
+            <option value="sans-serif">ゴシック体</option>
+        </select>
+        
+        <label class="settings-label">文字の大きさ</label>
+        <input type="range" class="settings-range" id="font-size-range" min="12" max="24" step="1" value="16">
+        
+        <label class="settings-label">行の間隔</label>
+        <input type="range" class="settings-range" id="line-height-range" min="1.2" max="2.5" step="0.1" value="1.6">
+        
+        <label class="settings-label">カラーテーマ</label>
+        <select class="settings-select" id="theme-select">
+            <option value="dark">ダークモード</option>
+            <option value="light">ライトモード</option>
+            <option value="high-contrast">高コントラスト</option>
+        </select>
+    </div>
+    
+    <div class="settings-group">
+        <h3>学習の進み具合</h3>
+        <div class="streak-display">
+            <span class="streak-count" id="streak-count">0</span>
+            <span class="streak-label">日連続学習</span>
+            <span class="streak-count" id="daily-goal-count">0</span>
+            <span class="streak-label">/本日の目標 5単語</span>
+        </div>
+        
+        <div class="stat-item">
+            <span class="stat-label">覚えた単語:</span>
+            <span class="stat-value" id="words-learned-count">0語</span>
+        </div>
+        
+        <div class="stat-item">
+            <span class="stat-label">学習時間:</span>
+            <span class="stat-value" id="time-spent-count">0分</span>
+        </div>
+        
+        <button class="btn" id="view-progress-btn" style="width: 100%; margin-top: 1rem;">
+            詳しい進捗を見る
+        </button>
+    </div>
+</div>
         
         <div class="offline-warning" id="offline-warning">You are offline - some features may not work</div>
         
@@ -1547,33 +1580,39 @@ header.hidden {
                         <span>▼</span>
                     </div>
                     <div class="how-to-use-content" id="how-to-use-content">
-<p>1. 英語テキストを貼り付けるか、日本語から翻訳</p>
-<p>2. 文章を読み、単語を選択して語彙に追加</p>
-<p>3. マッチングゲームで語彙を復習</p>
-<p>4. ショートカット: 矢印キー(移動), スペース(TTS), Enter(確定)</p>
-                    </div>
+<h4>使い方ガイド</h4>
+<p>1. <strong>英文を入力</strong>: 英語の文章を貼り付けるか入力してください</p>
+<p>2. <strong>単語を学習</strong>: 文章を読み、知らない単語を選択して登録</p>
+<p>3. <strong>単語を復習</strong>: 単語帳で覚えた単語を復習できます</p>
+<p>4. <strong>便利なショートカット</strong>:</p>
+<ul>
+    <li>←→キー: 前後の文章に移動</li>
+    <li>スペースキー: 音声読み上げ</li>
+    <li>Enterキー: 単語を登録</li>
+</ul>
+</div>
                 </div>
                 
 <div class="text-import-container">
-<h2>英語テキストを入力 <span role="img" aria-label="english">🇬🇧</span></h2>
-<p>学習を始めるには英語テキストを貼り付けてください (最大5,000文字)</p>
-<textarea class="text-input" id="text-input" placeholder="例: 猫が寝ています。犬が走っています..." aria-label="英語テキスト入力"></textarea>
-<div class="char-count"><span id="char-count">0</span>/5000 characters</div>
+<h2>英語テキスト入力 <span role="img" aria-label="english">🇬🇧</span></h2>
+<p>英語のテキストを貼り付けるか入力してください (最大5,000文字)</p>
+<textarea class="text-input" id="text-input" placeholder="例: The cat is sleeping. The dog is running..." aria-label="英語テキスト入力欄"></textarea>
+<div class="char-count"><span id="char-count">0</span>/5000 文字</div>
 <div class="input-actions" style="gap: 0.5rem; margin-bottom: 1rem;">
-    <button id="貼り付け-btn" class="btn" style="background-color: var(--accent); flex: 1;" aria-label="貼り付け">
+    <button id="貼り付け-btn" class="btn" style="background-color: var(--accent); flex: 1;" aria-label="クリップボードから貼り付け">
         <span>📋 貼り付け</span>
     </button>
-    <button id="voice-input-btn" class="btn" style="background-color: var(--accent); flex: 1;" aria-label="音声入力">
+    <button id="voice-input-btn" class="btn" style="background-color: var(--accent); flex: 1;" aria-label="音声で入力">
         <span>🎤 音声入力</span>
     </button>
 </div><div class="button-group" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;">
-<button class="btn" id="process-text" aria-label="テキスト処理" style="flex: 1;">
-    <span>テキストを処理</span>
+<button class="btn" id="process-text" aria-label="テキストを分析" style="flex: 1;">
+    <span>テキストを分析</span>
 </button>
-<button class="btn" id="clear-text" style="background-color: var(--danger); flex: 1;" aria-label="クリア">
+<button class="btn" id="clear-text" style="background-color: var(--danger); flex: 1;" aria-label="入力をクリア">
     クリア
 </button>
-    <button class="btn" id="show-history-btn" style="background-color: var(--accent); width: 100%; margin-top: 0.5rem;" aria-label="履歴を表示">
+    <button class="btn" id="show-history-btn" style="background-color: var(--accent); width: 100%; margin-top: 0.5rem;" aria-label="過去のテキストを表示">
         履歴を表示
     </button>
 </div>
@@ -1671,67 +1710,68 @@ header.hidden {
                 </div>
                 <div class="translation-display" id="translation-display"></div>
                 
-                <div class="sentence-controls">
-                    <button class="control-btn" id="prev-sentence" aria-label="Previous sentence">←</button>
-                    <button class="control-btn" id="translate-btn" aria-label="Translate sentence">翻訳</button>
-                    <button class="control-btn" id="tts-button" aria-label="Text to speech">🔊</button>
-                    <button class="control-btn" id="next-sentence" aria-label="Next sentence">→</button>
-                </div>
+<div class="sentence-controls">
+    <button class="control-btn" id="prev-sentence" aria-label="前の文章">←</button>
+    <button class="control-btn" id="translate-btn" aria-label="翻訳を表示">翻訳</button>
+    <button class="control-btn" id="tts-button" aria-label="音声で読み上げ" title="音声で読み上げ (スペースキー)">🔊</button>
+    <button class="control-btn" id="vocab-list-btn" aria-label="単語リストを表示">📖</button>
+    <button class="control-btn" id="next-sentence" aria-label="次の文章">→</button>
+</div>
 <select id="translation-lang" class="lang-selector" aria-label="翻訳言語">
     <option value="ja">日本語</option>
     <option value="en">英語</option>
 </select>
             </section>
-            
-            <section id="vocab-review-view" class="view">
-                <h2>語彙レビュー</h2>
-                <p>Select a difficulty level to 復習開始ing</p>
-                
-                <div class="bucket-container">
-                    <div class="bucket-card new" data-bucket="new" aria-label="新しい単語">
-                        <div class="bucket-count" id="new-count">0</div>
-                        <div class="bucket-label">新しい単語</div>
-                    </div>
-                    <div class="bucket-card 簡単" data-bucket="簡単" aria-label="簡単 words">
-                        <div class="bucket-count" id="簡単-count">0</div>
-                        <div class="bucket-label">簡単</div>
-                    </div>
-                    <div class="bucket-card 中級" data-bucket="中級" aria-label="中級 words">
-                        <div class="bucket-count" id="中級-count">0</div>
-                        <div class="bucket-label">中級</div>
-                    </div>
-                    <div class="bucket-card 難しい" data-bucket="難しい" aria-label="難しい words">
-                        <div class="bucket-count" id="難しい-count">0</div>
-                        <div class="bucket-label">難しい</div>
-                    </div>
-                </div>
-                
-<div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-    <button class="btn" id="start-review" disabled aria-label="復習開始" style="flex: 1;">Select a difficulty to start</button>
-    <button class="btn" id="manage-vocab-btn" style="background-color: var(--accent); flex: 1;" aria-label="単語管理">
-        単語管理
+
+<section id="vocab-review-view" class="view">
+    <h2>単語の復習</h2>
+    <p>難易度を選んで復習を開始しましょう</p>
+    
+    <div class="bucket-container">
+        <div class="bucket-card new" data-bucket="new" aria-label="新規単語">
+            <div class="bucket-count" id="new-count">0</div>
+            <div class="bucket-label">新規単語</div>
+        </div>
+        <div class="bucket-card 簡単" data-bucket="簡単" aria-label="かんたんな単語">
+            <div class="bucket-count" id="簡単-count">0</div>
+            <div class="bucket-label">かんたん</div>
+        </div>
+        <div class="bucket-card 中級" data-bucket="中級" aria-label="中級の単語">
+            <div class="bucket-count" id="中級-count">0</div>
+            <div class="bucket-label">ちゅうきゅう</div>
+        </div>
+        <div class="bucket-card 難しい" data-bucket="難しい" aria-label="むずかしい単語">
+            <div class="bucket-count" id="難しい-count">0</div>
+            <div class="bucket-label">むずかしい</div>
+        </div>
+    </div>
+    
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+        <button class="btn" id="start-review" disabled aria-label="復習を開始" style="flex: 1;">難易度を選択してください</button>
+        <button class="btn" id="manage-vocab-btn" style="background-color: var(--accent); flex: 1;" aria-label="単語を管理">
+            単語を管理
+        </button>
+    </div>
+    <button class="btn" id="wipe-data-btn" style="background-color: var(--danger); width: 100%;" aria-label="すべてのデータを削除">
+        すべてのデータを削除
     </button>
-</div>
-<button class="btn" id="wipe-data-btn" style="background-color: var(--danger); width: 100%;" aria-label="全データ削除">
-    全データ削除
-</button>
-                
-                <div class="progress-stats">
-                    <h3>Today's Progress</h3>
-                    <div class="streak-display">
-                        <span class="streak-count" id="daily-streak">0</span>
-                        <span class="streak-label">Day Streak</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Words Learned:</span>
-                        <span class="stat-value" id="daily-words-learned">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Time Spent:</span>
-                        <span class="stat-value" id="daily-time-spent">0 min</span>
-                    </div>
-                </div>
-            </section>
+    
+    <div class="progress-stats">
+        <h3>本日の進捗</h3>
+        <div class="streak-display">
+            <span class="streak-count" id="daily-streak">0</span>
+            <span class="streak-label">日連続学習</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">覚えた単語:</span>
+            <span class="stat-value" id="daily-words-learned">0語</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">学習時間:</span>
+            <span class="stat-value" id="daily-time-spent">0分</span>
+        </div>
+    </div>
+</section>
             
             <section id="review-mode-view" class="view">
     <button id="hide-header-btn" class="hide-header-btn" onclick="toggleHeaderVisibility()">↑</button>
@@ -1840,7 +1880,37 @@ header.hidden {
         <div class="sound-toggle" id="sound-toggle" aria-label="Toggle sound">🔊</div>
 
         <div class="tooltip" id="word-tooltip"></div>
+<div id="vocab-popup" class="vocab-popup" style="display: none;">
+    <div class="vocab-popup-content">
+        <h3>この文章の単語</h3>
+        <div id="current-sentence-vocab"></div>
+        <button id="close-vocab-popup">閉じる</button>
     </div>
+</div>
+</div>
+
+<style>
+.vocab-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.vocab-popup-content {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+</style>
 
     <script>
 // App state
@@ -3167,7 +3237,7 @@ function translateCurrentSentence() {
             copyBtn.setAttribute('aria-label', 'Copy translation');
             copyBtn.addEventListener('click', () => {
                 navigator.clipboard.writeText(translation);
-                showToast('Translation copied!', 'success');
+                showToast('翻訳をコピーしました！', 'success');
 // Check for milestones
 if (state.readingStats.wordsLearned === 100) {
   showToast('🎉 100 Words Learned!', 'success');
@@ -3485,7 +3555,7 @@ function checkRoundCompletion() {
                 document.getElementById('hide-header-btn').classList.remove('visible');
                 showView('vocab-review-view');
                 updateBucketCounts();
-                showToast('Review completed!', 'success');
+                showToast('よくできました！ (Great job!)', 'success');
             }, 1500);
         }
     }
@@ -4025,8 +4095,36 @@ document.getElementById('translate-to-english').addEventListener('click', async 
     }
 });
 
-    // Reading view controls
-    elements.prevSentenceBtn.addEventListener('click', () => {
+// Vocab list button
+document.getElementById('vocab-list-btn').addEventListener('click', () => {
+    const currentSentence = state.sentences[state.currentSentenceIndex].original;
+    const words = currentSentence.split(/\s+/).filter(w => w.length > 0);
+    const vocabList = document.getElementById('current-sentence-vocab');
+    vocabList.innerHTML = '';
+    
+    words.forEach(word => {
+        const wordElement = document.createElement('div');
+        wordElement.textContent = word;
+        wordElement.style.padding = '5px';
+        wordElement.style.borderBottom = '1px solid var(--accent)';
+        wordElement.addEventListener('click', () => {
+            elements.selectedWord.textContent = word;
+            elements.vocabTranslation.value = '';
+            elements.wordSelectionBox.style.display = 'block';
+            document.getElementById('vocab-popup').style.display = 'none';
+        });
+        vocabList.appendChild(wordElement);
+    });
+    
+    document.getElementById('vocab-popup').style.display = 'flex';
+});
+
+document.getElementById('close-vocab-popup').addEventListener('click', () => {
+    document.getElementById('vocab-popup').style.display = 'none';
+});
+
+// Reading view controls
+elements.prevSentenceBtn.addEventListener('click', () => {
         if (state.currentSentenceIndex > 0) {
             state.currentSentenceIndex--;
             elements.sentenceDisplay.classList.remove('current-sentence');
@@ -4278,6 +4376,14 @@ if (state.currentView === 'review-mode-view' && state.reviewMode === '難しい'
 
 // Initialize the app
 async function initApp() {
+const month = new Date().getMonth();
+const seasons = [
+    'winter', 'winter', 'spring', 
+    'spring', 'spring', 'summer',
+    'summer', 'summer', 'autumn',
+    'autumn', 'autumn', 'winter'
+];
+document.documentElement.setAttribute('data-season', seasons[month]);
     try {
         db = await openDatabase();
         
