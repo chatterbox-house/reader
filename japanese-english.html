@@ -1485,6 +1485,34 @@ header {
 #vocab-review-view .btn#wipe-data-btn {
     margin-top: 1rem;
 }
+/* Add this to your CSS section */
+#review-mode-view .review-container {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+    min-height: 300px; /* Ensure minimum height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#review-mode-view .review-question {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    width: 100%;
+}
+
+#review-mode-view .難しい-mode-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    width: 100%;
+    justify-content: center;
+}
     }
 /* Cherry blossom season (March-April) */
 [data-season="spring"] {
@@ -1806,6 +1834,7 @@ header {
  
                     
                     <div class="review-question" id="review-question"></div>
+<div id="progress-text" class="sentence-counter"></div>
                     
                     <div id="matching-game-container" class="matching-game-container" style="display: none;">
                         <div class="matching-game-columns">
@@ -3298,6 +3327,7 @@ async function startReview(bucket) {
         setupMatchingGame();
     }
 }
+
 function setupMatchingGame() {
     // Hide header when matching game starts
     const header = document.querySelector('header');
@@ -3325,62 +3355,64 @@ function setupMatchingGame() {
         return;
     }
 
-if (state.reviewMode === 'new' || state.reviewMode === '簡単') {
-    // english cards on left (words)
-    const englishWordCards = shuffleArray([...wordsToShow]).map(word => ({
-        id: word.id,
-        type: 'english',
-        text: word.word,
-        streak: word.streak || 0
-    }));
+    if (state.reviewMode === 'new' || state.reviewMode === '簡単') {
+        // Japanese cards on left (translations)
+        const japaneseCards = shuffleArray([...wordsToShow]).map(word => ({
+            id: word.id,
+            type: 'japanese',
+            text: word.translation,
+            englishWord: word.word,
+            streak: word.streak || 0
+        }));
 
-    // English cards on right (translations)
-    const englishTranslationCards = shuffleArray([...wordsToShow]).map(word => ({
-        id: word.id,
-        type: 'english',
-        text: word.translation,
-        streak: word.streak || 0
-    }));
-    
-    // Add cards to columns
-    englishWordCards.forEach(word => {
-        const card = createWordCard(word);
-        elements.leftColumn.appendChild(card);
-    });
+        // English cards on right (words)
+        const englishCards = shuffleArray([...wordsToShow]).map(word => ({
+            id: word.id,
+            type: 'english',
+            text: word.word,
+            streak: word.streak || 0
+        }));
+        
+        // Add cards to columns
+        japaneseCards.forEach(word => {
+            const card = createWordCard(word);
+            elements.leftColumn.appendChild(card);
+        });
 
-    englishTranslationCards.forEach(word => {
-        const card = createWordCard(word);
-        elements.rightColumn.appendChild(card);
-    });
+        englishCards.forEach(word => {
+            const card = createWordCard(word);
+            elements.rightColumn.appendChild(card);
+        });
+        
+    } else if (state.reviewMode === '中級') {
+        // English cards on left (words)
+        const englishCards = shuffleArray([...wordsToShow]).map(word => ({
+            id: word.id,
+            type: 'english',
+            text: word.word,
+            streak: word.streak || 0
+        }));
+        
+        // Japanese cards on right (translations)
+        const japaneseCards = shuffleArray([...wordsToShow]).map(word => ({
+            id: word.id,
+            type: 'japanese',
+            text: word.translation,
+            streak: word.streak || 0
+        }));
+        
+        // Add cards to columns
+        englishCards.forEach(word => {
+            const card = createWordCard(word);
+            elements.leftColumn.appendChild(card);
+        });
+        
+        japaneseCards.forEach(word => {
+            const card = createWordCard(word);
+            elements.rightColumn.appendChild(card);
+        });
+    }
     
-} else { // 中級 mode
-    // english cards on left (words)
-    const englishWordCards = shuffleArray([...wordsToShow]).map(word => ({
-        id: word.id,
-        type: 'english',
-        text: word.word,
-        streak: word.streak || 0
-    }));
-    
-    // English cards on right (translations)
-    const englishTranslationCards = shuffleArray([...wordsToShow]).map(word => ({
-        id: word.id,
-        type: 'english',
-        text: word.translation,
-        streak: word.streak || 0
-    }));
-    
-    // Add cards to columns
-    englishWordCards.forEach(word => {
-        const card = createWordCard(word);
-        elements.leftColumn.appendChild(card);
-    });
-    
-    englishTranslationCards.forEach(word => {
-        const card = createWordCard(word);
-        elements.rightColumn.appendChild(card);
-    });
-}
     // Update progress
     updateProgressDisplay();
 }
@@ -3459,13 +3491,14 @@ function createWordCard(word) {
     card.addEventListener('click', function() {
         playSound('flip');
         
-        if ((word.type === 'english' && state.reviewMode === '中級') ||
-            (word.type === 'english' && (state.reviewMode === 'new' || state.reviewMode === '簡単'))) {
-                const matchingWord = state.reviewWords.find(w => w.id === word.id);
-                if (matchingWord) {
-                    speakEnglishText(matchingWord.word);
-                }
-            }
+        // Play TTS for English words when clicked in any mode
+        if (word.type === 'english') {
+            speakEnglishText(word.text);
+        } 
+        // Play TTS for Japanese words in new/easy mode (but show English text)
+        else if (word.type === 'japanese' && word.englishWord) {
+            speakEnglishText(word.englishWord);
+        }
         
         selectCard(this, word.type);
     });
@@ -3588,59 +3621,89 @@ function checkRoundCompletion() {
     }
 }
 
-
-
 function setup難しいMode() {
+    // Hide matching game and show hard mode buttons
     elements.matchingGameContainer.style.display = 'none';
     elements.難しいModeContainer.style.display = 'flex';
     
+    // Check if review is complete
     if (state.currentReviewIndex >= state.reviewWords.length) {
-        elements.reviewQuestion.textContent = "Review complete!";
+        elements.reviewQuestion.textContent = "復習完了!";
         elements.難しいModeContainer.style.display = 'none';
         return;
     }
     
+    // Get current word
     state.current難しいWord = state.reviewWords[state.currentReviewIndex];
     
-    // Create question with streak indicator
-    const questionDiv = document.createElement('div');
-    questionDiv.style.textAlign = 'center';
-    
-    const wordElement = document.createElement('div');
-    wordElement.textContent = state.current難しいWord.word;
-    wordElement.style.fontSize = '2rem';
-    wordElement.style.marginBottom = '1rem';
-    
-    const streakElement = document.createElement('div');
-    streakElement.textContent = `Streak: ${state.current難しいWord.streak || 0}/3`;
-    streakElement.style.fontSize = '0.9rem';
-    streakElement.style.color = 'var(--text-secondary)';
-    
-    const progressBar = document.createElement('div');
-    progressBar.style.height = '4px';
-    progressBar.style.width = '100%';
-    progressBar.style.backgroundColor = 'var(--secondary)';
-    progressBar.style.borderRadius = '2px';
-    progressBar.style.margin = '0.5rem auto';
-    
-    const progressFill = document.createElement('div');
-    progressFill.style.height = '100%';
-    progressFill.style.width = `${(state.current難しいWord.streak || 0) * 33.33}%`;
-    progressFill.style.backgroundColor = 'var(--highlight)';
-    progressFill.style.borderRadius = '2px';
-    
-    progressBar.appendChild(progressFill);
-    
-    questionDiv.appendChild(wordElement);
-    questionDiv.appendChild(streakElement);
-    questionDiv.appendChild(progressBar);
-    
+    // Clear previous content
     elements.reviewQuestion.innerHTML = '';
-    elements.reviewQuestion.appendChild(questionDiv);
     
-    // Update progress
-    elements.progressText.textContent = `Word ${state.currentReviewIndex + 1}/${state.reviewWords.length}`;
-    elements.progressFill.style.width = `${((state.currentReviewIndex + 1) / state.reviewWords.length) * 100}%`;
+    // Create container for the word and translation
+    const container = document.createElement('div');
+    container.style.textAlign = 'center';
+    container.style.padding = '1rem';
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.alignItems = 'center';
+    
+    // Display English word
+    const englishWord = document.createElement('div');
+    englishWord.textContent = state.current難しいWord.word;
+    englishWord.style.fontSize = '2.5rem';
+    englishWord.style.marginBottom = '1.5rem';
+    englishWord.style.fontWeight = 'bold';
+    
+    // Play sound button
+    const playSoundBtn = document.createElement('button');
+    playSoundBtn.textContent = '🔊 Play Sound';
+    playSoundBtn.className = 'btn';
+    playSoundBtn.style.marginBottom = '1rem';
+    playSoundBtn.style.backgroundColor = 'var(--accent)';
+    playSoundBtn.addEventListener('click', () => {
+        speakEnglishText(state.current難しいWord.word);
+    });
+    
+    // Display translation (hidden by default)
+    const translation = document.createElement('div');
+    translation.textContent = state.current難しいWord.translation;
+    translation.style.fontSize = '1.5rem';
+    translation.style.color = 'var(--text-secondary)';
+    translation.style.marginBottom = '1.5rem';
+    translation.style.display = 'none';
+    
+    // Show translation button
+    const showTranslationBtn = document.createElement('button');
+    showTranslationBtn.textContent = '翻訳を表示';
+    showTranslationBtn.className = 'btn';
+    showTranslationBtn.style.marginBottom = '1rem';
+    showTranslationBtn.style.backgroundColor = 'var(--accent)';
+    showTranslationBtn.addEventListener('click', () => {
+        translation.style.display = 'block';
+        showTranslationBtn.style.display = 'none';
+    });
+    
+    // Add elements to container
+    container.appendChild(englishWord);
+    container.appendChild(playSoundBtn);
+    container.appendChild(showTranslationBtn);
+    container.appendChild(translation);
+    
+    // Add container to review question
+    elements.reviewQuestion.appendChild(container);
+    
+    // Make sure review question is visible
+    elements.reviewQuestion.style.display = 'flex';
+    
+    // Update progress display
+    const progressText = `単語 ${state.currentReviewIndex + 1}/${state.reviewWords.length}`;
+    document.getElementById('progress-text').textContent = progressText;
+    
+    // Set up hard mode buttons
+    elements.knewItBtn.textContent = '知っている';
+    elements.didntKnowBtn.textContent = "知らない";
+    elements.skipBtn.textContent = 'スキップ';
+    elements.難しいModeContainer.style.display = 'flex';
 }
 
 // Track selected cards
@@ -3683,33 +3746,18 @@ function handle難しいModeResponse(knewIt) {
     if (!state.current難しいWord) return;
     
     if (knewIt) {
-        state.current難しいStreak++;
+        // If user knows the word, delete it (retire it)
+        const transaction = db.transaction([STORE_VOCAB], 'readwrite');
+        const store = transaction.objectStore(STORE_VOCAB);
+        store.delete(state.current難しいWord.id);
         
-        if (state.current難しいStreak >= 3) {
-            // Remove word from vocabulary (retired)
-            const transaction = db.transaction([STORE_VOCAB], 'readwrite');
-            const store = transaction.objectStore(STORE_VOCAB);
-            store.delete(state.current難しいWord.id);
-            
-            showToast('Word retired!', 'success');
-        } else {
-            // Move to next bucket
-            if (state.current難しいWord.bucket === '難しい') {
-                state.current難しいWord.bucket = '中級';
-            } else if (state.current難しいWord.bucket === '中級') {
-                state.current難しいWord.bucket = '簡単';
-            } else if (state.current難しいWord.bucket === '簡単') {
-                state.current難しいWord.bucket = 'new';
-            }
-            
-            updateVocabWord(state.current難しいWord);
-            showToast('Word moved to easier bucket', 'success');
-        }
+        showToast('単語を削除しました！よくできました！', 'success');
     } else {
-        state.current難しいStreak = 0;
+        // If user doesn't know the word, move it back to "new" bucket
         state.current難しいWord.bucket = 'new';
+        state.current難しいWord.streak = 0; // Reset streak
         updateVocabWord(state.current難しいWord);
-        showToast('Word moved back to 新しい単語', 'error');
+        showToast('単語を「新しい単語」に戻しました', 'error');
     }
     
     // Move to next word
@@ -4300,11 +4348,14 @@ function handleTextSelection() {
         });
     });
     
-    elements.startReviewBtn.addEventListener('click', () => {
-        if (state.reviewMode) {
-            startReview(state.reviewMode);
+elements.startReviewBtn.addEventListener('click', () => {
+    if (state.reviewMode) {
+        if (state.reviewMode === '難しい') {
+            setup難しいMode(); // Make sure we call the correct function
         }
-    });
+        startReview(state.reviewMode);
+    }
+});
 
     // Review mode
 elements.exitReviewBtn.addEventListener('click', () => {
