@@ -384,7 +384,38 @@ header.hidden {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+.welcome-banner {
+  background: linear-gradient(135deg, var(--highlight), var(--accent));
+  color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
 
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.feature-card {
+  background: rgba(255,255,255,0.1);
+  padding: 1rem;
+  border-radius: 8px;
+  transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+}
+
+.feature-card span {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
 .text-import-container {
     background-color: var(--card-bg);
     border-radius: 12px;
@@ -1405,6 +1436,145 @@ header.hidden {
     margin-top: 1rem;
 }
     }
+.progress-bar-container {
+  background: var(--secondary);
+  height: 20px;
+  border-radius: 10px;
+  margin: 1rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--highlight), var(--success));
+  width: 0%;
+  transition: width 0.5s ease;
+}
+
+.progress-message {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 0.8rem;
+  line-height: 20px;
+  color: white;
+  text-shadow: 0 0 3px rgba(0,0,0,0.5);
+}
+.sample-texts {
+  margin: 1rem 0;
+}
+
+.sample-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.sample-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sample-btn:hover {
+  background: var(--highlight);
+  transform: translateY(-2px);
+}
+.daily-challenge {
+  background: var(--card-bg);
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  position: relative;
+}
+
+.challenge-progress {
+  height: 10px;
+  background: var(--secondary);
+  border-radius: 5px;
+  margin: 1rem 0;
+  overflow: hidden;
+}
+
+.challenge-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff8a00, #ff0058);
+  width: 0%;
+  transition: width 0.5s ease;
+}
+
+.achievement-badge {
+  font-size: 2rem;
+  opacity: 0.3;
+  transition: all 0.3s ease;
+}
+
+.achievement-badge.unlocked {
+  opacity: 1;
+  transform: scale(1.2);
+  text-shadow: 0 0 10px gold;
+}
+.testimonials {
+  background: var(--secondary);
+  padding: 2rem;
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.testimonial-carousel {
+  position: relative;
+  min-height: 120px;
+}
+
+.testimonial {
+  position: absolute;
+  width: 100%;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.testimonial.active {
+  opacity: 1;
+}
+
+.testimonial p {
+  font-size: 1.2rem;
+  font-style: italic;
+  max-width: 600px;
+  margin: 0 auto 1rem;
+}
+
+.author {
+  font-weight: bold;
+  color: var(--highlight);
+}
+
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.carousel-dots span {
+  width: 10px;
+  height: 10px;
+  background: var(--text-secondary);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.carousel-dots span.active {
+  background: var(--highlight);
+}
 </style
 </head>
 <body>
@@ -1509,11 +1679,38 @@ header.hidden {
                     </div>
                 </div>
                 
+<div class="welcome-banner">
+  <h1>Learn Spanish with Sentence Mode</h1>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <span>📖</span>
+      <h3>Read Spanish Texts</h3>
+      <p>Improve by reading real Spanish content</p>
+    </div>
+    <div class="feature-card">
+      <span>🗣️</span>
+      <h3>Practice Speaking</h3>
+      <p>Use voice input to check pronunciation</p>
+    </div>
+    <div class="feature-card">
+      <span>📚</span>
+      <h3>Build Vocabulary</h3>
+      <p>Save and review new words</p>
+    </div>
+  </div>
+</div>
+
 <div class="text-import-container">
 <h2>Import spanish Text <span role="img" aria-label="spanish">🇪🇸</span></h2>
-
-                    <p>Paste spanish text below to start learning (max 5,000 characters)</p>
-
+<p>Paste spanish text below to start learning (max 5,000 characters)</p>
+<div class="sample-texts">
+  <h4>Try these sample texts:</h4>
+  <div class="sample-buttons">
+    <button class="sample-btn" data-sample="beginner">Beginner</button>
+    <button class="sample-btn" data-sample="intermediate">Intermediate</button>
+    <button class="sample-btn" data-sample="news">News Excerpt</button>
+  </div>
+</div>
 <textarea class="text-input" id="text-input" placeholder="Ejemplo: El gato está durmiendo. El perro está corriendo..." aria-label="Spanish text input"></textarea>
 <div class="char-count"><span id="char-count">0</span>/5000 characters</div>
 <div class="input-actions" style="gap: 0.5rem; margin-bottom: 1rem;">
@@ -1636,8 +1833,17 @@ header.hidden {
 </select>
             </section>
             
-            <section id="vocab-review-view" class="view">
-                <h2>Vocabulary Review</h2>
+<section id="vocab-review-view" class="view">
+    <div class="daily-challenge">
+        <h3>Daily Challenge</h3>
+        <p id="challenge-text">Complete 5 reviews to unlock today's achievement!</p>
+        <div class="challenge-progress">
+            <div class="challenge-fill" id="challenge-fill"></div>
+        </div>
+        <div class="achievement-badge" id="achievement-badge">🏆</div>
+    </div>
+    
+    <h2>Vocabulary Review</h2>
                 <p>Select a difficulty level to start reviewing</p>
                 
                 <div class="bucket-container">
@@ -1668,13 +1874,16 @@ header.hidden {
 <button class="btn" id="wipe-data-btn" style="background-color: var(--danger); width: 100%;" aria-label="Wipe all data">
     Wipe All Data
 </button>
-                
                 <div class="progress-stats">
-                    <h3>Today's Progress</h3>
-                    <div class="streak-display">
-                        <span class="streak-count" id="daily-streak">0</span>
-                        <span class="streak-label">Day Streak</span>
-                    </div>
+    <h3>Today's Progress</h3>
+    <div class="progress-bar-container">
+        <div class="progress-bar" id="daily-progress-bar"></div>
+        <div class="progress-message" id="progress-message">Let's get started!</div>
+    </div>
+    <div class="streak-display">
+        <span class="streak-count" id="daily-streak">0</span>
+        <span class="streak-label">Day Streak</span>
+    </div>
                     <div class="stat-item">
                         <span class="stat-label">Words Learned:</span>
                         <span class="stat-value" id="daily-words-learned">0</span>
@@ -1776,7 +1985,26 @@ header.hidden {
         Clear All Bookmarks
     </button>
 </section>
-        </main>
+</main>
+
+<div class="testimonials">
+  <h2>Success Stories</h2>
+  <div class="testimonial-carousel">
+    <div class="testimonial active">
+      <p>"I learned 500 words in 2 months using this tool!"</p>
+      <div class="author">- María, Spain</div>
+    </div>
+    <div class="testimonial">
+      <p>"Finally a tool that makes reading Spanish enjoyable!"</p>
+      <div class="author">- John, USA</div>
+    </div>
+    <div class="testimonial">
+      <p>"My comprehension improved dramatically in weeks."</p>
+      <div class="author">- Sophie, France</div>
+    </div>
+  </div>
+  <div class="carousel-dots"></div>
+</div>
         
         <div class="confirmation-dialog" id="wipe-confirmation" style="display: none;">
             <div class="dialog-content" style="background-color: var(--card-bg); padding: 1.5rem; border-radius: 12px; max-width: 400px; margin: 0 auto; text-align: center; box-shadow: var(--shadow);">
@@ -1844,7 +2072,46 @@ currentTtsUtterance: null,
 wordLookupCache: {},
 bookmarks: JSON.parse(localStorage.getItem('bookmarks_es')) || []
 };
-
+// Add to initApp()
+function initTestimonialCarousel() {
+  const testimonials = document.querySelectorAll('.testimonial');
+  const dotsContainer = document.querySelector('.carousel-dots');
+  let currentIndex = 0;
+  
+  // Create dots
+  testimonials.forEach((_, index) => {
+    const dot = document.createElement('span');
+    dot.addEventListener('click', () => {
+      goToTestimonial(index);
+    });
+    dotsContainer.appendChild(dot);
+  });
+  
+  // Update dots
+  function updateDots() {
+    const dots = dotsContainer.querySelectorAll('span');
+    dots.forEach((dot, index) => {
+      dot.classList.toggle('active', index === currentIndex);
+    });
+  }
+  
+  // Go to specific testimonial
+  function goToTestimonial(index) {
+    testimonials[currentIndex].classList.remove('active');
+    currentIndex = index;
+    testimonials[currentIndex].classList.add('active');
+    updateDots();
+  }
+  
+  // Auto-rotate
+  setInterval(() => {
+    const nextIndex = (currentIndex + 1) % testimonials.length;
+    goToTestimonial(nextIndex);
+  }, 5000);
+  
+  // Initialize
+  updateDots();
+}
 // Initialize audio context and sounds
 function initAudio() {
     try {
@@ -3569,6 +3836,25 @@ function toggleTheme() {
 
 
 function setupEventListeners() {
+// Add to setupEventListeners()
+document.querySelectorAll('.sample-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const level = btn.dataset.sample;
+    let text = '';
+    
+    if (level === 'beginner') {
+      text = "Hola. Me llamo Juan. Soy de España. Me gusta leer libros y escuchar música. ¿Y tú?";
+    } else if (level === 'intermediate') {
+      text = "Ayer fui al mercado para comprar frutas y verduras. Compré manzanas, plátanos y lechuga. Después, visité a mi amiga María y tomamos café juntas.";
+    } else if (level === 'news') {
+      text = "El gobierno ha anunciado nuevas medidas para impulsar la economía. Según el ministro, estas reformas crearán miles de empleos y mejorarán la competitividad del país.";
+    }
+    
+    document.getElementById('text-input').value = text;
+    document.getElementById('char-count').textContent = text.length;
+    showToast(`Loaded ${level} sample text`, 'success');
+  });
+});
 // Translate section: Paste button
 document.getElementById('paste-btn-translate').addEventListener('click', async () => {
     try {
