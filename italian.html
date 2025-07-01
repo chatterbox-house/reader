@@ -3392,10 +3392,13 @@ function checkRoundCompletion() {
                 setupMatchingGame();
             }, 1500);
         } else {
-            // Review complete
+            // Review complete - show header and return to vocab review
             setTimeout(() => {
+                document.querySelector('header').classList.remove('hidden');
+                document.getElementById('hide-header-btn').classList.remove('visible');
                 showView('vocab-review-view');
                 updateBucketCounts();
+                showToast('Review completed!', 'success');
             }, 1500);
         }
     }
