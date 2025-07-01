@@ -153,22 +153,32 @@ header.hidden {
     opacity: 1;
 }
 .welcome-banner {
-    position: fixed;
+    position: sticky;
     top: 0;
     left: 0;
     right: 0;
     background-color: var(--highlight);
     color: white;
     text-align: center;
-    padding: 5px;
-    font-size: 0.8rem;
-    z-index: 102; /* Above header */
-    animation: slideDown 0.5s forwards;
+    padding: 3px;
+    font-size: 0.7rem;
+    z-index: 100; /* Same as header */
 }
 
-/* Add this new rule */
 header {
-    margin-top: 30px; /* Make space for banner */
+    position: sticky;
+    top: 20px; /* Adjusted for banner */
+    z-index: 100;
+}
+
+@media (max-width: 600px) {
+    .welcome-banner {
+        font-size: 0.6rem;
+        padding: 2px;
+    }
+    header {
+        top: 15px;
+    }
 }
 
 @keyframes slideDown {
@@ -1163,14 +1173,31 @@ header {
 
 @media (max-width: 600px) {
     .review-container {
-        height: calc(100vh - 80px); /* More compact */
+        height: calc(100vh - 100px);
         padding: 0.5rem;
     }
     
     .sentence-display {
-        min-height: 120px;
-        padding: 0.8rem;
-        font-size: 1.1rem;
+        min-height: 140px;
+        padding: 1rem;
+        font-size: 1.2rem;
+        margin-top: 10px;
+    }
+    
+    .welcome-banner {
+        position: sticky;
+        top: 0;
+        font-size: 0.6rem;
+        padding: 2px;
+    }
+    
+    header {
+        padding-top: 20px;
+    }
+    
+    .nav-btn {
+        font-size: 0.7rem !important;
+        padding: 0.3rem 0.5rem !important;
     }
     
     .control-btn {
@@ -1501,8 +1528,8 @@ header {
 
   <div class="settings-panel" id="settings-panel">
 <div class="settings-title">
-    <span>アプリ設定</span>
-    <button class="settings-btn" id="close-settings" aria-label="設定を閉じる">✕</button>
+    <span>設定メニュー</span>
+    <button class="settings-btn" id="close-settings" aria-label="設定を閉じる">✕ 閉じる</button>
 </div>
     <div class="settings-group">
         <h3>読書設定</h3>
@@ -1594,17 +1621,17 @@ header {
                 </div>
                 
 <div class="text-import-container">
-<h2>英語テキスト入力 <span role="img" aria-label="english">🇬🇧</span></h2>
-<p>英語のテキストを貼り付けるか入力してください (最大5,000文字)</p>
+<h2>英文入力 <span role="img" aria-label="english">🇬🇧</span></h2>
+<p>英文を貼り付けるか直接入力してください (5,000文字まで)</p>
 <textarea class="text-input" id="text-input" placeholder="例: The cat is sleeping. The dog is running..." aria-label="英語テキスト入力欄"></textarea>
 <div class="char-count"><span id="char-count">0</span>/5000 文字</div>
 <div class="input-actions" style="gap: 0.5rem; margin-bottom: 1rem;">
     <button id="貼り付け-btn" class="btn" style="background-color: var(--accent); flex: 1;" aria-label="クリップボードから貼り付け">
-        <span>📋 貼り付け</span>
-    </button>
-    <button id="voice-input-btn" class="btn" style="background-color: var(--accent); flex: 1;" aria-label="音声で入力">
-        <span>🎤 音声入力</span>
-    </button>
+    <span>📋 貼り付ける</span>
+</button>
+<button id="voice-input-btn" class="btn" style="background-color: var(--accent); flex: 1;" aria-label="音声で入力">
+    <span>🎤 音声で入力</span>
+</button>
 </div><div class="button-group" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;">
 <button class="btn" id="process-text" aria-label="テキストを分析" style="flex: 1;">
     <span>テキストを分析</span>
@@ -4487,6 +4514,25 @@ function undoDelete(id) {
     showToast('Bookmark restored!', 'success');
   }
 }
+// Add tooltips for icons
+function addJapaneseTooltips() {
+    const elements = [
+        { selector: '#theme-toggle', text: 'テーマ変更' },
+        { selector: '#settings-btn', text: '設定' },
+        { selector: '#tts-button', text: '音声読み上げ' },
+        { selector: '#vocab-list-btn', text: '単語リスト' }
+    ];
+    
+    elements.forEach(item => {
+        const el = document.querySelector(item.selector);
+        if (el) {
+            el.setAttribute('title', item.text);
+        }
+    });
+}
+
+// Call this function after page load
+window.addEventListener('DOMContentLoaded', addJapaneseTooltips);
 </script>
 </body>
 </html>
