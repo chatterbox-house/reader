@@ -3798,8 +3798,6 @@ function checkRoundCompletion() {
     }
 }
 
-
-
 function setupHardMode() {
     // Hide matching game and show hard mode buttons
     elements.matchingGameContainer.style.display = 'none';
@@ -3822,6 +3820,9 @@ function setupHardMode() {
     const container = document.createElement('div');
     container.style.textAlign = 'center';
     container.style.padding = '1rem';
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.alignItems = 'center';
     
     // Display Japanese word
     const japaneseWord = document.createElement('div');
@@ -3857,16 +3858,20 @@ function setupHardMode() {
     // Add container to review question
     elements.reviewQuestion.appendChild(container);
     
+    // Make sure review question is visible
+    elements.reviewQuestion.style.display = 'flex';
+    
     // Update progress display
     const progressText = `Word ${state.currentReviewIndex + 1}/${state.reviewWords.length}`;
     document.getElementById('sentence-counter').textContent = progressText;
+    document.getElementById('sentence-counter').style.display = 'block';
     
     // Set up hard mode buttons
     elements.knewItBtn.textContent = 'I Know This';
     elements.didntKnowBtn.textContent = "Don't Know";
     elements.skipBtn.textContent = 'Skip';
+    elements.hardModeContainer.style.display = 'flex';
 }
-
 // Track selected cards
 let selectedLeftCard = null;
 let selectedRightCard = null;
