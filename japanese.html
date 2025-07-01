@@ -1823,6 +1823,7 @@ const state = {
     uiLanguage: localStorage.getItem('uiLanguage_ja') || 'en',
     newWordsToday: parseInt(localStorage.getItem('newWordsToday_ja')) || 0,
     lastWordAddedDate: localStorage.getItem('lastWordAddedDate_ja') || '',
+languageUsage: JSON.parse(localStorage.getItem('languageUsage')) || {},
 
 
     currentFont: localStorage.getItem('font_ja') || 'system',
@@ -2876,6 +2877,19 @@ function resumeTTS() {
 
 // View management
 function showView(viewId) {
+// Track language usage
+if (!state.languageUsage['japanese']) {
+    state.languageUsage['japanese'] = 0;
+}
+state.languageUsage['japanese']++;
+localStorage.setItem('languageUsage', JSON.stringify(state.languageUsage));
+
+// Update recent languages list
+let recentLangs = JSON.parse(localStorage.getItem('recentLanguages')) || [];
+recentLangs = recentLangs.filter(lang => lang !== 'Japanese');
+recentLangs.unshift('Japanese');
+if (recentLangs.length > 3) recentLangs.pop();
+localStorage.setItem('recentLanguages', JSON.stringify(recentLangs));
     Object.values(elements.views).forEach(view => {
         view.classList.remove('active');
     });
@@ -3433,10 +3447,13 @@ function checkRoundCompletion() {
                 setupMatchingGame();
             }, 1500);
         } else {
-            // Review complete
+            // Review complete - show header and return to vocab review
             setTimeout(() => {
+                document.querySelector('header').classList.remove('hidden');
+                document.getElementById('hide-header-btn').classList.remove('visible');
                 showView('vocab-review-view');
                 updateBucketCounts();
+                showToast('Review completed!', 'success');
             }, 1500);
         }
     }
