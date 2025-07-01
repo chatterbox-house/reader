@@ -5,8 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#1a1a2e">
-    <title>JapLearner - Japanese Learning Tool</title>
-
+<title>Sentence Mode - Japanese Learning Tool</title>
 <style>
 html {
     overflow-x: hidden;
@@ -190,12 +189,17 @@ header.hidden {
     opacity: 1;
 }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--highlight);
-        }
+.logo {
+    display: flex;
+    align-items: center;
+    height: 40px;
+}
 
+.logo img {
+    height: 100%;
+    width: auto;
+    object-fit: contain;
+}
         .nav-tabs {
             display: flex;
             gap: 0.5rem;
@@ -1346,13 +1350,15 @@ header.hidden {
         gap: 0.5rem;
     }
     
-    .logo {
-        font-size: 1.2rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 30%; /* Limits logo width */
-    }
+.logo {
+    height: 30px;
+    max-width: 30%; /* Limits logo width */
+}
+
+.logo img {
+    height: 100%;
+    width: auto;
+}
     
     .nav-tabs {
         flex: 1; /* Takes remaining space */
@@ -1671,9 +1677,12 @@ header.hidden {
 <body>
     <div class="app-container">
 <header>
-    <div class="logo">JapLearner</div>
-    <div class="nav-tabs">
-        <button class="nav-btn" data-view="home" aria-label="Home">🏠 Home</button>
+    <div class="logo">
+        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/Flag_of_Japan.svg/1200px-Flag_of_Japan.svg.png" 
+             alt="Japanese Flag" 
+             style="height: 40px; width: auto; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+    </div>
+    <div class="nav-tabs">        <button class="nav-btn" data-view="home" aria-label="Home">🏠 Home</button>
         <button class="nav-btn active" data-view="text-import" aria-label="Reader">Reader</button>
         <button class="nav-btn" data-view="vocab-review" aria-label="Vocab">Vocab</button>
         <button class="nav-btn" data-view="bookmarks-view" aria-label="Library">Library</button> 
