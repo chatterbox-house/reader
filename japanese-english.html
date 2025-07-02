@@ -1710,9 +1710,9 @@ header {
 <!-- Translate Section -->
 <div id="translate-container" class="text-import-container" style="display: none;">
     <h2>英語に翻訳 <span role="img" aria-label="From your language to english">🌐 → 🇬🇧</span></h2>
-    <p>Type or 音声入力 text in your language to 英語に翻訳 (max 5,000 characters)</p>
+    <p>日本語でテキストを入力または音声入力して英語に翻訳 (最大5,000文字)</p>
         <textarea class="text-input" id="translate-input" placeholder="例: 猫が寝ています。犬が走っています..." aria-label="Translation input"></textarea>
-        <div class="char-count"><span id="translate-char-count">0</span>/5000 characters</div>
+        <div class="char-count"><span id="translate-char-count">0</span>/5000 文字</div>
         <div class="input-actions" style="gap: 0.5rem; margin-bottom: 1rem;">
             <button id="貼り付け-btn-translate" class="btn" style="background-color: var(--accent); flex: 1;" aria-label="貼り付け">
                 <span>📋 貼り付け</span>
@@ -1722,7 +1722,7 @@ header {
             </button>
         </div>
     <div class="button-group" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;">
-<button class="btn" id="translate-to-english" aria-label="Translate text" style="flex: 1;">
+<button class="btn" id="translate-to-english" aria-label="英語に翻訳" style="flex: 1;">
     <span>英語に翻訳</span>
 </button>        <button class="btn" id="clear-text-translate" style="background-color: var(--danger); flex: 1;" aria-label="クリア">
             クリア
@@ -1918,7 +1918,7 @@ header {
             
             <section id="history-view" class="view">
                 <h2>最近読んだテキスト</h2>
-                <p>Your recently imported texts (saved for 24 hours)</p>
+<p>最近インポートしたテキスト (24時間保存されます)</p>
                 
                 <div id="history-list" class="resources-container">
                     <!-- History items will appear here -->
@@ -1945,16 +1945,16 @@ header {
 </section>
         </main>
         
-        <div class="confirmation-dialog" id="wipe-confirmation" style="display: none;">
-            <div class="dialog-content" style="background-color: var(--card-bg); padding: 1.5rem; border-radius: 12px; max-width: 400px; margin: 0 auto; text-align: center; box-shadow: var(--shadow);">
-                <h3 style="margin-bottom: 1rem; color: var(--danger);">Warning!</h3>
-                <p style="margin-bottom: 1.5rem;">This will delete ALL your saved sentences and vocabulary. This cannot be undone!</p>
-                <div style="display: flex; gap: 1rem; justify-content: center;">
-                    <button class="btn" id="confirm-wipe" style="background-color: var(--danger);" aria-label="Confirm wipe">Yes, Delete Everything</button>
-                    <button class="btn" id="cancel-wipe" style="background-color: var(--accent);" aria-label="Cancel wipe">Cancel</button>
-                </div>
-            </div>
+<div class="confirmation-dialog" id="wipe-confirmation" style="display: none;">
+    <div class="dialog-content" style="background-color: var(--card-bg); padding: 1.5rem; border-radius: 12px; max-width: 400px; margin: 0 auto; text-align: center; box-shadow: var(--shadow);">
+        <h3 style="margin-bottom: 1rem; color: var(--danger);">警告!</h3>
+        <p style="margin-bottom: 1.5rem;">保存されたすべての文章と単語が削除されます。この操作は元に戻せません!</p>
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+            <button class="btn" id="confirm-wipe" style="background-color: var(--danger);" aria-label="すべて削除">はい、すべて削除します</button>
+            <button class="btn" id="cancel-wipe" style="background-color: var(--accent);" aria-label="キャンセル">キャンセル</button>
         </div>
+    </div>
+</div>
         
         <div class="toast" id="toast"></div>
         <div class="sound-toggle" id="sound-toggle" aria-label="Toggle sound">🔊</div>
@@ -3108,10 +3108,10 @@ function updateBucketCounts() {
         const selectedBucket = state.reviewMode;
         if (selectedBucket && counts[selectedBucket] > 0) {
             elements.startReviewBtn.disabled = false;
-            elements.startReviewBtn.textContent = `Review ${selectedBucket} words`;
+            elements.startReviewBtn.textContent = `${selectedBucket}の単語を復習`;
         } else {
             elements.startReviewBtn.disabled = true;
-            elements.startReviewBtn.textContent = 'Select a difficulty to start';
+            elements.startReviewBtn.textContent = '難易度を選択して開始';
         }
     });
 }
@@ -3570,9 +3570,9 @@ function checkMatch(leftCard, rightCard) {
                 // Show feedback
                 const neededForNext = 3 - matchedWord.streak;
                 if (neededForNext > 0) {
-                    showToast(`Correct! Need ${neededForNext} more correct answers to move up`, 'success');
+                    showToast(`正解！次のレベルに進むにはあと${neededForNext}回正解が必要です`, 'success');;
                 } else {
-                    showToast('Correct! Word will move to next bucket', 'success');
+                    showToast('正解！この単語は次のレベルに移動します', 'success');
                     moveWordToNextBucket(matchedWord);
                 }
             });
@@ -3869,7 +3869,7 @@ document.getElementById('bookmarks-list').addEventListener('click', (e) => {
         localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
         renderBookmarks();
 const undoId = generateUUID();
-showToast(`Bookmark removed <button onclick="undoDelete('${undoId}')" style="margin-left: 10px; background: none; border: none; color: var(--highlight); text-decoration: underline; cursor: pointer;">Undo</button>`, 'success');
+showToast(`ブックマークを削除しました <button onclick="undoDelete('${undoId}')" style="margin-left: 10px; background: none; border: none; color: var(--highlight); text-decoration: underline; cursor: pointer;">元に戻す</button>`, 'success');
 
 // Store the deleted item temporarily
 state.lastDeleted = { id: id, item: state.bookmarks.find(b => b.id === id) };
@@ -4184,9 +4184,9 @@ document.getElementById('translate-to-english').addEventListener('click', async 
             
             // Switch to english input view
             document.querySelector('.mode-toggle-btn[data-mode="import"]').click();
-            showToast('Translation complete!', 'success');
+            showToast('翻訳が完了しました！', 'success');
         } else {
-            showToast('Translation failed. Please try again.', 'error');
+            showToast('翻訳に失敗しました。もう一度お試しください。', 'error');
         }
     } catch (error) {
         console.error('Translation error:', error);
@@ -4313,7 +4313,7 @@ function handleTextSelection() {
                 
                 entriesContainer.appendChild(entryDiv);
             } else {
-                entriesContainer.innerHTML = '<div class="dictionary-entry">No definition found</div>';
+                entriesContainer.innerHTML = '<div class="dictionary-entry">定義が見つかりませんでした</div>';
             }
         } catch (error) {
             console.error('Dictionary error:', error);
