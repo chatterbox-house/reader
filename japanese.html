@@ -647,16 +647,15 @@ h2 {
 
 /* Review Mode */
 .review-container {
-  background-color: var(--card-bg);
-  border-radius: 12px;
-  padding: 0;
-  margin: 0;
-  box-shadow: var(--shadow);
-  height: calc(100vh - 120px); /* Full height minus header and buttons */
-  display: flex;
-  flex-direction: column;
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 0;
+    margin: 0;
+    box-shadow: var(--shadow);
+    height: calc(100vh - 180px); /* Increased space at bottom */
+    display: flex;
+    flex-direction: column;
 }
-
 .review-header {
   display: flex;
   justify-content: space-between;
@@ -699,13 +698,13 @@ h2 {
   opacity: 1; 
 }
 
-/* Matching Game */
 .matching-game-container {
     display: flex;
     flex-direction: column;
     flex: 1;
     margin: 0;
-    overflow: hidden;
+    overflow-y: auto;
+    padding-bottom: 20px; /* Extra space at bottom */
 }
 
 .matching-game-columns {
@@ -1839,7 +1838,7 @@ h2 {
         </div>
     </div>
     
-    <button class="btn" id="exit-review" aria-label="Exit review" style="margin: 1rem auto; display: block;">Exit Review</button>
+    <button class="btn" id="exit-review" aria-label="Exit review" style="margin: 1rem auto 3rem auto; display: block;">Exit Review</button>
 </section>
             
             <section id="manage-vocab-view" class="view">
