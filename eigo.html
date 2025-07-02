@@ -4493,11 +4493,15 @@ document.documentElement.setAttribute('data-season', seasons[month]);
         
         state.sentences = await getAllSentences();
         
-        if (state.sentences.length > 0) {
-            document.querySelector('.nav-btn[data-view="text-import"]').classList.remove('active');
-            document.querySelector('.nav-btn[data-view="vocab-review"]').classList.add('active');
-            showView('vocab-review-view');
-        }
+        // Always start with the reader view
+document.querySelector('.nav-btn[data-view="text-import"]').classList.add('active');
+document.querySelector('.nav-btn[data-view="vocab-review"]').classList.remove('active');
+showView('text-import-view');
+
+// If there are sentences, we can still load them but stay on reader view
+if (state.sentences.length > 0) {
+    // Sentences are loaded but we won't switch views
+}
         
         await updateBucketCounts();
         setupEventListeners();
