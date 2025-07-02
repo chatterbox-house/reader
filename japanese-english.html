@@ -1533,6 +1533,16 @@ header {
 [data-season="winter"] {
     --highlight: #7eb8e6; /* Ice blue */
 }
+.current-step {
+    position: relative;
+    padding-left: 1.5rem;
+}
+.current-step:before {
+    content: "👉";
+    position: absolute;
+    left: 0;
+    animation: pulse 1s infinite;
+}
 </style
 </head>
 <body>
@@ -1634,12 +1644,18 @@ header {
                         <span>使い方</span>
                         <span>▼</span>
                     </div>
-                    <div class="how-to-use-content" id="how-to-use-content">
-<h4>使い方ガイド</h4>
-<p>1. <strong>英文を入力</strong>: 英語の文章を貼り付けるか入力してください</p>
-<p>2. <strong>単語を学習</strong>: 文章を読み、知らない単語を選択して登録</p>
-<p>3. <strong>単語を復習</strong>: 単語帳で覚えた単語を復習できます</p>
-<p>4. <strong>便利なショートカット</strong>:</p>
+<div class="how-to-use-content" id="how-to-use-content">
+<h4>使い方ガイド (Step-by-Step)</h4>
+<p>1. <strong>英文を入力</strong>: 
+   <span style="color: var(--highlight)">📋 貼り付けボタン</span>で英語文章を貼り付けるか、直接入力してください
+   <br><small>(例: "The cat sat on the mat.")</small></p>
+<p>2. <strong>テキストを分析</strong>: 
+   <span style="color: var(--highlight)">青いボタン</span>を押して文章を分割します</p>
+<p>3. <strong>単語を学習</strong>: 
+   文章を読み、知らない単語を<span style="color: var(--highlight)">長押しまたは選択</span>して翻訳を登録</p>
+<p>4. <strong>単語を復習</strong>: 
+   📚 単語学習タブで覚えた単語を復習できます
+   <br><small>(単語は難易度別に分類されます)</small></p>
 <ul>
     <li>←→キー: 前後の文章に移動</li>
     <li>スペースキー: 音声読み上げ</li>
@@ -1649,8 +1665,15 @@ header {
                 </div>
                 
 <div class="text-import-container">
-<h2>英文入力 <span role="img" aria-label="english">🇬🇧</span></h2>
-<p>英文を貼り付けるか直接入力してください (5,000文字まで)</p>
+<h2>英語学習テキスト入力 <span role="img" aria-label="english">🇬🇧</span></h2>
+<div style="background: var(--card-bg); padding: 0.5rem; border-radius: 8px; margin-bottom: 0.5rem;">
+<p>📌 <strong>次のいずれかで入力:</strong></p>
+<ul style="margin-left: 1rem; padding-left: 1rem;">
+   <li>📋 <span style="color: var(--highlight)">貼り付けボタン</span> - ウェブ記事やPDFからコピー</li>
+   <li>🎤 <span style="color: var(--highlight)">音声入力</span> - 英語で話して入力</li>
+   <li>✍️ 直接入力 - 最大5,000文字</li>
+</ul>
+</div>
 <textarea class="text-input" id="text-input" placeholder="例: The cat is sleeping. The dog is running..." aria-label="英語テキスト入力欄"></textarea>
 <div class="char-count"><span id="char-count">0</span>/5000 文字</div>
 <div class="input-actions" style="gap: 0.5rem; margin-bottom: 1rem;">
@@ -1783,10 +1806,11 @@ header {
     <p>難易度を選んで復習を開始しましょう</p>
     
     <div class="bucket-container">
-        <div class="bucket-card new" data-bucket="new" aria-label="新規単語">
-            <div class="bucket-count" id="new-count">0</div>
-            <div class="bucket-label">新規単語</div>
-        </div>
+<div class="bucket-card new" data-bucket="new" aria-label="新規単語">
+    <div class="bucket-count" id="new-count">0</div>
+    <div class="bucket-label">新規単語</div>
+    <div style="font-size:0.7rem; margin-top:0.3rem;">(初めて学習)</div>
+</div>
         <div class="bucket-card 簡単" data-bucket="簡単" aria-label="かんたんな単語">
             <div class="bucket-count" id="簡単-count">0</div>
             <div class="bucket-label">かんたん</div>
@@ -4113,7 +4137,11 @@ localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
         }));
         
         try {
-            elements.processTextBtn.innerHTML = '<span>Processing...</span><span class="loading-spinner"></span>';
+            elements.processTextBtn.innerHTML = `
+    <span>処理中...</span>
+    <span class="loading-spinner"></span>
+    <div style="font-size:0.7rem; margin-top:3px;">文章を分析しています</div>
+`;
             await addSentences(sentenceObjects);
             state.sentences = await getAllSentences();
             state.currentSentenceIndex = 0;
@@ -4581,7 +4609,18 @@ function addJapaneseTooltips() {
         }
     });
 }
+// First-time user help
+function showFirstTimeHelp() {
+    if (!localStorage.getItem('seenHelp')) {
+        setTimeout(() => {
+            showToast(`👋 初めての方へ: まず「英文リーダー」で英語文章を入力しましょう!`, 'info', 5000);
+            localStorage.setItem('seenHelp', 'true');
+        }, 2000);
+    }
+}
 
+// Call this in initApp():
+showFirstTimeHelp();
 // Call this function after page load
 window.addEventListener('DOMContentLoaded', addJapaneseTooltips);
 </script>
