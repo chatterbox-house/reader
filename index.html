@@ -70,6 +70,24 @@ body::before {
     will-change: transform;
 }
 
+/* Add these new styles for floating characters */
+.floating-char {
+    position: fixed;
+    font-size: 2rem;
+    z-index: -1;
+    animation: floatAround 15s infinite linear;
+    user-select: none;
+    opacity: 0.7;
+}
+
+@keyframes floatAround {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(50vw, 20vh) rotate(90deg); }
+    50% { transform: translate(30vw, 50vh) rotate(180deg); }
+    75% { transform: translate(70vw, 30vh) rotate(270deg); }
+    100% { transform: translate(0, 0) rotate(360deg); }
+}
+
 body::after {
     content: "";
     position: absolute;
@@ -692,6 +710,30 @@ document.addEventListener('mousemove', (e) => {
 </head>
 <body>
 <script>
+// First visit celebration
+if (!localStorage.getItem('visitedBefore')) {
+    localStorage.setItem('visitedBefore', 'true');
+    
+    // Create confetti elements
+    for (let i = 0; i < 100; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.top = -10 + 'px';
+        confetti.style.backgroundColor = getRandomColor();
+        confetti.style.animationDelay = Math.random() * 3 + 's';
+        document.body.appendChild(confetti);
+    }
+    
+    setTimeout(() => {
+        document.querySelectorAll('.confetti').forEach(el => el.remove());
+    }, 5000);
+}
+
+function getRandomColor() {
+    const colors = ['#ff7b25', '#38b000', '#00ccff', '#ff00cc', '#e9c46a'];
+    return colors[Math.floor(Math.random() * colors.length)];
+}
     // Function to detect if user's primary language is Japanese
     function isJapaneseUser() {
         // Get browser language (returns something like 'en-US' or 'ja-JP')
@@ -850,16 +892,16 @@ document.addEventListener('mousemove', (e) => {
     <div class="container">
         <header class="header">
             <h1 class="logo">
-                SentenceMODE
-                <span class="logo-flags">
-                    <span class="flag" title="Japanese"><img src="https://flagcdn.com/jp.svg" alt="Japanese" width="40" height="30" loading="lazy"></span>
-                    <span class="flag" title="English"><img src="https://flagcdn.com/gb.svg" alt="English" width="40" height="30" loading="lazy"></span>
-                    <span class="flag" title="Spanish"><img src="https://flagcdn.com/es.svg" alt="Spanish" width="40" height="30" loading="lazy"></span>
-                    <span class="flag" title="French"><img src="https://flagcdn.com/fr.svg" alt="French" width="40" height="30" loading="lazy"></span>
-                    <span class="flag" title="Chinese"><img src="https://flagcdn.com/cn.svg" alt="Chinese" width="40" height="30" loading="lazy"></span>
-                </span>
-            </h1>
-            <p class="tagline">Learn languages through sentences and context</p>
+    SentenceMODE
+    <span class="logo-flags">
+        <span class="flag" title="Japanese"><img src="https://flagcdn.com/jp.svg" alt="Japanese" width="40" height="30" loading="lazy"></span>
+        <span class="flag" title="English"><img src="https://flagcdn.com/gb.svg" alt="English" width="40" height="30" loading="lazy"></span>
+        <span class="flag" title="Spanish"><img src="https://flagcdn.com/es.svg" alt="Spanish" width="40" height="30" loading="lazy"></span>
+        <span class="flag" title="French"><img src="https://flagcdn.com/fr.svg" alt="French" width="40" height="30" loading="lazy"></span>
+        <span class="flag" title="Chinese"><img src="https://flagcdn.com/cn.svg" alt="Chinese" width="40" height="30" loading="lazy"></span>
+    </span>
+</h1>
+<p class="tagline">Learn Languages through Sentences and Context / 文脈を通じて言語を学ぶ</p>
             <div class="theme-toggle-container">
                 <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode" aria-pressed="false">
                     <span class="toggle-icon">🌙</span>
@@ -874,9 +916,9 @@ document.addEventListener('mousemove', (e) => {
 
         <section class="progress-section">
             <h2 class="section-title">
-                <span>📊</span>
-                Your Language Progress
-            </h2>
+    <span>📊</span>
+    Your Language Progress / あなたの進捗状況
+</h2>
             <div class="progress-stats">
                 <div class="stat-item">
                     <span class="stat-label">Total Words Learned:</span>
@@ -900,9 +942,9 @@ document.addEventListener('mousemove', (e) => {
 
         <section class="quick-start-section">
             <h2 class="section-title">
-                <span>⚡</span>
-                Quick Start
-            </h2>
+    <span>⚡</span>
+    Quick Start / クイックスタート
+</h2>
             <div class="quick-start-grid">
                 <a href="spanish.html" class="quick-start-card">
                     <div class="quick-start-icon"><img src="https://flagcdn.com/es.svg" alt="Spanish"></div>
@@ -924,12 +966,12 @@ document.addEventListener('mousemove', (e) => {
 
 <section class="motivation-section">
     <div class="motivation-card">
-        <h3 class="motivation-title">Daily Language Motivation</h3>
+        <h3 class="motivation-title">Daily Language Motivation / 今日のモチベーション</h3>
         <p class="motivation-quote" id="daily-quote">"The limits of my language mean the limits of my world."</p>
         <p class="motivation-author">- Ludwig Wittgenstein</p>
     </div>
     <div class="tip-card">
-        <h4 class="tip-title">💡 Daily Learning Tip</h4>
+        <h4 class="tip-title">💡 Daily Learning Tip / 学習のヒント</h4>
         <p class="tip-text" id="daily-tip">"Practice new words in sentences to remember them better!"</p>
     </div>
 </section>
@@ -952,6 +994,22 @@ document.addEventListener('mousemove', (e) => {
         font-size: 0.9rem;
         line-height: 1.4;
     }
+/* Confetti styles */
+.confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    opacity: 0.8;
+    z-index: 1000;
+    animation: fall 3s linear forwards;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
 </style>
 
 <script>
@@ -977,7 +1035,7 @@ document.addEventListener('mousemove', (e) => {
     });
 </script>
         <footer class="footer">
-            <p>SentenceMODE © 2025 - Learn languages through immersive sentence practice</p>
+            <p>SentenceMODE © 2025 - Learn languages through immersive sentence practice / 没入型の文章練習で言語を学ぶ</p>
         </footer>
     </div>
 
@@ -1295,7 +1353,7 @@ document.addEventListener('DOMContentLoaded', setupSmartButton);
 <div class="floating-button" id="smart-floating-button">
     <button>
         <span class="button-flag"></span>
-        <span class="button-text">Start Learning</span>
+        <span class="button-text">Start Learning 学習を始める</span>
     </button>
 </div>
 <script>
@@ -1304,12 +1362,12 @@ document.addEventListener('DOMContentLoaded', setupSmartButton);
         const wordsLearned = parseInt(document.getElementById('total-words').textContent);
         
         if (wordsLearned >= 100) {
-            showBadge("100 Words Master");
-        } else if (wordsLearned >= 50) {
-            showBadge("50 Words Expert");
-        } else if (wordsLearned >= 10) {
-            showBadge("10 Words Starter");
-        }
+    showBadge("100 Words Master / 100語マスター");
+} else if (wordsLearned >= 50) {
+    showBadge("50 Words Expert / 50語エキスパート");
+} else if (wordsLearned >= 10) {
+    showBadge("10 Words Starter / 10語スタート");
+}
     }
 
     function showBadge(title) {
@@ -1366,6 +1424,32 @@ document.addEventListener('DOMContentLoaded', setupSmartButton);
         margin-left: 5px;
     }
 </style>
-
+<script>
+    // Add floating language characters
+    const chars = ['あ', 'に', '語', 'A', 'B', 'C', '¿', '¡', 'ß', '你', '好'];
+    for (let i = 0; i < 12; i++) {
+        const char = document.createElement('div');
+        char.className = 'floating-char';
+        char.textContent = chars[Math.floor(Math.random() * chars.length)];
+        char.style.left = Math.random() * 100 + 'vw';
+        char.style.top = Math.random() * 100 + 'vh';
+        char.style.animationDuration = (10 + Math.random() * 20) + 's';
+        char.style.animationDelay = Math.random() * 5 + 's';
+        document.body.appendChild(char);
+    }
+</script><script>
+    // Add floating language characters
+    const chars = ['あ', 'に', '語', 'A', 'B', 'C', '¿', '¡', 'ß', '你', '好'];
+    for (let i = 0; i < 12; i++) {
+        const char = document.createElement('div');
+        char.className = 'floating-char';
+        char.textContent = chars[Math.floor(Math.random() * chars.length)];
+        char.style.left = Math.random() * 100 + 'vw';
+        char.style.top = Math.random() * 100 + 'vh';
+        char.style.animationDuration = (10 + Math.random() * 20) + 's';
+        char.style.animationDelay = Math.random() * 5 + 's';
+        document.body.appendChild(char);
+    }
+</script>
 </body>
 </html>
