@@ -1796,18 +1796,33 @@ header.hidden {
         
         <main>
             <section id="text-import-view" class="view active">
-                <div class="how-to-use">
-                    <div class="how-to-use-title" id="how-to-use-toggle">
-                        <span>How to Use SentenceMODE</span>
-                        <span>▼</span>
-                    </div>
-                    <div class="how-to-use-content" id="how-to-use-content">
-                        <p>1. Paste Japanese text or translate from your language</p>
-                        <p>2. Read sentences and select words to add to vocabulary</p>
-                        <p>3. Review vocabulary with matching games</p>
-                        <p>4. Use keyboard shortcuts: Arrows (navigation), Space (TTS), Enter (confirm)</p>
-                    </div>
-                </div>
+<div class="how-to-use" style="background: var(--highlight); color: white;">
+    <div class="how-to-use-title" id="how-to-use-toggle" style="padding: 1rem;">
+        <span style="font-weight: bold; font-size: 1.2rem;">Quick Start Guide (Click to Expand)</span>
+        <span>▼</span>
+    </div>
+    <div class="how-to-use-content" id="how-to-use-content" style="padding: 1rem;">
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+            <div style="flex: 1; min-width: 200px; background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 8px;">
+                <h4>Step 1: Add Text</h4>
+                <p>Paste Japanese text or translate from English</p>
+            </div>
+            <div style="flex: 1; min-width: 200px; background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 8px;">
+                <h4>Step 2: Read & Learn</h4>
+                <p>Click any word to save it with translation</p>
+            </div>
+            <div style="flex: 1; min-width: 200px; background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 8px;">
+                <h4>Step 3: Review</h4>
+                <p>Practice saved words in Vocab section</p>
+            </div>
+        </div>
+        <div style="margin-top: 1rem; text-align: center;">
+            <button class="btn" style="background: white; color: var(--highlight);" onclick="document.getElementById('try-demo-btn').click()">
+                Try Demo Now
+            </button>
+        </div>
+    </div>
+</div>
                 
 <div class="hero-section fade-in">
   <div class="hero-content">
@@ -1820,9 +1835,12 @@ header.hidden {
   </div>
 </div>
 
-<div class="text-import-container slide-up">
-<h2>Import Japanese Text <span role="img" aria-label="Japanese">🇯🇵</span></h2>
-<p>Paste Japanese text below to start learning (max 5,000 characters)</p>
+<div class="text-import-container slide-up" style="border: 2px dashed var(--highlight);">
+<h2 style="color: var(--highlight); font-size: 1.5rem;">Start Here: Import Japanese Text <span role="img" aria-label="Japanese">🇯🇵</span></h2>
+<p><strong>How to begin:</strong> Paste any Japanese text below or click "Try Demo Text" for an example (max 5,000 characters)</p>
+<div style="background: var(--accent); padding: 0.5rem; border-radius: 8px; margin: 0.5rem 0;">
+  <span style="font-weight:bold;">Tip:</span> You can paste from websites, PDFs, or even manga!
+</div>
 
 <textarea class="text-input" id="text-input" placeholder="例: 猫が寝ている。犬が走っている。..." aria-label="Japanese text input"></textarea>
 <div class="char-count"><span id="char-count">0</span>/5000 characters</div>
@@ -4127,6 +4145,16 @@ state.lastDeleted = { id: id, item: state.bookmarks.find(b => b.id === id) };
 setTimeout(() => delete state.lastDeleted, 5000); // Clear after 5 sec
     }
 });
+// Welcome modal for first-time users
+const firstTime = localStorage.getItem('firstTime_ja') !== 'false';
+if (firstTime) {
+    document.getElementById('welcome-modal').style.display = 'flex';
+    localStorage.setItem('firstTime_ja', 'false');
+}
+
+document.getElementById('close-welcome').addEventListener('click', () => {
+    document.getElementById('welcome-modal').style.display = 'none';
+});
 // Close modal when clicking outside
 tutorialModal.addEventListener('click', (e) => {
   if (e.target === tutorialModal) {
@@ -4898,5 +4926,34 @@ function undoDelete(id) {
   }
 }
 </script>
+<div class="welcome-modal" id="welcome-modal">
+  <div class="modal-content" style="max-width: 500px;">
+    <h2>Welcome to Japanese SentenceMODE!</h2>
+    <p>Here's how to get started:</p>
+    <ol style="text-align: left; margin: 1rem 2rem;">
+      <li>Paste Japanese text or translate from English</li>
+      <li>Click any word to save it to your vocabulary</li>
+      <li>Review words with flashcards in the Vocab section</li>
+    </ol>
+    <div style="margin-top: 2rem;">
+      <button class="btn" id="close-welcome" style="background-color: var(--highlight);">Get Started</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.welcome-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+</style>
 </body>
 </html>
