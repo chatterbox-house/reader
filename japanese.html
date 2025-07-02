@@ -1902,6 +1902,8 @@ h2 {
                     Back to Text Import
                 </button>
             </section>
+
+
 <section id="bookmarks-view" class="view">
     <h2>Library</h2>
     <p>Saved texts and example chapters</p>
@@ -1914,34 +1916,8 @@ h2 {
         </div>
     </div>
     
-    <div class="resources-container">
-        <h3 style="color: var(--highlight); margin-bottom: 0.5rem;">Example Chapters</h3>
-        <div class="resources-list" id="example-chapters">
-            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-1.html?m=1" class="resource-link" target="_blank">Chapter 1</a>
-            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-2.html?m=1" class="resource-link" target="_blank">Chapter 2</a>
-            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-3.html?m=1" class="resource-link" target="_blank">Chapter 3</a>
-            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-4.html?m=1" class="resource-link" target="_blank">Chapter 4</a>
-            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-5.html?m=1" class="resource-link" target="_blank">Chapter 5</a>
-            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-6.html?m=1" class="resource-link" target="_blank">Chapter 6</a>
-            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-7.html?m=1" class="resource-link" target="_blank">Chapter 7</a>
-            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-8.html?m=1" class="resource-link" target="_blank">Chapter 8</a>
-            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-9.html?m=1" class="resource-link" target="_blank">Chapter 9</a>
-            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-10.html?m=1" class="resource-link" target="_blank">Chapter 10</a>
-            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-11.html?m=1" class="resource-link" target="_blank">Chapter 11</a>
-            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-12.html?m=1" class="resource-link" target="_blank">Chapter 12</a>
-            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-13.html?m=1" class="resource-link" target="_blank">Chapter 13</a>
-            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-14.html?m=1" class="resource-link" target="_blank">Chapter 14</a>
-            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-15.html?m=1" class="resource-link" target="_blank">Chapter 15</a>
-            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-16.html?m=1" class="resource-link" target="_blank">Chapter 16</a>
-            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-17.html?m=1" class="resource-link" target="_blank">Chapter 17</a>
-            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-18.html?m=1" class="resource-link" target="_blank">Chapter 18</a>
-            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-19.html?m=1" class="resource-link" target="_blank">Chapter 19</a>
-            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-20.html?m=1" class="resource-link" target="_blank">Chapter 20</a>
-        </div>
-    </div>
-    
     <div id="bookmarks-list" class="resources-container" style="margin-top: 1rem;">
-        <h3 style="color: var(--highlight); margin-bottom: 0.5rem;">Your Saved URLs</h3>
+        <h3 style="color: var(--highlight); margin-bottom: 0.5rem;">Your Saved Resources</h3>
         <!-- Saved URLs will appear here -->
     </div>
     
@@ -2060,7 +2036,28 @@ selectedCards: [],
 currentTtsUtterance: null,
 wordLookupCache: {},
 bookmarks: JSON.parse(localStorage.getItem('bookmarks_ja')) || [],
-    savedUrls: JSON.parse(localStorage.getItem('savedUrls_ja')) || []
+    savedUrls: JSON.parse(localStorage.getItem('savedUrls_ja')) || [
+        {id: '1', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-1.html', title: 'Chapter 1', date: new Date().toISOString()},
+        {id: '2', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-2.html', title: 'Chapter 2', date: new Date().toISOString()},
+        {id: '3', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-3.html', title: 'Chapter 3', date: new Date().toISOString()},
+        {id: '4', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-4.html', title: 'Chapter 4', date: new Date().toISOString()},
+        {id: '5', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-5.html', title: 'Chapter 5', date: new Date().toISOString()},
+        {id: '6', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-6.html', title: 'Chapter 6', date: new Date().toISOString()},
+        {id: '7', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-7.html', title: 'Chapter 7', date: new Date().toISOString()},
+        {id: '8', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-8.html', title: 'Chapter 8', date: new Date().toISOString()},
+        {id: '9', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-9.html', title: 'Chapter 9', date: new Date().toISOString()},
+        {id: '10', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-10.html', title: 'Chapter 10', date: new Date().toISOString()},
+        {id: '11', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-11.html', title: 'Chapter 11', date: new Date().toISOString()},
+        {id: '12', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-12.html', title: 'Chapter 12', date: new Date().toISOString()},
+        {id: '13', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-13.html', title: 'Chapter 13', date: new Date().toISOString()},
+        {id: '14', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-14.html', title: 'Chapter 14', date: new Date().toISOString()},
+        {id: '15', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-15.html', title: 'Chapter 15', date: new Date().toISOString()},
+        {id: '16', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-16.html', title: 'Chapter 16', date: new Date().toISOString()},
+        {id: '17', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-17.html', title: 'Chapter 17', date: new Date().toISOString()},
+        {id: '18', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-18.html', title: 'Chapter 18', date: new Date().toISOString()},
+        {id: '19', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-19.html', title: 'Chapter 19', date: new Date().toISOString()},
+        {id: '20', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-20.html', title: 'Chapter 20', date: new Date().toISOString()}
+    ]
 };
 
 // Initialize audio context and sounds
@@ -4057,7 +4054,10 @@ document.getElementById('custom-url-input').addEventListener('keypress', (e) => 
 document.getElementById('clear-bookmarks-btn').addEventListener('click', clearSavedUrls);
 
 // Load saved URLs when library view is shown
-document.querySelector('.nav-btn[data-view="bookmarks-view"]').addEventListener('click', renderSavedUrls);
+document.querySelector('.nav-btn[data-view="bookmarks-view"]').addEventListener('click', () => {
+    showView('bookmarks-view');
+    renderSavedUrls();
+});
 // Welcome modal for first-time users
 const firstTime = localStorage.getItem('firstTime_ja') !== 'false';
 if (firstTime) {
