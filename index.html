@@ -45,169 +45,113 @@
             font-family: var(--font-family);
         }
 
-body {
-    background: var(--gradient);
-    background-attachment: fixed;
-    color: var(--text);
-    min-height: 100vh;
-    transition: all 0.3s ease;
-    font-size: var(--font-size);
-    line-height: var(--line-height);
-    position: relative;
-    overflow-x: hidden;
-}
-
-body::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.1) 0%, transparent 20%);
-    animation: float 15s infinite ease-in-out;
-    z-index: -1;
-    will-change: transform;
-}
-
-/* Add these new styles for floating characters */
-.floating-char {
-    position: fixed;
-    font-size: 2rem;
-    z-index: -1;
-    animation: floatAround 15s infinite linear;
-    user-select: none;
-    opacity: 0.7;
-}
-
-@keyframes floatAround {
-    0% { transform: translate(0, 0) rotate(0deg); }
-    25% { transform: translate(50vw, 20vh) rotate(90deg); }
-    50% { transform: translate(30vw, 50vh) rotate(180deg); }
-    75% { transform: translate(70vw, 30vh) rotate(270deg); }
-    100% { transform: translate(0, 0) rotate(360deg); }
-}
-
-body::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(45deg, 
-        rgba(255, 123, 37, 0.05) 0%, 
-        rgba(56, 176, 0, 0.05) 20%, 
-        rgba(0, 204, 255, 0.05) 40%, 
-        rgba(255, 0, 204, 0.05) 60%, 
-        rgba(233, 196, 106, 0.05) 80%);
-    background-size: 300% 300%;
-    animation: gradientBG 15s ease infinite;
-    z-index: -2;
-}
-
-@keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-/* Add this new rule */
-body {
-    background-attachment: fixed;
-    background-position: center;
-    transition: background-position 0.3s ease-out;
-}
-
-/* Add this JavaScript at the bottom of your script section */
-document.addEventListener('mousemove', (e) => {
-    const x = e.clientX / window.innerWidth;
-    const y = e.clientY / window.innerHeight;
-    document.body.style.backgroundPosition = `${50 + x * 10}% ${50 + y * 10}%`;
-});
-
-@keyframes float {
-    0%, 100% {
-        transform: translate(0, 0);
-    }
-    50% {
-        transform: translate(20px, 20px);
-    }
-}
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-}
-
-        /* Animation Classes */
-        .language-card {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.5s ease;
+        body {
+            background: var(--gradient);
+            background-attachment: fixed;
+            color: var(--text);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+            font-size: var(--font-size);
+            line-height: var(--line-height);
+            position: relative;
+            overflow-x: hidden;
         }
 
-        .language-card.show {
-            opacity: 1;
-            transform: translateY(0);
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.1) 0%, transparent 20%);
+            animation: float 15s infinite ease-in-out;
+            z-index: -1;
+            will-change: transform;
         }
 
-        .quick-start-card {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.5s ease 0.2s;
+        body::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, 
+                rgba(255, 123, 37, 0.05) 0%, 
+                rgba(56, 176, 0, 0.05) 20%, 
+                rgba(0, 204, 255, 0.05) 40%, 
+                rgba(255, 0, 204, 0.05) 60%, 
+                rgba(233, 196, 106, 0.05) 80%);
+            background-size: 300% 300%;
+            animation: gradientBG 15s ease infinite;
+            z-index: -2;
         }
 
-        .quick-start-card.show {
-            opacity: 1;
-            transform: translateY(0);
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
-        .progress-section {
-            opacity: 0;
-            transition: all 0.5s ease 0.4s;
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(20px, 20px); }
         }
 
-        .progress-section.show {
-            opacity: 1;
+        /* Floating elements */
+        .floating-char {
+            position: fixed;
+            font-size: 2rem;
+            z-index: -1;
+            animation: floatAround 15s infinite linear;
+            user-select: none;
+            opacity: 0.7;
         }
 
-        /* Rest of your existing CSS... */
+        @keyframes floatAround {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(50vw, 20vh) rotate(90deg); }
+            50% { transform: translate(30vw, 50vh) rotate(180deg); }
+            75% { transform: translate(70vw, 30vh) rotate(270deg); }
+            100% { transform: translate(0, 0) rotate(360deg); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header styles */
         .header {
             text-align: center;
             margin-bottom: 3rem;
             position: relative;
         }
 
-.logo {
-    font-size: 3rem;
-    font-weight: 800;
-    color: var(--highlight);
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    animation: pulse 2s infinite;
-}
+        .logo {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--highlight);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            animation: pulse 2s infinite;
+        }
 
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
 
         .logo-flags {
             display: flex;
             gap: 0.5rem;
             align-items: center;
-        }
-
-        .logo-flags img {
-            width: 30px;
-            height: auto;
-            border-radius: 2px;
-            transition: all 0.3s ease;
         }
 
         .tagline {
@@ -216,30 +160,7 @@ document.addEventListener('mousemove', (e) => {
             margin-bottom: 2rem;
         }
 
-        .language-section {
-            background-color: var(--card-bg);
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            color: var(--highlight);
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .section-title img {
-            width: 28px;
-            height: auto;
-        }
-
+        /* Theme toggle */
         .theme-toggle-container {
             display: flex;
             justify-content: center;
@@ -279,90 +200,124 @@ document.addEventListener('mousemove', (e) => {
             display: none;
         }
 
+        /* Section styles */
+        .language-section, .progress-section, .quick-start-section, .motivation-section {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--highlight);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title img {
+            width: 28px;
+            height: auto;
+        }
+
+        /* Language cards */
         .language-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 1rem;
         }
 
-.language-card {
-    background-color: var(--secondary);
-    border-radius: 16px;
-    padding: 1.5rem;
-    text-align: center;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    position: relative;
-    overflow: hidden;
-    text-decoration: none;
-    color: inherit;
-    box-shadow: 0 0 0 1px transparent;
-}
+        .language-card {
+            background-color: var(--secondary);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            box-shadow: 0 0 0 1px transparent;
+            opacity: 0;
+            transform: translateY(20px);
+        }
 
-.language-card::after {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(45deg, var(--highlight), #ff00cc, #00ccff);
-    z-index: -1;
-    border-radius: 18px;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
+        .language-card.show {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.5s ease;
+        }
 
-.language-card:hover::after {
-    opacity: 0.7;
-}
+        .language-card::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--highlight), #ff00cc, #00ccff);
+            z-index: -1;
+            border-radius: 18px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
 
-.language-card::before {
-    content: "";
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(
-        to bottom right,
-        rgba(255,255,255,0) 0%,
-        rgba(255,255,255,0.1) 50%,
-        rgba(255,255,255,0) 100%
-    );
-    transform: rotate(30deg);
-    transition: all 0.5s ease;
-}
+        .language-card:hover::after {
+            opacity: 0.7;
+        }
 
-.language-card:hover::before {
-    animation: shine 1.5s;
-}
+        .language-card::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                rgba(255,255,255,0) 0%,
+                rgba(255,255,255,0.1) 50%,
+                rgba(255,255,255,0) 100%
+            );
+            transform: rotate(30deg);
+            transition: all 0.5s ease;
+        }
 
-@keyframes shine {
-    0% { transform: rotate(30deg) translate(-30%, -30%); }
-    100% { transform: rotate(30deg) translate(30%, 30%); }
-}
+        .language-card:hover::before {
+            animation: shine 1.5s;
+        }
 
-.language-card:hover {
-    transform: translateY(-8px) scale(1.02) rotateY(15deg);
-    background-color: var(--accent);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3), 
-                0 0 0 3px var(--highlight);
-    border-color: rgba(255, 255, 255, 0.2);
-    animation: pulseGlow 2s infinite;
-}
+        @keyframes shine {
+            0% { transform: rotate(30deg) translate(-30%, -30%); }
+            100% { transform: rotate(30deg) translate(30%, 30%); }
+        }
 
-@keyframes pulseGlow {
-    0% { box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3), 0 0 0 3px var(--highlight); }
-    50% { box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3), 0 0 0 6px rgba(255, 123, 37, 0.5); }
-    100% { box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3), 0 0 0 3px var(--highlight); }
-}
+        .language-card:hover {
+            transform: translateY(-8px) scale(1.02) rotateY(15deg);
+            background-color: var(--accent);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3), 
+                        0 0 0 3px var(--highlight);
+            border-color: rgba(255, 255, 255, 0.2);
+            animation: pulseGlow 2s infinite;
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3), 0 0 0 3px var(--highlight); }
+            50% { box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3), 0 0 0 6px rgba(255, 123, 37, 0.5); }
+            100% { box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3), 0 0 0 3px var(--highlight); }
+        }
 
         .language-flag img {
             width: 40px;
@@ -375,49 +330,6 @@ document.addEventListener('mousemove', (e) => {
         .language-name {
             font-weight: 600;
             font-size: 1.1rem;
-        }
-
-        .divider {
-            height: 1px;
-            background-color: var(--accent);
-            margin: 2rem 0;
-            opacity: 0.3;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 3rem;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .motivation-section {
-            background-color: var(--card-bg);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin: 2rem 0;
-            box-shadow: var(--shadow);
-            text-align: center;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .motivation-title {
-            color: var(--highlight);
-            margin-bottom: 1rem;
-            font-size: 1.2rem;
-        }
-
-        .motivation-quote {
-            font-style: italic;
-            margin-bottom: 0.5rem;
-            font-size: 1.1rem;
-            line-height: 1.5;
-        }
-
-        .motivation-author {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
         }
 
         .difficulty-meter {
@@ -440,103 +352,7 @@ document.addEventListener('mousemove', (e) => {
             background-color: var(--highlight);
         }
 
-        .progress-section {
-            background-color: var(--card-bg);
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .progress-stats {
-            margin-bottom: 1.5rem;
-        }
-        
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.8rem;
-            padding: 0.8rem;
-            background-color: var(--secondary);
-            border-radius: 8px;
-        }
-        
-        .stat-label {
-            color: var(--text-secondary);
-        }
-        
-        .stat-value {
-            font-weight: bold;
-            color: var(--highlight);
-        }
-        
-        .quick-access {
-            display: flex;
-            justify-content: center;
-        }
-        
-        .quick-access .btn {
-            padding: 1rem 2rem;
-            font-size: 1.1rem;
-            background-color: var(--highlight);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .quick-access .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-.flag {
-    transition: all 0.3s ease;
-    display: inline-block;
-    cursor: pointer;
-    position: relative;
-}
-
-.flag:hover {
-    transform: scale(1.5);
-    filter: drop-shadow(0 0 8px rgba(255,255,255,0.7));
-    z-index: 10;
-}
-
-.flag::after {
-    content: attr(title);
-    position: absolute;
-    bottom: -25px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--accent);
-    color: var(--text);
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    opacity: 0;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-}
-
-.flag:hover::after {
-    opacity: 1;
-    bottom: -20px;
-}
-
-        .quick-start-section {
-            background-color: var(--card-bg);
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
+        /* Quick start cards */
         .quick-start-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -554,6 +370,14 @@ document.addEventListener('mousemove', (e) => {
             color: var(--text);
             border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .quick-start-card.show {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.5s ease 0.2s;
         }
 
         .quick-start-card:hover {
@@ -585,6 +409,300 @@ document.addEventListener('mousemove', (e) => {
             font-size: 0.9rem;
         }
 
+        /* Progress section */
+        .progress-stats {
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            padding: 0.8rem;
+            background-color: var(--secondary);
+            border-radius: 8px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: var(--highlight);
+        }
+
+        .quick-access .btn {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            background-color: var(--highlight);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quick-access .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Motivation section */
+        .motivation-title {
+            color: var(--highlight);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .motivation-quote {
+            font-style: italic;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        .motivation-author {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .tip-card {
+            background: var(--secondary);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .tip-title {
+            color: var(--highlight);
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .tip-text {
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* Flags */
+        .flag {
+            transition: all 0.3s ease;
+            display: inline-block;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .flag:hover {
+            transform: scale(1.5);
+            filter: drop-shadow(0 0 8px rgba(255,255,255,0.7));
+            z-index: 10;
+        }
+
+        .flag::after {
+            content: attr(title);
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: var(--text);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .flag:hover::after {
+            opacity: 1;
+            bottom: -20px;
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background-color: var(--accent);
+            margin: 2rem 0;
+            opacity: 0.3;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* New feature ribbon */
+        .new-feature {
+            position: absolute;
+            top: 10px;
+            right: -30px;
+            background: var(--highlight);
+            color: white;
+            padding: 5px 30px;
+            transform: rotate(45deg);
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        /* Page loader */
+        .page-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border-top-color: var(--highlight);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Floating button */
+        .floating-button {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 100;
+            transition: all 0.3s ease;
+            animation: floatUp 3s ease-in-out infinite;
+        }
+
+        .floating-button button {
+            background: var(--highlight);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 0.8rem 1.5rem 0.8rem 0.8rem;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .floating-button button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            padding-right: 1.8rem;
+        }
+
+        .button-flag {
+            width: 24px;
+            height: 24px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .floating-button:hover .button-flag {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        @keyframes floatUp {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* Achievement badge */
+        .achievement-badge {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: var(--secondary);
+            color: var(--text);
+            padding: 10px 15px;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(-150%);
+            transition: transform 0.5s ease;
+            z-index: 1000;
+        }
+
+        .achievement-badge.show {
+            transform: translateX(0);
+        }
+
+        .close-badge {
+            cursor: pointer;
+            font-size: 18px;
+            margin-left: 5px;
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            opacity: 0.8;
+            z-index: 1000;
+            animation: fall 3s linear forwards;
+        }
+
+        .confetti-explosion {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Float text */
+        .float-text {
+            position: absolute;
+            color: var(--highlight);
+            font-weight: bold;
+            font-size: 1.2rem;
+            animation: floatUpText 2s ease-out forwards;
+            pointer-events: none;
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+
+        @keyframes floatUpText {
+            to {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive styles */
         @media (max-width: 768px) {
             .logo {
                 font-size: 2rem;
@@ -608,339 +726,27 @@ document.addEventListener('mousemove', (e) => {
             .container {
                 padding: 1rem;
             }
-
-.page-loader {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: var(--primary);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    transition: opacity 0.5s ease;
-}
-
-.loader-spinner {
-    width: 50px;
-    height: 50px;
-    border: 5px solid rgba(255,255,255,0.1);
-    border-radius: 50%;
-    border-top-color: var(--highlight);
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-/* Smart Floating Button */
-.floating-button {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    z-index: 100;
-    transition: all 0.3s ease;
-}
-
-.floating-button button {
-    background: var(--highlight);
-    color: white;
-    border: none;
-    border-radius: 50px;
-    padding: 0.8rem 1.5rem 0.8rem 0.8rem;
-    font-size: 1.1rem;
-    cursor: pointer;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    position: relative;
-    overflow: hidden;
-}
-
-.floating-button button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-    padding-right: 1.8rem;
-}
-
-.button-flag {
-    width: 24px;
-    height: 24px;
-    background-size: cover;
-    background-position: center;
-    border-radius: 2px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    transition: all 0.3s ease;
-}
-
-.floating-button:hover .button-flag {
-    transform: scale(1.2) rotate(5deg);
-}
-
-/* Animation */
-@keyframes floatUp {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
-}
-
-.floating-button {
-    animation: floatUp 3s ease-in-out infinite;
-}
         }
-/* Language Rain Effect */
-.language-rain {
-    position: fixed;
-    top: -50px;
-    z-index: -1;
-    font-size: 24px;
-    animation: rain linear infinite;
-    opacity: 0.7;
-}
-
-@keyframes rain {
-    to {
-        transform: translateY(100vh);
-    }
-}
-.confetti-explosion {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    pointer-events: none;
-}
-
-.float-text {
-    position: absolute;
-    color: var(--highlight);
-    font-weight: bold;
-    font-size: 1.2rem;
-    animation: floatUp 2s ease-out forwards;
-    pointer-events: none;
-    text-shadow: 0 0 5px rgba(0,0,0,0.5);
-}
-
-@keyframes floatUp {
-    to {
-        transform: translateY(-100px);
-        opacity: 0;
-    }
-}
     </style>
-<style>
-    .new-feature {
-        position: absolute;
-        top: 10px;
-        right: -30px;
-        background: var(--highlight);
-        color: white;
-        padding: 5px 30px;
-        transform: rotate(45deg);
-        font-size: 12px;
-        font-weight: bold;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        z-index: 10;
-    }
-</style>
 </head>
 <body>
-<script>
-// First visit celebration
-if (!localStorage.getItem('visitedBefore')) {
-    localStorage.setItem('visitedBefore', 'true');
+    <div class="page-loader">
+        <div class="loader-spinner"></div>
+    </div>
     
-    // Create confetti elements
-    for (let i = 0; i < 100; i++) {
-        const confetti = document.createElement('div');
-        confetti.className = 'confetti';
-        confetti.style.left = Math.random() * 100 + 'vw';
-        confetti.style.top = -10 + 'px';
-        confetti.style.backgroundColor = getRandomColor();
-        confetti.style.animationDelay = Math.random() * 3 + 's';
-        document.body.appendChild(confetti);
-    }
-    
-    setTimeout(() => {
-        document.querySelectorAll('.confetti').forEach(el => el.remove());
-    }, 5000);
-}
-
-function getRandomColor() {
-    const colors = ['#ff7b25', '#38b000', '#00ccff', '#ff00cc', '#e9c46a'];
-    return colors[Math.floor(Math.random() * colors.length)];
-}
-    // Function to detect if user's primary language is Japanese
-    function isJapaneseUser() {
-        // Get browser language (returns something like 'en-US' or 'ja-JP')
-        const userLanguage = navigator.language || navigator.userLanguage;
-        // Check if language starts with 'ja' (Japanese)
-        return userLanguage.toLowerCase().startsWith('ja');
-    }
-
-    // Function to render language sections in the correct order
-    function renderLanguageSections() {
-        const container = document.getElementById('language-sections-container');
-        const isJapanese = isJapaneseUser();
-        
-        if (isJapanese) {
-            // For Japanese users - show Japanese section first
-            container.innerHTML = `
-                <section class="language-section">
-                    <h2 class="section-title">
-                        <img src="https://flagcdn.com/jp.svg" alt="Japanese">
-                        日本語話者の方へ
-                    </h2>
-                    <div class="language-grid">
-                        <a href="japanese-english.html" class="language-card">
-                            <div class="language-flag"><img src="https://flagcdn.com/gb.svg" alt="English"></div>
-                            <div class="language-name">英語 (English)</div>
-                        </a>
-                        <a href="japanese-spanish.html" class="language-card">
-                            <div class="language-flag"><img src="https://flagcdn.com/es.svg" alt="Spanish"></div>
-                            <div class="language-name">スペイン語 (Spanish)</div>
-                        </a>
-                    </div>
-                </section>
-
-                <div class="divider"></div>
-
-                <section class="language-section">
-                    <div class="new-feature">New!</div>
-                    <h1 class="section-title">
-                        <img src="https://flagcdn.com/gb.svg" alt="English">
-                        For English Speakers
-                    </h1>
-                    <div class="language-grid">
-                        <a href="japanese.html" class="language-card">
-                            <div class="language-flag"><img src="https://flagcdn.com/jp.svg" alt="Japanese"></div>
-                            <div class="language-name">Japanese</div>
-                            <div class="difficulty-meter">
-                                <span class="difficulty-dot active"></span>
-                                <span class="difficulty-dot active"></span>
-                                <span class="difficulty-dot"></span>
-                                <span class="difficulty-dot"></span>
-                            </div>
-                        </a>
-                        <a href="spanish.html" class="language-card">
-                            <div class="language-flag"><img src="https://flagcdn.com/es.svg" alt="Spanish"></div>
-                            <div class="language-name">Spanish</div>
-                        </a>
-                        <a href="french.html" class="language-card">
-                            <div class="language-flag"><img src="https://flagcdn.com/fr.svg" alt="French"></div>
-                            <div class="language-name">French</div>
-                        </a>
-                        <a href="chinese.html" class="language-card">
-                            <div class="language-flag"><img src="https://flagcdn.com/cn.svg" alt="Chinese"></div>
-                            <div class="language-name">Chinese</div>
-                        </a>
-                        <a href="latin.html" class="language-card">
-                            <div class="language-flag"><img src="https://flagcdn.com/w20/va.png" srcset="https://flagcdn.com/w40/va.png 2x" alt="Vatican City"></div>
-                            <div class="language-name">Latin</div>
-                        </a>
-                        <a href="italian.html" class="language-card">
-                            <div class="language-flag"><img src="https://flagcdn.com/it.svg" alt="Italian"></div>
-                            <div class="language-name">Italian</div>
-                        </a>
-                    </div>
-                </section>
-            `;
-        } else {
-            // For non-Japanese users (default) - show English section first
-            container.innerHTML = `
-                <section class="language-section">
-                    <div class="new-feature">New!</div>
-                    <h1 class="section-title">
-                        <img src="https://flagcdn.com/gb.svg" alt="English">
-                        For English Speakers
-                    </h1>
-                    <div class="language-grid">
-                        <a href="japanese.html" class="language-card">
-                            <div class="language-flag"><img src="https://flagcdn.com/jp.svg" alt="Japanese"></div>
-                            <div class="language-name">Japanese</div>
-                            <div class="difficulty-meter">
-                                <span class="difficulty-dot active"></span>
-                                <span class="difficulty-dot active"></span>
-                                <span class="difficulty-dot"></span>
-                                <span class="difficulty-dot"></span>
-                            </div>
-                        </a>
-                        <a href="spanish.html" class="language-card">
-                            <div class="language-flag"><img src="https://flagcdn.com/es.svg" alt="Spanish"></div>
-                            <div class="language-name">Spanish</div>
-                        </a>
-                        <a href="french.html" class="language-card">
-                            <div class="language-flag"><img src="https://flagcdn.com/fr.svg" alt="French"></div>
-                            <div class="language-name">French</div>
-                        </a>
-                        <a href="chinese.html" class="language-card">
-                            <div class="language-flag"><img src="https://flagcdn.com/cn.svg" alt="Chinese"></div>
-                            <div class="language-name">Chinese</div>
-                        </a>
-                        <a href="latin.html" class="language-card">
-                            <div class="language-flag"><img src="https://flagcdn.com/w20/va.png" srcset="https://flagcdn.com/w40/va.png 2x" alt="Vatican City"></div>
-                            <div class="language-name">Latin</div>
-                        </a>
-                        <a href="italian.html" class="language-card">
-                            <div class="language-flag"><img src="https://flagcdn.com/it.svg" alt="Italian"></div>
-                            <div class="language-name">Italian</div>
-                        </a>
-                    </div>
-                </section>
-
-                <div class="divider"></div>
-
-                <section class="language-section">
-                    <h2 class="section-title">
-                        <img src="https://flagcdn.com/jp.svg" alt="Japanese">
-                        日本語話者の方へ
-                    </h2>
-                    <div class="language-grid">
-                        <a href="japanese-english.html" class="language-card">
-                            <div class="language-flag"><img src="https://flagcdn.com/gb.svg" alt="English"></div>
-                            <div class="language-name">英語 (English)</div>
-                        </a>
-                        <a href="japanese-spanish.html" class="language-card">
-                            <div class="language-flag"><img src="https://flagcdn.com/es.svg" alt="Spanish"></div>
-                            <div class="language-name">スペイン語 (Spanish)</div>
-                        </a>
-                    </div>
-                </section>
-            `;
-        }
-        
-        // Animate the cards after they're inserted
-        setTimeout(() => {
-            document.querySelectorAll('.language-card').forEach((card, index) => {
-                setTimeout(() => {
-                    card.classList.add('show');
-                }, index * 100);
-            });
-        }, 50);
-    }
-
-    // Run this when the page loads
-    document.addEventListener('DOMContentLoaded', renderLanguageSections);
-</script>
-<div class="page-loader">
-    <div class="loader-spinner"></div>
-</div>
     <div class="container">
         <header class="header">
             <h1 class="logo">
-    SentenceMODE
-    <span class="logo-flags">
-        <span class="flag" title="Japanese"><img src="https://flagcdn.com/jp.svg" alt="Japanese" width="40" height="30" loading="lazy"></span>
-        <span class="flag" title="English"><img src="https://flagcdn.com/gb.svg" alt="English" width="40" height="30" loading="lazy"></span>
-        <span class="flag" title="Spanish"><img src="https://flagcdn.com/es.svg" alt="Spanish" width="40" height="30" loading="lazy"></span>
-        <span class="flag" title="French"><img src="https://flagcdn.com/fr.svg" alt="French" width="40" height="30" loading="lazy"></span>
-        <span class="flag" title="Chinese"><img src="https://flagcdn.com/cn.svg" alt="Chinese" width="40" height="30" loading="lazy"></span>
-    </span>
-</h1>
-<p class="tagline">Learn Languages through Sentences and Context / 文脈を通じて言語を学ぶ</p>
+                SentenceMODE
+                <span class="logo-flags">
+                    <span class="flag" title="Japanese"><img src="https://flagcdn.com/jp.svg" alt="Japanese" width="40" height="30" loading="lazy"></span>
+                    <span class="flag" title="English"><img src="https://flagcdn.com/gb.svg" alt="English" width="40" height="30" loading="lazy"></span>
+                    <span class="flag" title="Spanish"><img src="https://flagcdn.com/es.svg" alt="Spanish" width="40" height="30" loading="lazy"></span>
+                    <span class="flag" title="French"><img src="https://flagcdn.com/fr.svg" alt="French" width="40" height="30" loading="lazy"></span>
+                    <span class="flag" title="Chinese"><img src="https://flagcdn.com/cn.svg" alt="Chinese" width="40" height="30" loading="lazy"></span>
+                </span>
+            </h1>
+            <p class="tagline">Learn Languages through Sentences and Context / 文脈を通じて言語を学ぶ</p>
             <div class="theme-toggle-container">
                 <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode" aria-pressed="false">
                     <span class="toggle-icon">🌙</span>
@@ -948,16 +754,15 @@ function getRandomColor() {
             </div>
         </header>
 
-        <!-- Language sections will be ordered based on user's browser language -->
         <div id="language-sections-container">
             <!-- This will be filled by JavaScript -->
         </div>
 
         <section class="progress-section">
             <h2 class="section-title">
-    <span>📊</span>
-    Your Language Progress / あなたの進捗状況
-</h2>
+                <span>📊</span>
+                Your Language Progress / あなたの進捗状況
+            </h2>
             <div class="progress-stats">
                 <div class="stat-item">
                     <span class="stat-label">Total Words Learned:</span>
@@ -981,9 +786,9 @@ function getRandomColor() {
 
         <section class="quick-start-section">
             <h2 class="section-title">
-    <span>⚡</span>
-    Quick Start / クイックスタート
-</h2>
+                <span>⚡</span>
+                Quick Start / クイックスタート
+            </h2>
             <div class="quick-start-grid">
                 <a href="spanish.html" class="quick-start-card">
                     <div class="quick-start-icon"><img src="https://flagcdn.com/es.svg" alt="Spanish"></div>
@@ -1003,286 +808,263 @@ function getRandomColor() {
             </div>
         </section>
 
-<section class="motivation-section">
-    <div class="motivation-card">
-        <h3 class="motivation-title">Daily Language Motivation / 今日のモチベーション</h3>
-        <p class="motivation-quote" id="daily-quote">"The limits of my language mean the limits of my world."</p>
-        <p class="motivation-author">- Ludwig Wittgenstein</p>
-    </div>
-    <div class="tip-card">
-        <h4 class="tip-title">💡 Daily Learning Tip / 学習のヒント</h4>
-        <p class="tip-text" id="daily-tip">"Practice new words in sentences to remember them better!"</p>
-    </div>
-</section>
+        <section class="motivation-section">
+            <div class="motivation-card">
+                <h3 class="motivation-title">Daily Language Motivation / 今日のモチベーション</h3>
+                <p class="motivation-quote" id="daily-quote">"The limits of my language mean the limits of my world."</p>
+                <p class="motivation-author">- Ludwig Wittgenstein</p>
+            </div>
+            <div class="tip-card">
+                <h4 class="tip-title">💡 Daily Learning Tip / 学習のヒント</h4>
+                <p class="tip-text" id="daily-tip">"Practice new words in sentences to remember them better!"</p>
+            </div>
+        </section>
 
-<style>
-    .tip-card {
-        background: var(--secondary);
-        border-radius: 12px;
-        padding: 1rem;
-        margin-top: 1.5rem;
-    }
-    
-    .tip-title {
-        color: var(--highlight);
-        margin-bottom: 0.5rem;
-        font-size: 1rem;
-    }
-    
-    .tip-text {
-        font-size: 0.9rem;
-        line-height: 1.4;
-    }
-/* Confetti styles */
-.confetti {
-    position: fixed;
-    width: 10px;
-    height: 10px;
-    opacity: 0.8;
-    z-index: 1000;
-    animation: fall 3s linear forwards;
-}
-
-@keyframes fall {
-    to {
-        transform: translateY(100vh) rotate(360deg);
-        opacity: 0;
-    }
-}
-</style>
-
-<script>
-    const tips = [
-        "Try learning 5 new words every day - small consistent steps lead to big results!",
-        "Listen to music in your target language - it helps with pronunciation and rhythm.",
-        "Label objects around your house with their names in the language you're learning.",
-        "Practice speaking out loud, even if it's just to yourself - it builds confidence.",
-        "Watch movies with subtitles in your target language to improve listening skills."
-    ];
-    
-    function showDailyTip() {
-        const today = new Date().getDate();
-        const tipIndex = today % tips.length;
-        document.getElementById('daily-tip').textContent = tips[tipIndex];
-    }
-    
-    // Add this to your existing DOMContentLoaded event
-    document.addEventListener('DOMContentLoaded', () => {
-        loadProgressStats();
-        showDailyQuote();
-        showDailyTip(); // Add this line
-    });
-</script>
         <footer class="footer">
             <p>SentenceMODE © 2025 - Learn languages through immersive sentence practice / 没入型の文章練習で言語を学ぶ</p>
         </footer>
     </div>
 
+    <div class="floating-button" id="smart-floating-button">
+        <button>
+            <span class="button-flag"></span>
+            <span class="button-text">Start Learning 学習を始める</span>
+        </button>
+    </div>
+
     <script>
-
-        // ==================== THEME TOGGLE ====================
-        const themeToggle = document.getElementById('theme-toggle');
-
-        // 1. Check saved theme or use dark mode as default
-        const currentTheme = localStorage.getItem('theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', currentTheme);
-
-        // 2. Set the correct icon on page load
-        if (currentTheme === 'light') {
-            themeToggle.innerHTML = '<span class="toggle-icon">☀️</span>';
-        } else {
-            themeToggle.innerHTML = '<span class="toggle-icon">🌙</span>';
-        }
-
-        // 3. Toggle theme when button clicked
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        // ==================== INITIALIZATION ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up theme
+            setupTheme();
             
-            // Update the theme and save preference
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
+            // Render language sections based on user's language
+            renderLanguageSections();
             
-            // Update the icon
-            themeToggle.innerHTML = newTheme === 'light' 
-                ? '<span class="toggle-icon">☀️</span>' 
-                : '<span class="toggle-icon">🌙</span>';
+            // Load progress stats
+            loadProgressStats();
+            
+            // Show daily content
+            showDailyQuote();
+            showDailyTip();
+            
+            // Check for achievements
+            checkAchievements();
+            
+            // Set up floating button
+            setupSmartButton();
+            
+            // Create floating characters
+            createFloatingChars();
+            
+            // Initialize audio
+            initAudio();
+            
+            // Animate elements
+            animateElements();
+            
+            // Set up mouse move effect
+            setupMouseMoveEffect();
+            
+            // Remove loader
+            setTimeout(function() {
+                document.querySelector('.page-loader').style.opacity = '0';
+                setTimeout(function() {
+                    document.querySelector('.page-loader').style.display = 'none';
+                }, 500);
+            }, 1000);
+            
+            // First visit celebration
+            if (!localStorage.getItem('visitedBefore')) {
+                localStorage.setItem('visitedBefore', 'true');
+                createConfetti();
+            }
         });
 
-// ==================== AUDIO CONTEXT ====================
-let audioContext;
-
-function initAudio() {
-    // Only initialize once
-    if (audioContext) return;
-    
-    try {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        console.log('AudioContext created');
-    } catch (e) {
-        console.log('Web Audio API not supported', e);
-    }
-}
-
-function playRippleSound() {
-    if (!audioContext) initAudio();
-    
-    try {
-        // Create and configure audio nodes
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.type = 'sine';
-        oscillator.frequency.value = 440;
-        
-        gainNode.gain.value = 0.3;
-        
-        // Connect nodes
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        // Schedule changes
-        oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.5);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-        
-        // Start and stop
-        oscillator.start();
-        oscillator.stop(audioContext.currentTime + 0.5);
-    } catch (e) {
-        console.log("Audio error:", e);
-    }
-}
-
-// Initialize audio on first interaction
-document.addEventListener('click', function firstInteraction() {
-    initAudio();
-    // Play test sound on first interaction
-    playRippleSound();
-    // Remove this listener after first interaction
-    document.removeEventListener('click', firstInteraction);
-}, { once: true });
-
-
-// Language cards - speak when flag clicked, navigate otherwise
-document.querySelectorAll('.language-card').forEach(card => {
-    const language = card.querySelector('.language-name')?.textContent;
-    if (!language) return;
-
-card.addEventListener('click', (e) => {
-    if (e.target.closest('.language-flag')) {
-        e.preventDefault();
-        e.stopPropagation();
-        speakLanguage(language.trim());
-        playRippleSound();
-        
-        // Big confetti explosion
-        for (let i = 0; i < 30; i++) {
-            const confetti = document.createElement('div');
-            confetti.className = 'confetti-explosion';
-            confetti.style.left = e.clientX + 'px';
-            confetti.style.top = e.clientY + 'px';
-            confetti.style.backgroundColor = getRandomColor();
-            confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
-            document.body.appendChild(confetti);
+        // ==================== THEME TOGGLE ====================
+        function setupTheme() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const currentTheme = localStorage.getItem('theme') || 'dark';
             
-            // Animate each piece
-            const angle = Math.random() * Math.PI * 2;
-            const velocity = 2 + Math.random() * 8;
-            const x = Math.cos(angle) * velocity;
-            const y = Math.sin(angle) * velocity;
+            document.documentElement.setAttribute('data-theme', currentTheme);
             
-            let posX = e.clientX;
-            let posY = e.clientY;
-            let opacity = 1;
-            
-            const animate = () => {
-                posX += x;
-                posY += y + 1; // Add gravity
-                opacity -= 0.02;
-                
-                confetti.style.left = posX + 'px';
-                confetti.style.top = posY + 'px';
-                confetti.style.opacity = opacity;
-                
-                if (opacity > 0) {
-                    requestAnimationFrame(animate);
-                } else {
-                    confetti.remove();
-                }
-            };
-            
-            animate();
-        }
-        
-        // Add floating text effect
-        const floatText = document.createElement('div');
-        floatText.textContent = 'Yay! ' + language;
-        floatText.className = 'float-text';
-        floatText.style.left = e.clientX + 'px';
-        floatText.style.top = e.clientY + 'px';
-        document.body.appendChild(floatText);
-        
-        setTimeout(() => {
-            floatText.remove();
-        }, 2000);
-    }
-});
-
-function getRandomColor() {
-    const colors = ['#ff7b25', '#38b000', '#00ccff', '#ff00cc', '#e9c46a'];
-    return colors[Math.floor(Math.random() * colors.length)];
-}
-
-        // ==================== PROGRESS STATS ====================
-function getCombinedStats() {
-    // Get stats from all language learning pages
-    const japaneseEnglishStats = JSON.parse(localStorage.getItem('readingStats_japanese_english') || '{}');
-    const otherLanguageStats = ['ja', 'es', 'fr', 'zh', 'la', 'it'].map(lang => 
-        JSON.parse(localStorage.getItem(`readingStats_${lang}`) || '{}')
-    );
-    
-    // Combine all stats
-    const allStats = [japaneseEnglishStats, ...otherLanguageStats];
-    
-    let totalWords = 0;
-    let maxStreak = 0;
-    let recentLanguages = [];
-    
-    allStats.forEach(stats => {
-        totalWords += parseInt(stats.wordsLearned || 0);
-        maxStreak = Math.max(maxStreak, parseInt(stats.streak || 0));
-        
-        // Track recently studied languages
-        if (stats.lastActiveDate && stats.lastActiveDate === new Date().toDateString()) {
-            if (stats === japaneseEnglishStats) {
-                recentLanguages.push('Japanese-English');
+            if (currentTheme === 'light') {
+                themeToggle.innerHTML = '<span class="toggle-icon">☀️</span>';
             } else {
-                // Add logic for other languages if needed
+                themeToggle.innerHTML = '<span class="toggle-icon">🌙</span>';
+            }
+            
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                
+                themeToggle.innerHTML = newTheme === 'light' 
+                    ? '<span class="toggle-icon">☀️</span>' 
+                    : '<span class="toggle-icon">🌙</span>';
+            });
+        }
+
+        // ==================== LANGUAGE SECTIONS ====================
+        function isJapaneseUser() {
+            const userLanguage = navigator.language || navigator.userLanguage;
+            return userLanguage.toLowerCase().startsWith('ja');
+        }
+
+        function renderLanguageSections() {
+            const container = document.getElementById('language-sections-container');
+            const isJapanese = isJapaneseUser();
+            
+            const englishSection = `
+                <section class="language-section">
+                    <div class="new-feature">New!</div>
+                    <h1 class="section-title">
+                        <img src="https://flagcdn.com/gb.svg" alt="English">
+                        For English Speakers
+                    </h1>
+                    <div class="language-grid">
+                        <a href="japanese.html" class="language-card">
+                            <div class="language-flag"><img src="https://flagcdn.com/jp.svg" alt="Japanese"></div>
+                            <div class="language-name">Japanese</div>
+                            <div class="difficulty-meter">
+                                <span class="difficulty-dot active"></span>
+                                <span class="difficulty-dot active"></span>
+                                <span class="difficulty-dot"></span>
+                                <span class="difficulty-dot"></span>
+                            </div>
+                        </a>
+                        <a href="spanish.html" class="language-card">
+                            <div class="language-flag"><img src="https://flagcdn.com/es.svg" alt="Spanish"></div>
+                            <div class="language-name">Spanish</div>
+                        </a>
+                        <a href="french.html" class="language-card">
+                            <div class="language-flag"><img src="https://flagcdn.com/fr.svg" alt="French"></div>
+                            <div class="language-name">French</div>
+                        </a>
+                        <a href="chinese.html" class="language-card">
+                            <div class="language-flag"><img src="https://flagcdn.com/cn.svg" alt="Chinese"></div>
+                            <div class="language-name">Chinese</div>
+                        </a>
+                        <a href="latin.html" class="language-card">
+                            <div class="language-flag"><img src="https://flagcdn.com/w20/va.png" srcset="https://flagcdn.com/w40/va.png 2x" alt="Vatican City"></div>
+                            <div class="language-name">Latin</div>
+                        </a>
+                        <a href="italian.html" class="language-card">
+                            <div class="language-flag"><img src="https://flagcdn.com/it.svg" alt="Italian"></div>
+                            <div class="language-name">Italian</div>
+                        </a>
+                    </div>
+                </section>
+            `;
+            
+            const japaneseSection = `
+                <section class="language-section">
+                    <h2 class="section-title">
+                        <img src="https://flagcdn.com/jp.svg" alt="Japanese">
+                        日本語話者の方へ
+                    </h2>
+                    <div class="language-grid">
+                        <a href="japanese-english.html" class="language-card">
+                            <div class="language-flag"><img src="https://flagcdn.com/gb.svg" alt="English"></div>
+                            <div class="language-name">英語 (English)</div>
+                        </a>
+                        <a href="japanese-spanish.html" class="language-card">
+                            <div class="language-flag"><img src="https://flagcdn.com/es.svg" alt="Spanish"></div>
+                            <div class="language-name">スペイン語 (Spanish)</div>
+                        </a>
+                    </div>
+                </section>
+            `;
+            
+            if (isJapanese) {
+                container.innerHTML = japaneseSection + '<div class="divider"></div>' + englishSection;
+            } else {
+                container.innerHTML = englishSection + '<div class="divider"></div>' + japaneseSection;
+            }
+            
+            // Set up language card interactions
+            setupLanguageCards();
+        }
+
+        // ==================== LANGUAGE CARDS ====================
+        function setupLanguageCards() {
+            document.querySelectorAll('.language-card').forEach(card => {
+                const language = card.querySelector('.language-name')?.textContent;
+                if (!language) return;
+                
+                card.addEventListener('click', (e) => {
+                    if (e.target.closest('.language-flag')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        speakLanguage(language.trim());
+                        playRippleSound();
+                        createConfettiExplosion(e.clientX, e.clientY, language);
+                    }
+                });
+            });
+        }
+
+        function speakLanguage(language) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(language);
+                utterance.lang = 'en-US'; // Default to English
+                
+                // Set language based on content
+                if (language.includes('日本語') || language.includes('スペイン語')) {
+                    utterance.lang = 'ja-JP';
+                } else if (language.includes('¿') || language.includes('¡')) {
+                    utterance.lang = 'es-ES';
+                }
+                
+                speechSynthesis.speak(utterance);
             }
         }
-    });
-    
-    // Update recent languages in localStorage
-    if (recentLanguages.length > 0) {
-        localStorage.setItem('recentLanguages', JSON.stringify(recentLanguages));
-    }
-    
-    return { wordsLearned: totalWords, streak: maxStreak };
-}
+
+        // ==================== PROGRESS STATS ====================
+        function getCombinedStats() {
+            const japaneseEnglishStats = JSON.parse(localStorage.getItem('readingStats_japanese_english') || '{}');
+            const otherLanguageStats = ['ja', 'es', 'fr', 'zh', 'la', 'it'].map(lang => 
+                JSON.parse(localStorage.getItem(`readingStats_${lang}`) || '{}')
+            );
+            
+            const allStats = [japaneseEnglishStats, ...otherLanguageStats];
+            
+            let totalWords = 0;
+            let maxStreak = 0;
+            let recentLanguages = [];
+            
+            allStats.forEach(stats => {
+                totalWords += parseInt(stats.wordsLearned || 0);
+                maxStreak = Math.max(maxStreak, parseInt(stats.streak || 0));
+                
+                if (stats.lastActiveDate && stats.lastActiveDate === new Date().toDateString()) {
+                    if (stats === japaneseEnglishStats) {
+                        recentLanguages.push('Japanese-English');
+                    }
+                }
+            });
+            
+            if (recentLanguages.length > 0) {
+                localStorage.setItem('recentLanguages', JSON.stringify(recentLanguages));
+            }
+            
+            return { wordsLearned: totalWords, streak: maxStreak };
+        }
 
         function loadProgressStats() {
             const stats = getCombinedStats();
             
-            // Update the display
             document.getElementById('total-words').textContent = stats.wordsLearned || '0';
             document.getElementById('current-streak').textContent = (stats.streak || '0') + ' days';
             
-            // Get recently studied languages
             const recentLangs = JSON.parse(localStorage.getItem('recentLanguages') || '[]');
             document.getElementById('recent-languages').textContent = 
                 recentLangs.length > 0 ? recentLangs.join(', ') : 'None yet';
         }
 
+        // ==================== DAILY CONTENT ====================
         const quotes = [
             {
                 text: "Learning another language is not only learning different words for the same things, but learning another way to think about things.",
@@ -1302,6 +1084,14 @@ function getCombinedStats() {
             }
         ];
 
+        const tips = [
+            "Try learning 5 new words every day - small consistent steps lead to big results!",
+            "Listen to music in your target language - it helps with pronunciation and rhythm.",
+            "Label objects around your house with their names in the language you're learning.",
+            "Practice speaking out loud, even if it's just to yourself - it builds confidence.",
+            "Watch movies with subtitles in your target language to improve listening skills."
+        ];
+
         function showDailyQuote() {
             const today = new Date().getDate();
             const quoteIndex = today % quotes.length;
@@ -1310,216 +1100,243 @@ function getCombinedStats() {
             document.querySelector('.motivation-author').textContent = `- ${quote.author}`;
         }
 
-        // Continue learning button
-document.getElementById('continue-learning').addEventListener('click', () => {
-    const recentLangs = JSON.parse(localStorage.getItem('recentLanguages') || '[]');
-    if (recentLangs.includes('Japanese-English')) {
-        window.location.href = 'japanese-english.html';
-    } else if (recentLangs.length > 0) {
-        window.location.href = recentLangs[0].toLowerCase() + '.html';
-    } else {
-        window.location.href = 'japanese.html';
-    }
-});
-        
-        // Load stats when page loads
-        window.addEventListener('DOMContentLoaded', () => {
-            loadProgressStats();
-            showDailyQuote();
+        function showDailyTip() {
+            const today = new Date().getDate();
+            const tipIndex = today % tips.length;
+            document.getElementById('daily-tip').textContent = tips[tipIndex];
+        }
+
+        // ==================== CONTINUE LEARNING ====================
+        document.getElementById('continue-learning').addEventListener('click', () => {
+            const recentLangs = JSON.parse(localStorage.getItem('recentLanguages') || '[]');
+            if (recentLangs.includes('Japanese-English')) {
+                window.location.href = 'japanese-english.html';
+            } else if (recentLangs.length > 0) {
+                window.location.href = recentLangs[0].toLowerCase() + '.html';
+            } else {
+                window.location.href = 'japanese.html';
+            }
         });
-// Add this right after the DOMContentLoaded event listener for the progress stats
-document.addEventListener('DOMContentLoaded', () => {
-    loadProgressStats();
-    showDailyQuote();
-    
-    // Add this animation code to make cards appear
-    document.querySelectorAll('.language-card').forEach((card, index) => {
-        setTimeout(() => {
-            card.classList.add('show');
-        }, index * 100);
-    });
 
-    document.querySelectorAll('.quick-start-card').forEach((card, index) => {
-        setTimeout(() => {
-            card.classList.add('show');
-        }, index * 100 + 200);
-    });
+        // ==================== FLOATING BUTTON ====================
+        function setupSmartButton() {
+            const button = document.getElementById('smart-floating-button');
+            const buttonFlag = button.querySelector('.button-flag');
+            const buttonText = button.querySelector('.button-text');
+            
+            const recentLangs = JSON.parse(localStorage.getItem('recentLanguages') || '[]');
+            const japaneseEnglishStats = JSON.parse(localStorage.getItem('readingStats_japanese_english') || '{}');
+            
+            if (japaneseEnglishStats.lastActiveDate === new Date().toDateString()) {
+                buttonFlag.style.backgroundImage = 'url(https://flagcdn.com/gb.svg)';
+                buttonText.textContent = 'Continue English';
+                button.onclick = () => {
+                    window.location.href = 'japanese-english.html';
+                };
+                return;
+            }
+            
+            const defaultLang = recentLangs[0] || 'Spanish';
+            const langData = {
+                'Japanese': { flag: 'https://flagcdn.com/jp.svg', text: 'Continue Japanese' },
+                'Spanish': { flag: 'https://flagcdn.com/es.svg', text: 'Start Spanish' },
+                'French': { flag: 'https://flagcdn.com/fr.svg', text: 'Continue French' },
+                'Chinese': { flag: 'https://flagcdn.com/cn.svg', text: 'Learn Chinese' },
+                'Latin': { flag: 'https://flagcdn.com/w20/va.png', text: 'Study Latin' },
+                'Italian': { flag: 'https://flagcdn.com/it.svg', text: 'Practice Italian' }
+            };
+            
+            const lang = langData[defaultLang] || langData['Spanish'];
+            buttonFlag.style.backgroundImage = `url(${lang.flag})`;
+            buttonText.textContent = lang.text;
+            button.onclick = () => {
+                window.location.href = `${defaultLang.toLowerCase()}.html`;
+            };
+        }
 
-    setTimeout(() => {
-        document.querySelector('.progress-section').classList.add('show');
-    }, 600);
-});
-// Loading animation
-window.addEventListener('load', function() {
-    setTimeout(function() {
-        document.querySelector('.page-loader').style.opacity = '0';
-        setTimeout(function() {
-            document.querySelector('.page-loader').style.display = 'none';
-        }, 500);
-    }, 1000);
-});
-// Smart Floating Button
-function setupSmartButton() {
-    const button = document.getElementById('smart-floating-button');
-    const buttonFlag = button.querySelector('.button-flag');
-    const buttonText = button.querySelector('.button-text');
-    
-    // Get recently studied languages
-    const recentLangs = JSON.parse(localStorage.getItem('recentLanguages') || '[]');
-    
-    // Check if Japanese-English was recently studied
-    const japaneseEnglishStats = JSON.parse(localStorage.getItem('readingStats_japanese_english') || '{}');
-    if (japaneseEnglishStats.lastActiveDate === new Date().toDateString()) {
-        buttonFlag.style.backgroundImage = 'url(https://flagcdn.com/gb.svg)';
-        buttonText.textContent = 'Continue English';
-        button.onclick = () => {
-            window.location.href = 'japanese-english.html';
-        };
-        return;
-    }
-    
-    // Default to other languages
-    const defaultLang = recentLangs[0] || 'Spanish';
-    const langData = {
-        'Japanese': { flag: 'https://flagcdn.com/jp.svg', text: 'Continue Japanese' },
-        'Spanish': { flag: 'https://flagcdn.com/es.svg', text: 'Start Spanish' },
-        'French': { flag: 'https://flagcdn.com/fr.svg', text: 'Continue French' },
-        'Chinese': { flag: 'https://flagcdn.com/cn.svg', text: 'Learn Chinese' },
-        'Latin': { flag: 'https://flagcdn.com/w20/va.png', text: 'Study Latin' },
-        'Italian': { flag: 'https://flagcdn.com/it.svg', text: 'Practice Italian' }
-    };
-    
-    const lang = langData[defaultLang] || langData['Spanish'];
-    buttonFlag.style.backgroundImage = `url(${lang.flag})`;
-    buttonText.textContent = lang.text;
-    button.onclick = () => {
-        window.location.href = `${defaultLang.toLowerCase()}.html`;
-    };
-}
+        // ==================== ACHIEVEMENTS ====================
+        function checkAchievements() {
+            const wordsLearned = parseInt(document.getElementById('total-words').textContent);
+            
+            if (wordsLearned >= 100) {
+                showBadge("100 Words Master / 100語マスター");
+            } else if (wordsLearned >= 50) {
+                showBadge("50 Words Expert / 50語エキスパート");
+            } else if (wordsLearned >= 10) {
+                showBadge("10 Words Starter / 10語スタート");
+            }
+        }
 
-// Call this after DOM loads
-document.addEventListener('DOMContentLoaded', setupSmartButton);
+        function showBadge(title) {
+            const badge = document.createElement('div');
+            badge.className = 'achievement-badge';
+            badge.innerHTML = `
+                <span>🏆 ${title}</span>
+                <span class="close-badge">×</span>
+            `;
+            document.body.appendChild(badge);
+            
+            setTimeout(() => {
+                badge.classList.add('show');
+            }, 1000);
+            
+            badge.querySelector('.close-badge').addEventListener('click', () => {
+                badge.remove();
+            });
+        }
+
+        // ==================== AUDIO ====================
+        let audioContext;
+
+        function initAudio() {
+            if (audioContext) return;
+            
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('Web Audio API not supported', e);
+            }
+        }
+
+        function playRippleSound() {
+            if (!audioContext) initAudio();
+            
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.value = 440;
+                gainNode.gain.value = 0.3;
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.5);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.5);
+            } catch (e) {
+                console.log("Audio error:", e);
+            }
+        }
+
+        // ==================== VISUAL EFFECTS ====================
+        function createConfetti() {
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = -10 + 'px';
+                confetti.style.backgroundColor = getRandomColor();
+                confetti.style.animationDelay = Math.random() * 3 + 's';
+                document.body.appendChild(confetti);
+            }
+            
+            setTimeout(() => {
+                document.querySelectorAll('.confetti').forEach(el => el.remove());
+            }, 5000);
+        }
+
+        function createConfettiExplosion(x, y, text) {
+            for (let i = 0; i < 30; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti-explosion';
+                confetti.style.left = x + 'px';
+                confetti.style.top = y + 'px';
+                confetti.style.backgroundColor = getRandomColor();
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                document.body.appendChild(confetti);
+                
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = 2 + Math.random() * 8;
+                const xMove = Math.cos(angle) * velocity;
+                const yMove = Math.sin(angle) * velocity;
+                
+                let posX = x;
+                let posY = y;
+                let opacity = 1;
+                
+                const animate = () => {
+                    posX += xMove;
+                    posY += yMove + 1;
+                    opacity -= 0.02;
+                    
+                    confetti.style.left = posX + 'px';
+                    confetti.style.top = posY + 'px';
+                    confetti.style.opacity = opacity;
+                    
+                    if (opacity > 0) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        confetti.remove();
+                    }
+                };
+                
+                animate();
+            }
+            
+            const floatText = document.createElement('div');
+            floatText.textContent = 'Yay! ' + text;
+            floatText.className = 'float-text';
+            floatText.style.left = x + 'px';
+            floatText.style.top = y + 'px';
+            document.body.appendChild(floatText);
+            
+            setTimeout(() => {
+                floatText.remove();
+            }, 2000);
+        }
+
+        function createFloatingChars() {
+            const chars = ['あ', 'に', '語', 'A', 'B', 'C', '¿', '¡', 'ß', '你', '好'];
+            for (let i = 0; i < 12; i++) {
+                const char = document.createElement('div');
+                char.className = 'floating-char';
+                char.textContent = chars[Math.floor(Math.random() * chars.length)];
+                char.style.left = Math.random() * 100 + 'vw';
+                char.style.top = Math.random() * 100 + 'vh';
+                char.style.animationDuration = (10 + Math.random() * 20) + 's';
+                char.style.animationDelay = Math.random() * 5 + 's';
+                document.body.appendChild(char);
+            }
+        }
+
+
+
+        function getRandomColor() {
+            const colors = ['#ff7b25', '#38b000', '#00ccff', '#ff00cc', '#e9c46a'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        // ==================== ANIMATIONS ====================
+        function animateElements() {
+            document.querySelectorAll('.language-card').forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('show');
+                }, index * 100);
+            });
+
+            document.querySelectorAll('.quick-start-card').forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('show');
+                }, index * 100 + 200);
+            });
+
+            setTimeout(() => {
+                document.querySelector('.progress-section').classList.add('show');
+            }, 600);
+        }
+
+        function setupMouseMoveEffect() {
+            document.addEventListener('mousemove', (e) => {
+                const x = e.clientX / window.innerWidth;
+                const y = e.clientY / window.innerHeight;
+                document.body.style.backgroundPosition = `${50 + x * 10}% ${50 + y * 10}%`;
+            });
+        }
+
     </script>
-<div class="floating-button" id="smart-floating-button">
-    <button>
-        <span class="button-flag"></span>
-        <span class="button-text">Start Learning 学習を始める</span>
-    </button>
-</div>
-<script>
-    // Simple achievement system
-    function checkAchievements() {
-        const wordsLearned = parseInt(document.getElementById('total-words').textContent);
-        
-        if (wordsLearned >= 100) {
-    showBadge("100 Words Master / 100語マスター");
-} else if (wordsLearned >= 50) {
-    showBadge("50 Words Expert / 50語エキスパート");
-} else if (wordsLearned >= 10) {
-    showBadge("10 Words Starter / 10語スタート");
-}
-    }
-
-    function showBadge(title) {
-        const badge = document.createElement('div');
-        badge.className = 'achievement-badge';
-        badge.innerHTML = `
-            <span>🏆 ${title}</span>
-            <span class="close-badge">×</span>
-        `;
-        document.body.appendChild(badge);
-        
-        setTimeout(() => {
-            badge.classList.add('show');
-        }, 1000);
-        
-        badge.querySelector('.close-badge').addEventListener('click', () => {
-            badge.remove();
-        });
-    }
-
-    // Add this to your existing DOMContentLoaded event
-    document.addEventListener('DOMContentLoaded', () => {
-        loadProgressStats();
-        showDailyQuote();
-        checkAchievements(); // Add this line
-    });
-// Language rain effect
-function createLanguageRain() {
-    const chars = ['あ', 'に', '語', 'A', 'B', 'C', '¿', '¡', 'ß', '你', '好', '감', '사', '해'];
-    
-    setInterval(() => {
-        const char = document.createElement('div');
-        char.className = 'language-rain';
-        char.textContent = chars[Math.floor(Math.random() * chars.length)];
-        char.style.left = Math.random() * 100 + 'vw';
-        char.style.animationDuration = (3 + Math.random() * 5) + 's';
-        document.body.appendChild(char);
-        
-        // Remove after animation completes
-        setTimeout(() => {
-            char.remove();
-        }, 8000);
-    }, 300);
-}
-
-createLanguageRain();
-</script>
-
-<style>
-    .achievement-badge {
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        background: var(--secondary);
-        color: var(--text);
-        padding: 10px 15px;
-        border-radius: 20px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        transform: translateX(-150%);
-        transition: transform 0.5s ease;
-        z-index: 1000;
-    }
-    
-    .achievement-badge.show {
-        transform: translateX(0);
-    }
-    
-    .close-badge {
-        cursor: pointer;
-        font-size: 18px;
-        margin-left: 5px;
-    }
-</style>
-<script>
-    // Add floating language characters
-    const chars = ['あ', 'に', '語', 'A', 'B', 'C', '¿', '¡', 'ß', '你', '好'];
-    for (let i = 0; i < 12; i++) {
-        const char = document.createElement('div');
-        char.className = 'floating-char';
-        char.textContent = chars[Math.floor(Math.random() * chars.length)];
-        char.style.left = Math.random() * 100 + 'vw';
-        char.style.top = Math.random() * 100 + 'vh';
-        char.style.animationDuration = (10 + Math.random() * 20) + 's';
-        char.style.animationDelay = Math.random() * 5 + 's';
-        document.body.appendChild(char);
-    }
-</script><script>
-    // Add floating language characters
-    const chars = ['あ', 'に', '語', 'A', 'B', 'C', '¿', '¡', 'ß', '你', '好'];
-    for (let i = 0; i < 12; i++) {
-        const char = document.createElement('div');
-        char.className = 'floating-char';
-        char.textContent = chars[Math.floor(Math.random() * chars.length)];
-        char.style.left = Math.random() * 100 + 'vw';
-        char.style.top = Math.random() * 100 + 'vh';
-        char.style.animationDuration = (10 + Math.random() * 20) + 's';
-        char.style.animationDelay = Math.random() * 5 + 's';
-        document.body.appendChild(char);
-    }
-</script>
 </body>
 </html>
