@@ -837,8 +837,11 @@ h2 {
 }
 
 .shuffle-btn {
-  background-color: var(--accent);
-  margin-top: 1rem;
+    background-color: var(--accent);
+    margin: 0 auto 1rem auto;
+    display: block;
+    width: 90%;
+    max-width: 300px;
 }
 
 /* Review Question */
@@ -1430,9 +1433,10 @@ h2 {
         font-size: calc(var(--font-size) * 1.15) !important;
     }
     
-    .shuffle-btn {
-        margin-top: 0.5rem;
-        padding: 0.8rem;
+        .shuffle-btn {
+        position: static;
+        margin: 0 auto 1rem auto;
+        width: 90%;
     }
     
     .review-question {
@@ -1831,17 +1835,17 @@ h2 {
     <div class="review-container">
         <div class="review-question" id="review-question"></div>
         
-        <div id="matching-game-container" class="matching-game-container" style="display: none;">
-            <div class="matching-game-columns">
-                <div class="matching-column" id="left-column">
+        <button class="btn shuffle-btn" id="shuffle-cards" aria-label="Shuffle cards">Shuffle Cards</button>
+<div id="matching-game-container" class="matching-game-container" style="display: none;">
+    <div class="matching-game-columns">
+        <div class="matching-column" id="left-column">
       
-                </div>
-                <div class="matching-column" id="right-column">
-
-                </div>
-            </div>
-            <button class="btn shuffle-btn" id="shuffle-cards" aria-label="Shuffle cards">Shuffle Cards</button>
         </div>
+        <div class="matching-column" id="right-column">
+
+        </div>
+    </div>
+</div>
         
         <div id="hard-mode-container" class="hard-mode-buttons" style="display: none;">
             <button class="hard-mode-btn knew-it" id="knew-it-btn" aria-label="I know this">I know this</button>
@@ -3483,9 +3487,10 @@ function setupMatchingGame() {
     const wordsToShow = state.reviewWords.slice(state.currentReviewIndex, state.currentReviewIndex + 5);
     state.currentRoundWords = wordsToShow;
 
-    // Show matching game container
-    elements.matchingGameContainer.style.display = 'flex';
-    elements.hardModeContainer.style.display = 'none';
+    // Show matching game container and shuffle button
+elements.shuffleCardsBtn.style.display = 'block';
+elements.matchingGameContainer.style.display = 'flex';
+elements.hardModeContainer.style.display = 'none';
 
     if (wordsToShow.length === 0) {
         showToast('No words to review!', 'error');
@@ -3781,8 +3786,9 @@ function checkRoundCompletion() {
 
 function setupHardMode() {
     // Hide matching game and show hard mode buttons
-    elements.matchingGameContainer.style.display = 'none';
-    elements.hardModeContainer.style.display = 'flex';
+elements.shuffleCardsBtn.style.display = 'none';
+elements.matchingGameContainer.style.display = 'none';
+elements.hardModeContainer.style.display = 'flex';
     
     // Check if review is complete
     if (state.currentReviewIndex >= state.reviewWords.length) {
