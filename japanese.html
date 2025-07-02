@@ -689,6 +689,7 @@ h2 {
   height: calc(100vh - 120px);
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .review-header {
@@ -744,16 +745,16 @@ h2 {
   flex: 1;
   gap: 0.5rem;
   min-height: 0;
-  padding: 0.5rem;
+  padding: 0.5rem 0.5rem 80px; /* Add bottom padding for buttons */
   overflow-y: auto;
+  align-items: flex-start; /* Align cards to top */
 }
-
 .matching-column {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 0;
-  padding: 0.5rem;
+  padding: 0;
   gap: 0.5rem;
   justify-content: flex-start;
   align-items: center;
@@ -820,13 +821,16 @@ h2 {
 /* Hard Mode */
 .hard-mode-buttons, 
 .shuffle-btn {
-  position: absolute;
+  position: fixed;
   bottom: 1rem;
   left: 0;
   right: 0;
   padding: 0 1rem;
+  z-index: 10;
+  background: var(--secondary);
+  padding: 1rem;
+  border-top: 1px solid var(--accent);
 }
-
 .hard-mode-buttons {
   display: flex;
   gap: 1rem;
@@ -1404,6 +1408,7 @@ h2 {
   
   /* Matching Game */
   .matching-game-columns {
+ padding-bottom: 100px; /* More space for mobile buttons */
     flex-direction: row;
     gap: 0.5rem;
   }
@@ -1430,6 +1435,20 @@ h2 {
   .review-question {
     font-size: 1.8rem;
     min-height: 90px;
+  }
+.hard-mode-buttons {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.5rem;
+    background: var(--secondary);
+    z-index: 10;
+  }
+  
+  .hard-mode-btn {
+    padding: 0.8rem;
+    font-size: 0.9rem;
   }
   
   /* Settings Panel */
