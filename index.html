@@ -1029,19 +1029,41 @@ function getRandomColor() {
 }
 
         // ==================== PROGRESS STATS ====================
-        function getCombinedStats() {
-            const languages = ['ja', 'es', 'fr', 'zh', 'la', 'it'];
-            let totalWords = 0;
-            let maxStreak = 0;
-            
-            languages.forEach(lang => {
-                const stats = JSON.parse(localStorage.getItem(`readingStats_${lang}`) || '{}');
-                totalWords += parseInt(stats.wordsLearned || 0);
-                maxStreak = Math.max(maxStreak, parseInt(stats.streak || 0));
-            });
-            
-            return { wordsLearned: totalWords, streak: maxStreak };
+function getCombinedStats() {
+    // Get stats from all language learning pages
+    const japaneseEnglishStats = JSON.parse(localStorage.getItem('readingStats_japanese_english') || '{}');
+    const otherLanguageStats = ['ja', 'es', 'fr', 'zh', 'la', 'it'].map(lang => 
+        JSON.parse(localStorage.getItem(`readingStats_${lang}`) || '{}')
+    );
+    
+    // Combine all stats
+    const allStats = [japaneseEnglishStats, ...otherLanguageStats];
+    
+    let totalWords = 0;
+    let maxStreak = 0;
+    let recentLanguages = [];
+    
+    allStats.forEach(stats => {
+        totalWords += parseInt(stats.wordsLearned || 0);
+        maxStreak = Math.max(maxStreak, parseInt(stats.streak || 0));
+        
+        // Track recently studied languages
+        if (stats.lastActiveDate && stats.lastActiveDate === new Date().toDateString()) {
+            if (stats === japaneseEnglishStats) {
+                recentLanguages.push('Japanese-English');
+            } else {
+                // Add logic for other languages if needed
+            }
         }
+    });
+    
+    // Update recent languages in localStorage
+    if (recentLanguages.length > 0) {
+        localStorage.setItem('recentLanguages', JSON.stringify(recentLanguages));
+    }
+    
+    return { wordsLearned: totalWords, streak: maxStreak };
+}
 
         function loadProgressStats() {
             const stats = getCombinedStats();
@@ -1084,16 +1106,16 @@ function getRandomColor() {
         }
 
         // Continue learning button
-        document.getElementById('continue-learning').addEventListener('click', () => {
-            const recentLangs = JSON.parse(localStorage.getItem('recentLanguages') || '[]');
-            if (recentLangs.length > 0) {
-                // Redirect to the most recent language
-                window.location.href = recentLangs[0].toLowerCase() + '.html';
-            } else {
-                // Default to Japanese if no recent languages
-                window.location.href = 'japanese.html';
-            }
-        });
+document.getElementById('continue-learning').addEventListener('click', () => {
+    const recentLangs = JSON.parse(localStorage.getItem('recentLanguages') || '[]');
+    if (recentLangs.includes('Japanese-English')) {
+        window.location.href = 'japanese-english.html';
+    } else if (recentLangs.length > 0) {
+        window.location.href = recentLangs[0].toLowerCase() + '.html';
+    } else {
+        window.location.href = 'japanese.html';
+    }
+});
         
         // Load stats when page loads
         window.addEventListener('DOMContentLoaded', () => {
@@ -1137,11 +1159,22 @@ function setupSmartButton() {
     const buttonFlag = button.querySelector('.button-flag');
     const buttonText = button.querySelector('.button-text');
     
-    // Get recently studied languages or default to Spanish
+    // Get recently studied languages
     const recentLangs = JSON.parse(localStorage.getItem('recentLanguages') || '[]');
-    const defaultLang = recentLangs[0] || 'Spanish';
     
-    // Set button content based on language
+    // Check if Japanese-English was recently studied
+    const japaneseEnglishStats = JSON.parse(localStorage.getItem('readingStats_japanese_english') || '{}');
+    if (japaneseEnglishStats.lastActiveDate === new Date().toDateString()) {
+        buttonFlag.style.backgroundImage = 'url(https://flagcdn.com/gb.svg)';
+        buttonText.textContent = 'Continue English';
+        button.onclick = () => {
+            window.location.href = 'japanese-english.html';
+        };
+        return;
+    }
+    
+    // Default to other languages
+    const defaultLang = recentLangs[0] || 'Spanish';
     const langData = {
         'Japanese': { flag: 'https://flagcdn.com/jp.svg', text: 'Continue Japanese' },
         'Spanish': { flag: 'https://flagcdn.com/es.svg', text: 'Start Spanish' },
@@ -1152,12 +1185,8 @@ function setupSmartButton() {
     };
     
     const lang = langData[defaultLang] || langData['Spanish'];
-    
-    // Set button content
     buttonFlag.style.backgroundImage = `url(${lang.flag})`;
     buttonText.textContent = lang.text;
-    
-    // Set click action
     button.onclick = () => {
         window.location.href = `${defaultLang.toLowerCase()}.html`;
     };
