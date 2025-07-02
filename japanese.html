@@ -77,7 +77,7 @@ body {
   --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   --font-size: 16px;
   --line-height: 1.6;
-  --font-family: 'Segoe UI', system-ui, sans-serif;
+  --font-family: 'Segoe UI', system-ui, serif;
 }
 
 [data-theme="light"] {
@@ -106,7 +106,7 @@ body {
 }
 
 [data-font="serif"] { --font-family: Georgia, serif; }
-[data-font="sans-serif"] { --font-family: Arial, sans-serif; }
+[data-font="serif"] { --font-family: Arial, serif; }
 
 /* Base Elements */
 html, body {
@@ -681,27 +681,28 @@ h2 {
 
 /* Review Mode */
 .review-container {
-  background-color: var(--card-bg);
-  border-radius: 12px;
-  padding: 0;
-  margin: 0;
-  box-shadow: var(--shadow);
-  height: calc(100vh - 120px);
-  display: flex;
-  flex-direction: column;
-  position: relative;
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 0;
+    margin: 0;
+    box-shadow: var(--shadow);
+    height: calc(100vh - 40px); /* Adjusted to header height */
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
 }
-
 .review-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 1rem;
-  background-color: var(--secondary);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.3rem 0.5rem; /* Reduced padding */
+    background-color: var(--secondary);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    min-height: 40px; /* Fixed height */
 }
 
 .review-progress {
@@ -733,31 +734,34 @@ h2 {
 
 /* Matching Game */
 .matching-game-container {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  margin: 0;
-  overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin: 0;
+    overflow: hidden;
+    padding-top: 0 !important; /* Force no top padding */
 }
 
 .matching-game-columns {
-  display: flex;
-  flex: 1;
-  gap: 0.5rem;
-  min-height: 0;
-  padding: 0.5rem 0.5rem 80px; /* Add bottom padding for buttons */
-  overflow-y: auto;
-  align-items: flex-start; /* Align cards to top */
+    display: flex;
+    flex: 1;
+    gap: 0.5rem;
+    min-height: 0;
+    padding: 0 0.5rem 80px; /* Removed top padding */
+    overflow-y: auto;
+    align-items: flex-start;
+    margin-top: 0; /* Ensure no margin at top */
 }
 .matching-column {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  padding: 0;
-  gap: 0.5rem;
-  justify-content: flex-start;
-  align-items: center;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: 0;
+    gap: 0.3rem; /* Reduced gap */
+    justify-content: flex-start;
+    align-items: stretch; /* Stretch to fill width */
+    margin-top: 0; /* No top margin */
 }
 
 /* Word Cards */
@@ -1407,11 +1411,13 @@ h2 {
   }
   
   /* Matching Game */
-  .matching-game-columns {
- padding-bottom: 100px; /* More space for mobile buttons */
-    flex-direction: row;
-    gap: 0.5rem;
-  }
+    .matching-game-columns {
+        padding: 0 0.3rem 80px; /* Reduced padding */
+        flex-direction: row;
+        gap: 0.3rem; /* Reduced gap */
+        align-items: flex-start;
+        margin-top: 0;
+    }
   
   .matching-column {
     display: flex;
@@ -1428,9 +1434,10 @@ h2 {
   
   /* Review Container */
   .review-container {
-    height: calc(100vh - 100px);
-    border-radius: 0;
-  }
+        height: calc(100vh - 60px); /* More compact height */
+        border-radius: 0;
+        margin-top: 0; /* Remove top margin */
+    }
   
   .review-question {
     font-size: 1.8rem;
@@ -1461,14 +1468,14 @@ h2 {
   
   /* Review Header */
   .review-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+       position: sticky;
+        top: 0;
+        z-index: 10;
+        padding: 0.5rem;
   }
   
   .review-container {
-    margin-top: 50px;
+    margin-top: 0;
   }
   
   /* Mobile-specific button styles */
@@ -1536,7 +1543,7 @@ h2 {
                 <select class="settings-select" id="font-select">
                     <option value="system">System UI</option>
                     <option value="serif">Serif</option>
-                    <option value="sans-serif">Sans-serif</option>
+                    <option value="sans-serif">serif</option>
                 </select>
                 
                 <label class="settings-label">Font Size</label>
@@ -1907,15 +1914,50 @@ h2 {
                 </button>
             </section>
 <section id="bookmarks-view" class="view">
-    <h2>Saved Bookmarks</h2>
-    <p>Your favorite sentences and readings</p>
+    <h2>Library</h2>
+    <p>Saved texts and example chapters</p>
     
-    <div id="bookmarks-list" class="resources-container">
-        <!-- Bookmarks will appear here -->
+    <div class="resources-container" style="margin-bottom: 1rem;">
+        <h3 style="color: var(--highlight); margin-bottom: 0.5rem;">Add Custom URL</h3>
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <input type="text" id="custom-url-input" placeholder="Enter URL to save" style="flex: 1; padding: 0.5rem; border-radius: 8px; border: 1px solid var(--accent); background: var(--secondary); color: var(--text);">
+            <button class="btn" id="save-url-btn" style="background-color: var(--highlight);">Save</button>
+        </div>
+    </div>
+    
+    <div class="resources-container">
+        <h3 style="color: var(--highlight); margin-bottom: 0.5rem;">Example Chapters</h3>
+        <div class="resources-list" id="example-chapters">
+            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-1.html?m=1" class="resource-link" target="_blank">Chapter 1</a>
+            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-2.html?m=1" class="resource-link" target="_blank">Chapter 2</a>
+            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-3.html?m=1" class="resource-link" target="_blank">Chapter 3</a>
+            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-4.html?m=1" class="resource-link" target="_blank">Chapter 4</a>
+            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-5.html?m=1" class="resource-link" target="_blank">Chapter 5</a>
+            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-6.html?m=1" class="resource-link" target="_blank">Chapter 6</a>
+            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-7.html?m=1" class="resource-link" target="_blank">Chapter 7</a>
+            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-8.html?m=1" class="resource-link" target="_blank">Chapter 8</a>
+            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-9.html?m=1" class="resource-link" target="_blank">Chapter 9</a>
+            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-10.html?m=1" class="resource-link" target="_blank">Chapter 10</a>
+            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-11.html?m=1" class="resource-link" target="_blank">Chapter 11</a>
+            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-12.html?m=1" class="resource-link" target="_blank">Chapter 12</a>
+            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-13.html?m=1" class="resource-link" target="_blank">Chapter 13</a>
+            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-14.html?m=1" class="resource-link" target="_blank">Chapter 14</a>
+            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-15.html?m=1" class="resource-link" target="_blank">Chapter 15</a>
+            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-16.html?m=1" class="resource-link" target="_blank">Chapter 16</a>
+            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-17.html?m=1" class="resource-link" target="_blank">Chapter 17</a>
+            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-18.html?m=1" class="resource-link" target="_blank">Chapter 18</a>
+            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-19.html?m=1" class="resource-link" target="_blank">Chapter 19</a>
+            <a href="https://aijapanesetext.blogspot.com/2025/06/chapter-20.html?m=1" class="resource-link" target="_blank">Chapter 20</a>
+        </div>
+    </div>
+    
+    <div id="bookmarks-list" class="resources-container" style="margin-top: 1rem;">
+        <h3 style="color: var(--highlight); margin-bottom: 0.5rem;">Your Saved URLs</h3>
+        <!-- Saved URLs will appear here -->
     </div>
     
     <button class="btn" id="clear-bookmarks-btn" style="background-color: var(--danger); margin-top: 1rem;">
-        Clear All Bookmarks
+        Clear Saved URLs
     </button>
 </section>
         </main>
@@ -2028,7 +2070,8 @@ currentSessionStart: null,
 selectedCards: [],
 currentTtsUtterance: null,
 wordLookupCache: {},
-bookmarks: JSON.parse(localStorage.getItem('bookmarks_ja')) || []
+bookmarks: JSON.parse(localStorage.getItem('bookmarks_ja')) || [],
+    savedUrls: JSON.parse(localStorage.getItem('savedUrls_ja')) || []
 };
 
 // Initialize audio context and sounds
@@ -2299,7 +2342,91 @@ if (!displayText && bookmark.sentence) {
         });
     });
 }
+function saveCustomUrl() {
+    const urlInput = document.getElementById('custom-url-input');
+    const url = urlInput.value.trim();
+    
+    if (!url) {
+        showToast('Please enter a URL', 'error');
+        return;
+    }
+    
+    // Basic URL validation
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        showToast('Please enter a valid URL (include http:// or https://)', 'error');
+        return;
+    }
+    
+    // Create a title from the URL or prompt for one
+    const title = prompt("Enter a title for this URL (or leave blank to use domain name):", 
+                        new URL(url).hostname.replace('www.', ''));
+    
+    if (title === null) return; // User cancelled
+    
+    const urlObj = {
+        id: generateUUID(),
+        url: url,
+        title: title || new URL(url).hostname.replace('www.', ''),
+        date: new Date().toISOString()
+    };
+    
+    state.savedUrls.unshift(urlObj);
+    localStorage.setItem('savedUrls_ja', JSON.stringify(state.savedUrls));
+    urlInput.value = '';
+    renderSavedUrls();
+    showToast('URL saved to library!', 'success');
+}
 
+function renderSavedUrls() {
+    const container = document.querySelector('#bookmarks-list');
+    container.innerHTML = '';
+    
+    if (state.savedUrls.length === 0) {
+        container.innerHTML = '<p style="padding: 1rem; color: var(--text-secondary);">No saved URLs yet</p>';
+        return;
+    }
+    
+    state.savedUrls.forEach(url => {
+        const item = document.createElement('div');
+        item.className = 'resource-link';
+        item.style.alignItems = 'center';
+        
+        item.innerHTML = `
+            <span style="flex: 1;">${url.title}</span>
+            <span style="font-size: 0.8rem; color: var(--text-secondary); margin-right: 0.5rem;">
+                ${new Date(url.date).toLocaleDateString()}
+            </span>
+            <a href="${url.url}" target="_blank" class="nav-btn" style="padding: 0.3rem 0.6rem;">Open</a>
+            <button class="nav-btn" style="background-color: var(--danger); padding: 0.3rem 0.6rem;" 
+                data-url-id="${url.id}" aria-label="Delete URL">✕</button>
+        `;
+        
+        container.appendChild(item);
+    });
+    
+    // Add event listeners to delete buttons
+    container.querySelectorAll('[data-url-id]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const id = e.target.getAttribute('data-url-id');
+            deleteSavedUrl(id);
+            e.stopPropagation();
+        });
+    });
+}
+
+function deleteSavedUrl(id) {
+    state.savedUrls = state.savedUrls.filter(url => url.id !== id);
+    localStorage.setItem('savedUrls_ja', JSON.stringify(state.savedUrls));
+    renderSavedUrls();
+    showToast('URL removed', 'success');
+}
+
+function clearSavedUrls() {
+    state.savedUrls = [];
+    localStorage.removeItem('savedUrls_ja');
+    renderSavedUrls();
+    showToast('All saved URLs cleared', 'success');
+}
 function clearBookmarks() {
     state.bookmarks = [];
     localStorage.setItem('bookmarks_ja', JSON.stringify(state.bookmarks));
@@ -3931,6 +4058,17 @@ state.lastDeleted = { id: id, item: state.bookmarks.find(b => b.id === id) };
 setTimeout(() => delete state.lastDeleted, 5000); // Clear after 5 sec
     }
 });
+// URL saving
+document.getElementById('save-url-btn').addEventListener('click', saveCustomUrl);
+document.getElementById('custom-url-input').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') saveCustomUrl();
+});
+
+// Clear URLs button
+document.getElementById('clear-bookmarks-btn').addEventListener('click', clearSavedUrls);
+
+// Load saved URLs when library view is shown
+document.querySelector('.nav-btn[data-view="bookmarks-view"]').addEventListener('click', renderSavedUrls);
 // Welcome modal for first-time users
 const firstTime = localStorage.getItem('firstTime_ja') !== 'false';
 if (firstTime) {
