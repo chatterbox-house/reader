@@ -966,7 +966,7 @@
                         日本語話者の方へ
                     </h2>
                     <div class="language-grid">
-                        <a href="japanese-english.html" class="language-card">
+                        <a href="eigo.html" class="language-card">
                             <div class="language-flag"><img src="https://flagcdn.com/gb.svg" alt="English"></div>
                             <div class="language-name">英語 (English)</div>
                         </a>
@@ -1110,7 +1110,7 @@
         document.getElementById('continue-learning').addEventListener('click', () => {
             const recentLangs = JSON.parse(localStorage.getItem('recentLanguages') || '[]');
             if (recentLangs.includes('Japanese-English')) {
-                window.location.href = 'japanese-english.html';
+                window.location.href = 'eigo.html';
             } else if (recentLangs.length > 0) {
                 window.location.href = recentLangs[0].toLowerCase() + '.html';
             } else {
@@ -1131,7 +1131,7 @@
                 buttonFlag.style.backgroundImage = 'url(https://flagcdn.com/gb.svg)';
                 buttonText.textContent = 'Continue English';
                 button.onclick = () => {
-                    window.location.href = 'japanese-english.html';
+                    window.location.href = 'eigo.html';
                 };
                 return;
             }
