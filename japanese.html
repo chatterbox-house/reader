@@ -911,7 +911,6 @@ h2 {
   color: var(--text-secondary);
   text-align: center;
 }
-
 /* Stats Display */
 .stat-item {
   display: flex;
@@ -1829,12 +1828,13 @@ h2 {
     </div>
 </div>
             </section>
-            
+        
             <section id="review-mode-view" class="view">
     <button id="hide-header-btn" class="hide-header-btn" onclick="toggleHeaderVisibility()">↑</button>
     <div class="review-container">
+
         <div class="review-question" id="review-question"></div>
-        
+      
         <button class="btn shuffle-btn" id="shuffle-cards" aria-label="Shuffle cards">Shuffle Cards</button>
 <div id="matching-game-container" class="matching-game-container" style="display: none;">
     <div class="matching-game-columns">
@@ -1845,6 +1845,7 @@ h2 {
 
         </div>
     </div>
+<button class="btn" id="exit-review" aria-label="Exit review" style="margin: 1rem auto 3rem auto; display: block;">Exit Review</button>
 </div>
         
         <div id="hard-mode-container" class="hard-mode-buttons" style="display: none;">
@@ -1854,7 +1855,7 @@ h2 {
         </div>
     </div>
     
-    <button class="btn" id="exit-review" aria-label="Exit review" style="margin: 1rem auto 3rem auto; display: block;">Exit Review</button>
+    
 </section>
             
             <section id="manage-vocab-view" class="view">
