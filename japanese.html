@@ -1450,6 +1450,19 @@ h2 {
     .hard-mode-btn {
         width: 100%;
     }
+    /* New style for hard mode exit button */
+    #exit-hard-btn {
+        display: block !important;
+    }
+    
+    .hard-mode-buttons {
+        position: relative;
+        bottom: auto;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
 }
   
   /* Settings Panel */
@@ -1849,11 +1862,15 @@ h2 {
 </div>
         
         <div id="hard-mode-container" class="hard-mode-buttons" style="display: none;">
-            <button class="hard-mode-btn knew-it" id="knew-it-btn" aria-label="I know this">I know this</button>
-            <button class="hard-mode-btn didnt-know" id="didnt-know-btn" aria-label="Don't know">Don't know</button>
-            <button class="hard-mode-btn skip-btn" id="skip-btn" aria-label="Skip word">Skip</button>
-        </div>
-    </div>
+    <!-- New exit button for mobile -->
+    <button class="btn exit-hard-btn" id="exit-hard-btn" style="width: 100%; margin-bottom: 1rem; display: none;">
+        Exit Review
+    </button>
+    
+    <button class="hard-mode-btn knew-it" id="knew-it-btn" aria-label="I know this">I know this</button>
+    <button class="hard-mode-btn didnt-know" id="didnt-know-btn" aria-label="Don't know">Don't know</button>
+    <button class="hard-mode-btn skip-btn" id="skip-btn" aria-label="Skip word">Skip</button>
+</div>
     
     
 </section>
@@ -4642,6 +4659,15 @@ document.getElementById('lookup-word').addEventListener('click', async () => {
 
     // Review mode
 elements.exitReviewBtn.addEventListener('click', () => {
+// Add click handler for the new mobile exit button
+document.getElementById('exit-hard-btn').addEventListener('click', () => {
+    // Show header when exiting review
+    document.querySelector('header').classList.remove('hidden');
+    document.getElementById('hide-header-btn').classList.remove('visible');
+    
+    state.currentHardStreak = 0; // Reset streak when exiting
+    showView('vocab-review-view');
+});
     // Show header when exiting review
     document.querySelector('header').classList.remove('hidden');
     document.getElementById('hide-header-btn').classList.remove('visible');
