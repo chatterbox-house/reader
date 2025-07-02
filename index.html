@@ -691,6 +691,45 @@ document.addEventListener('mousemove', (e) => {
     animation: floatUp 3s ease-in-out infinite;
 }
         }
+/* Language Rain Effect */
+.language-rain {
+    position: fixed;
+    top: -50px;
+    z-index: -1;
+    font-size: 24px;
+    animation: rain linear infinite;
+    opacity: 0.7;
+}
+
+@keyframes rain {
+    to {
+        transform: translateY(100vh);
+    }
+}
+.confetti-explosion {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.float-text {
+    position: absolute;
+    color: var(--highlight);
+    font-weight: bold;
+    font-size: 1.2rem;
+    animation: floatUp 2s ease-out forwards;
+    pointer-events: none;
+    text-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+@keyframes floatUp {
+    to {
+        transform: translateY(-100px);
+        opacity: 0;
+    }
+}
     </style>
 <style>
     .new-feature {
@@ -1129,27 +1168,26 @@ document.querySelectorAll('.language-card').forEach(card => {
     const language = card.querySelector('.language-name')?.textContent;
     if (!language) return;
 
-    card.addEventListener('click', (e) => {
-        if (e.target.closest('.language-flag')) {
-            e.preventDefault();
-            e.stopPropagation();
-            speakLanguage(language.trim());
-            playRippleSound();
-            
-            // Add confetti effect
+card.addEventListener('click', (e) => {
+    if (e.target.closest('.language-flag')) {
+        e.preventDefault();
+        e.stopPropagation();
+        speakLanguage(language.trim());
+        playRippleSound();
+        
+        // Big confetti explosion
+        for (let i = 0; i < 30; i++) {
             const confetti = document.createElement('div');
-            confetti.style.position = 'absolute';
-            confetti.style.width = '10px';
-            confetti.style.height = '10px';
-            confetti.style.backgroundColor = getRandomColor();
-            confetti.style.borderRadius = '50%';
+            confetti.className = 'confetti-explosion';
             confetti.style.left = e.clientX + 'px';
             confetti.style.top = e.clientY + 'px';
+            confetti.style.backgroundColor = getRandomColor();
+            confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
             document.body.appendChild(confetti);
             
-            // Animate confetti
+            // Animate each piece
             const angle = Math.random() * Math.PI * 2;
-            const velocity = 5 + Math.random() * 5;
+            const velocity = 2 + Math.random() * 8;
             const x = Math.cos(angle) * velocity;
             const y = Math.sin(angle) * velocity;
             
@@ -1159,7 +1197,7 @@ document.querySelectorAll('.language-card').forEach(card => {
             
             const animate = () => {
                 posX += x;
-                posY += y;
+                posY += y + 1; // Add gravity
                 opacity -= 0.02;
                 
                 confetti.style.left = posX + 'px';
@@ -1175,7 +1213,19 @@ document.querySelectorAll('.language-card').forEach(card => {
             
             animate();
         }
-    });
+        
+        // Add floating text effect
+        const floatText = document.createElement('div');
+        floatText.textContent = 'Yay! ' + language;
+        floatText.className = 'float-text';
+        floatText.style.left = e.clientX + 'px';
+        floatText.style.top = e.clientY + 'px';
+        document.body.appendChild(floatText);
+        
+        setTimeout(() => {
+            floatText.remove();
+        }, 2000);
+    }
 });
 
 function getRandomColor() {
@@ -1394,6 +1444,26 @@ document.addEventListener('DOMContentLoaded', setupSmartButton);
         showDailyQuote();
         checkAchievements(); // Add this line
     });
+// Language rain effect
+function createLanguageRain() {
+    const chars = ['あ', 'に', '語', 'A', 'B', 'C', '¿', '¡', 'ß', '你', '好', '감', '사', '해'];
+    
+    setInterval(() => {
+        const char = document.createElement('div');
+        char.className = 'language-rain';
+        char.textContent = chars[Math.floor(Math.random() * chars.length)];
+        char.style.left = Math.random() * 100 + 'vw';
+        char.style.animationDuration = (3 + Math.random() * 5) + 's';
+        document.body.appendChild(char);
+        
+        // Remove after animation completes
+        setTimeout(() => {
+            char.remove();
+        }, 8000);
+    }, 300);
+}
+
+createLanguageRain();
 </script>
 
 <style>
