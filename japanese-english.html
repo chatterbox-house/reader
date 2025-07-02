@@ -2026,14 +2026,14 @@ const state = {
     currentLineHeight: parseFloat(localStorage.getItem('lineHeight')) || 1.6,
     autoTranslate: localStorage.getItem('autoTranslate') === 'true',
 
-readingStats: JSON.parse(localStorage.getItem('readingStats')) || {
+readingStats: JSON.parse(localStorage.getItem('readingStats_japanese_english')) || {
     streak: 0,
     lastActiveDate: '',
     wordsLearned: 0,
     timeSpent: 0,
     dailyWords: 0,
     dailyTime: 0,
-    dailySentences: 0  // <-- Add this line
+    dailySentences: 0
 },
 currentSessionStart: null,
 selectedCards: [],
@@ -2517,7 +2517,7 @@ function updateStatsDisplay() {
         state.readingStats.lastActiveDate = today;
         state.readingStats.dailyWords = 0;
         state.readingStats.dailyTime = 0;
-        localStorage.setItem('readingStats', JSON.stringify(state.readingStats));
+        localStorage.setItem('readingStats_japanese_english', JSON.stringify(state.readingStats));
     }
     
     elements.streakCount.textContent = state.readingStats.streak;
@@ -2559,7 +2559,7 @@ function endReadingSession() {
         state.readingStats.timeSpent += timeSpent;
         state.readingStats.dailyTime += timeSpent;
         state.currentSessionStart = null;
-        localStorage.setItem('readingStats', JSON.stringify(state.readingStats));
+        localStorage.setItem('readingStats_japanese_english', JSON.stringify(state.readingStats));
         updateStatsDisplay();
     }
 }
@@ -2797,7 +2797,7 @@ function addVocabWord(word) {
                 // Update reading stats
                 state.readingStats.wordsLearned++;
                 state.readingStats.dailyWords++;
-                localStorage.setItem('readingStats', JSON.stringify(state.readingStats));
+                localStorage.setItem('readingStats_japanese_english', JSON.stringify(state.readingStats));
                 updateStatsDisplay();
                 
                 const addRequest = store.add(word);
