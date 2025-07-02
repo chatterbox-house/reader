@@ -691,6 +691,159 @@ document.addEventListener('mousemove', (e) => {
 </style>
 </head>
 <body>
+<script>
+    // Function to detect if user's primary language is Japanese
+    function isJapaneseUser() {
+        // Get browser language (returns something like 'en-US' or 'ja-JP')
+        const userLanguage = navigator.language || navigator.userLanguage;
+        // Check if language starts with 'ja' (Japanese)
+        return userLanguage.toLowerCase().startsWith('ja');
+    }
+
+    // Function to render language sections in the correct order
+    function renderLanguageSections() {
+        const container = document.getElementById('language-sections-container');
+        const isJapanese = isJapaneseUser();
+        
+        if (isJapanese) {
+            // For Japanese users - show Japanese section first
+            container.innerHTML = `
+                <section class="language-section">
+                    <h2 class="section-title">
+                        <img src="https://flagcdn.com/jp.svg" alt="Japanese">
+                        日本語話者の方へ
+                    </h2>
+                    <div class="language-grid">
+                        <a href="japanese-english.html" class="language-card">
+                            <div class="language-flag"><img src="https://flagcdn.com/gb.svg" alt="English"></div>
+                            <div class="language-name">英語 (English)</div>
+                        </a>
+                        <a href="japanese-spanish.html" class="language-card">
+                            <div class="language-flag"><img src="https://flagcdn.com/es.svg" alt="Spanish"></div>
+                            <div class="language-name">スペイン語 (Spanish)</div>
+                        </a>
+                    </div>
+                </section>
+
+                <div class="divider"></div>
+
+                <section class="language-section">
+                    <div class="new-feature">New!</div>
+                    <h1 class="section-title">
+                        <img src="https://flagcdn.com/gb.svg" alt="English">
+                        For English Speakers
+                    </h1>
+                    <div class="language-grid">
+                        <a href="japanese.html" class="language-card">
+                            <div class="language-flag"><img src="https://flagcdn.com/jp.svg" alt="Japanese"></div>
+                            <div class="language-name">Japanese</div>
+                            <div class="difficulty-meter">
+                                <span class="difficulty-dot active"></span>
+                                <span class="difficulty-dot active"></span>
+                                <span class="difficulty-dot"></span>
+                                <span class="difficulty-dot"></span>
+                            </div>
+                        </a>
+                        <a href="spanish.html" class="language-card">
+                            <div class="language-flag"><img src="https://flagcdn.com/es.svg" alt="Spanish"></div>
+                            <div class="language-name">Spanish</div>
+                        </a>
+                        <a href="french.html" class="language-card">
+                            <div class="language-flag"><img src="https://flagcdn.com/fr.svg" alt="French"></div>
+                            <div class="language-name">French</div>
+                        </a>
+                        <a href="chinese.html" class="language-card">
+                            <div class="language-flag"><img src="https://flagcdn.com/cn.svg" alt="Chinese"></div>
+                            <div class="language-name">Chinese</div>
+                        </a>
+                        <a href="latin.html" class="language-card">
+                            <div class="language-flag"><img src="https://flagcdn.com/w20/va.png" srcset="https://flagcdn.com/w40/va.png 2x" alt="Vatican City"></div>
+                            <div class="language-name">Latin</div>
+                        </a>
+                        <a href="italian.html" class="language-card">
+                            <div class="language-flag"><img src="https://flagcdn.com/it.svg" alt="Italian"></div>
+                            <div class="language-name">Italian</div>
+                        </a>
+                    </div>
+                </section>
+            `;
+        } else {
+            // For non-Japanese users (default) - show English section first
+            container.innerHTML = `
+                <section class="language-section">
+                    <div class="new-feature">New!</div>
+                    <h1 class="section-title">
+                        <img src="https://flagcdn.com/gb.svg" alt="English">
+                        For English Speakers
+                    </h1>
+                    <div class="language-grid">
+                        <a href="japanese.html" class="language-card">
+                            <div class="language-flag"><img src="https://flagcdn.com/jp.svg" alt="Japanese"></div>
+                            <div class="language-name">Japanese</div>
+                            <div class="difficulty-meter">
+                                <span class="difficulty-dot active"></span>
+                                <span class="difficulty-dot active"></span>
+                                <span class="difficulty-dot"></span>
+                                <span class="difficulty-dot"></span>
+                            </div>
+                        </a>
+                        <a href="spanish.html" class="language-card">
+                            <div class="language-flag"><img src="https://flagcdn.com/es.svg" alt="Spanish"></div>
+                            <div class="language-name">Spanish</div>
+                        </a>
+                        <a href="french.html" class="language-card">
+                            <div class="language-flag"><img src="https://flagcdn.com/fr.svg" alt="French"></div>
+                            <div class="language-name">French</div>
+                        </a>
+                        <a href="chinese.html" class="language-card">
+                            <div class="language-flag"><img src="https://flagcdn.com/cn.svg" alt="Chinese"></div>
+                            <div class="language-name">Chinese</div>
+                        </a>
+                        <a href="latin.html" class="language-card">
+                            <div class="language-flag"><img src="https://flagcdn.com/w20/va.png" srcset="https://flagcdn.com/w40/va.png 2x" alt="Vatican City"></div>
+                            <div class="language-name">Latin</div>
+                        </a>
+                        <a href="italian.html" class="language-card">
+                            <div class="language-flag"><img src="https://flagcdn.com/it.svg" alt="Italian"></div>
+                            <div class="language-name">Italian</div>
+                        </a>
+                    </div>
+                </section>
+
+                <div class="divider"></div>
+
+                <section class="language-section">
+                    <h2 class="section-title">
+                        <img src="https://flagcdn.com/jp.svg" alt="Japanese">
+                        日本語話者の方へ
+                    </h2>
+                    <div class="language-grid">
+                        <a href="japanese-english.html" class="language-card">
+                            <div class="language-flag"><img src="https://flagcdn.com/gb.svg" alt="English"></div>
+                            <div class="language-name">英語 (English)</div>
+                        </a>
+                        <a href="japanese-spanish.html" class="language-card">
+                            <div class="language-flag"><img src="https://flagcdn.com/es.svg" alt="Spanish"></div>
+                            <div class="language-name">スペイン語 (Spanish)</div>
+                        </a>
+                    </div>
+                </section>
+            `;
+        }
+        
+        // Animate the cards after they're inserted
+        setTimeout(() => {
+            document.querySelectorAll('.language-card').forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('show');
+                }, index * 100);
+            });
+        }, 50);
+    }
+
+    // Run this when the page loads
+    document.addEventListener('DOMContentLoaded', renderLanguageSections);
+</script>
 <div class="page-loader">
     <div class="loader-spinner"></div>
 </div>
@@ -714,66 +867,10 @@ document.addEventListener('mousemove', (e) => {
             </div>
         </header>
 
-        <!-- For English Speakers -->
-        <section class="language-section">
-<div class="new-feature">New!</div>
-            <h1 class="section-title">
-                <img src="https://flagcdn.com/gb.svg" alt="English">
-                For English Speakers
-            </h1>
-            <div class="language-grid">
-                <a href="japanese.html" class="language-card">
-                    <div class="language-flag"><img src="https://flagcdn.com/jp.svg" alt="Japanese"></div>
-                    <div class="language-name">Japanese</div>
-                    <div class="difficulty-meter">
-                        <span class="difficulty-dot active"></span>
-                        <span class="difficulty-dot active"></span>
-                        <span class="difficulty-dot"></span>
-                        <span class="difficulty-dot"></span>
-                    </div>
-                </a>
-                <a href="spanish.html" class="language-card">
-                    <div class="language-flag"><img src="https://flagcdn.com/es.svg" alt="Spanish"></div>
-                    <div class="language-name">Spanish</div>
-                </a>
-                <a href="french.html" class="language-card">
-                    <div class="language-flag"><img src="https://flagcdn.com/fr.svg" alt="French"></div>
-                    <div class="language-name">French</div>
-                </a>
-                <a href="chinese.html" class="language-card">
-                    <div class="language-flag"><img src="https://flagcdn.com/cn.svg" alt="Chinese"></div>
-                    <div class="language-name">Chinese</div>
-                </a>
-                <a href="latin.html" class="language-card">
-                    <div class="language-flag"><img src="https://flagcdn.com/w20/va.png" srcset="https://flagcdn.com/w40/va.png 2x" alt="Vatican City"></div>
-                    <div class="language-name">Latin</div>
-                </a>
-                <a href="italian.html" class="language-card">
-                    <div class="language-flag"><img src="https://flagcdn.com/it.svg" alt="Italian"></div>
-                    <div class="language-name">Italian</div>
-                </a>
-            </div>
-        </section>
-
-        <div class="divider"></div>
-
-        <!-- For Japanese Speakers -->
-        <section class="language-section">
-            <h2 class="section-title">
-                <img src="https://flagcdn.com/jp.svg" alt="Japanese">
-                日本語話者の方へ
-            </h2>
-            <div class="language-grid">
-                <a href="japanese-english.html" class="language-card">
-                    <div class="language-flag"><img src="https://flagcdn.com/gb.svg" alt="English"></div>
-                    <div class="language-name">英語 (English)</div>
-                </a>
-                <a href="japanese-spanish.html" class="language-card">
-                    <div class="language-flag"><img src="https://flagcdn.com/es.svg" alt="Spanish"></div>
-                    <div class="language-name">スペイン語 (Spanish)</div>
-                </a>
-            </div>
-        </section>
+        <!-- Language sections will be ordered based on user's browser language -->
+        <div id="language-sections-container">
+            <!-- This will be filled by JavaScript -->
+        </div>
 
         <section class="progress-section">
             <h2 class="section-title">
@@ -1269,5 +1366,6 @@ document.addEventListener('DOMContentLoaded', setupSmartButton);
         margin-left: 5px;
     }
 </style>
+
 </body>
 </html>
