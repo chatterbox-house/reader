@@ -1709,10 +1709,9 @@ header {
 
 <!-- Translate Section -->
 <div id="translate-container" class="text-import-container" style="display: none;">
-    <h2>英語に翻訳 <span role="img" aria-label="From your language to english">🌐 → 🇬🇧</span></h2>
+    <h2>日本語から英語に翻訳 <span role="img" aria-label="Japanese to English">🇯🇵 → 🇬🇧</span></h2>
     <p>日本語でテキストを入力または音声入力して英語に翻訳 (最大5,000文字)</p>
-        <textarea class="text-input" id="translate-input" placeholder="例: 猫が寝ています。犬が走っています..." aria-label="Translation input"></textarea>
-        <div class="char-count"><span id="translate-char-count">0</span>/5000 文字</div>
+        <textarea class="text-input" id="translate-input" placeholder="例: 猫が寝ています。犬が走っています..." aria-label="翻訳入力欄"></textarea>        <div class="char-count"><span id="translate-char-count">0</span>/5000 文字</div>
         <div class="input-actions" style="gap: 0.5rem; margin-bottom: 1rem;">
             <button id="貼り付け-btn-translate" class="btn" style="background-color: var(--accent); flex: 1;" aria-label="貼り付け">
                 <span>📋 貼り付け</span>
@@ -2895,7 +2894,7 @@ function detectLanguage(text) {
 
 
 <!-- NEW CODE -->
-async function translateToenglish(text, sourceLang) {
+async function translateToEnglish(text, sourceLang) {
     try {
         const cachedTranslation = await getCachedTranslation(text, sourceLang, 'en');
         if (cachedTranslation) {
@@ -4161,21 +4160,20 @@ localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
 document.getElementById('translate-to-english').addEventListener('click', async function() {
     const text = document.getElementById('translate-input').value.trim();
     if (text.length === 0) {
-        showToast('Please enter some text to translate', 'error');
+        showToast('翻訳するテキストを入力してください', 'error');
         return;
     }
 
     try {
         const button = this;
-        button.innerHTML = '<span>Translating...</span><span class="loading-spinner"></span>';
+        button.innerHTML = '<span>翻訳中...</span><span class="loading-spinner"></span>';
         button.disabled = true;
         
         // Show loading state
-        showToast('Translating...', 'info');
+        showToast('翻訳中...', 'info');
         
-        // Detect source language from input
-        const sourceLang = detectLanguage(text) || 'en';
-        const translatedText = await translateToenglish(text, sourceLang);
+        // Detect source language from input (always Japanese to English)
+        const translatedText = await translateToEnglish(text, 'ja');
         
         if (translatedText) {
             // Put the translated text in the english input field
