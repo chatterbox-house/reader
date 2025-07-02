@@ -6,62 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#1a1a2e">
 <title>Sentence Mode - Japanese Learning Tool</title>
+
+
 <style>
-html {
-    overflow-x: hidden;
-    scroll-behavior: smooth;
-}
-
-body {
-    max-width: 100%;
-    position: relative;
-}
-
-/* Animation classes */
-.fade-in {
-    animation: fadeIn 0.5s ease-in-out;
-}
-
-.slide-up {
-    animation: slideUp 0.5s ease-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes slideUp {
-    from { 
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to { 
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Animation Delays */
-.hero-section.fade-in {
-    animation-delay: 0.1s;
-}
-
-.text-import-container.slide-up {
-    animation-delay: 0.3s;
-}
-
-.testimonials-container.fade-in {
-    animation-delay: 0.5s;
-}
-.app-container {
-    width: 100%;
-    overflow-x: hidden;
-}
-/* Always show theme and settings buttons */
-.theme-toggle, .settings-btn {
-    display: flex !important;
-}
 /* Base Styles & Variables */
 :root {
   --primary: #1a1a2e;
@@ -77,7 +24,7 @@ body {
   --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   --font-size: 16px;
   --line-height: 1.6;
-  --font-family: 'Segoe UI', system-ui, serif;
+  --font-family: 'Segoe UI', system-ui, sans-serif;
 }
 
 [data-theme="light"] {
@@ -105,8 +52,9 @@ body {
   --card-bg: #111;
 }
 
-[data-font="serif"] { --font-family: Georgia, serif; }
-[data-font="serif"] { --font-family: Arial, serif; }
+[data-font="serif"] { 
+  --font-family: Georgia, serif; 
+}
 
 /* Base Elements */
 html, body {
@@ -152,7 +100,9 @@ main {
   animation: fadeIn 0.3s ease;
 }
 
-.view.active { display: block; }
+.view.active { 
+  display: block; 
+}
 
 /* Header & Navigation */
 header {
@@ -168,7 +118,9 @@ header {
   transition: transform 0.3s ease;
 }
 
-header.hidden { transform: translateY(-100%); }
+header.hidden { 
+  transform: translateY(-100%); 
+}
 
 .logo {
   display: flex;
@@ -224,7 +176,9 @@ header.hidden { transform: translateY(-100%); }
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-.settings-btn { margin-left: 0.5rem; }
+.settings-btn { 
+  margin-left: 0.5rem; 
+}
 
 /* Settings Panel */
 .settings-panel {
@@ -241,7 +195,9 @@ header.hidden { transform: translateY(-100%); }
   overflow-y: auto;
 }
 
-.settings-panel.open { right: 0; }
+.settings-panel.open { 
+  right: 0; 
+}
 
 .settings-overlay {
   position: fixed;
@@ -270,7 +226,9 @@ header.hidden { transform: translateY(-100%); }
   align-items: center;
 }
 
-.settings-group { margin-bottom: 1.5rem; }
+.settings-group { 
+  margin-bottom: 1.5rem; 
+}
 
 .settings-label {
   display: block;
@@ -368,7 +326,9 @@ input:checked + .toggle-slider:before {
   transform: translateX(26px);
 }
 
-.toggle-label { font-size: 0.9rem; }
+.toggle-label { 
+  font-size: 0.9rem; 
+}
 
 /* Hero Section */
 .hero-section {
@@ -458,7 +418,9 @@ h2 {
   padding: 0 10px;
 }
 
-.input-actions .btn { flex: 1; }
+.input-actions .btn { 
+  flex: 1; 
+}
 
 /* Buttons */
 .btn {
@@ -640,7 +602,9 @@ h2 {
   font-size: 0.9rem;
 }
 
-.copy-translation:hover { color: var(--highlight); }
+.copy-translation:hover { 
+  color: var(--highlight); 
+}
 
 /* Vocabulary Review */
 .bucket-container {
@@ -660,7 +624,9 @@ h2 {
   transition: transform 0.2s ease;
 }
 
-.bucket-card:hover { transform: translateY(-5px); }
+.bucket-card:hover { 
+  transform: translateY(-5px); 
+}
 
 .bucket-card.new { border-top: 4px solid #3b82f6; }
 .bucket-card.easy { border-top: 4px solid var(--success); }
@@ -681,28 +647,29 @@ h2 {
 
 /* Review Mode */
 .review-container {
-    background-color: var(--card-bg);
-    border-radius: 12px;
-    padding: 0;
-    margin: 0;
-    box-shadow: var(--shadow);
-    height: calc(100vh - 40px); /* Adjusted to header height */
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    overflow: hidden;
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  padding: 0;
+  margin: 0;
+  box-shadow: var(--shadow);
+  height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
 }
+
 .review-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.3rem 0.5rem; /* Reduced padding */
-    background-color: var(--secondary);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    min-height: 40px; /* Fixed height */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.3rem 0.5rem;
+  background-color: var(--secondary);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  min-height: 40px;
 }
 
 .review-progress {
@@ -730,38 +697,41 @@ h2 {
   transition: opacity 0.3s ease;
 }
 
-.hide-header-btn.visible { opacity: 1; }
+.hide-header-btn.visible { 
+  opacity: 1; 
+}
 
 /* Matching Game */
 .matching-game-container {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    margin: 0;
-    overflow: hidden;
-    padding-top: 0 !important; /* Force no top padding */
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin: 0;
+  overflow: hidden;
+  padding-top: 0 !important;
 }
 
 .matching-game-columns {
-    display: flex;
-    flex: 1;
-    gap: 0.5rem;
-    min-height: 0;
-    padding: 0 0.5rem 80px; /* Removed top padding */
-    overflow-y: auto;
-    align-items: flex-start;
-    margin-top: 0; /* Ensure no margin at top */
+  display: flex;
+  flex: 1;
+  gap: 0.5rem;
+  min-height: 0;
+  padding: 0 0.5rem 80px;
+  overflow-y: auto;
+  align-items: flex-start;
+  margin-top: 0;
 }
+
 .matching-column {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    padding: 0;
-    gap: 0.3rem; /* Reduced gap */
-    justify-content: flex-start;
-    align-items: stretch; /* Stretch to fill width */
-    margin-top: 0; /* No top margin */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0;
+  gap: 0.3rem;
+  justify-content: flex-start;
+  align-items: stretch;
+  margin-top: 0;
 }
 
 /* Word Cards */
@@ -835,6 +805,7 @@ h2 {
   padding: 1rem;
   border-top: 1px solid var(--accent);
 }
+
 .hard-mode-buttons {
   display: flex;
   gap: 1rem;
@@ -1100,7 +1071,9 @@ h2 {
   padding-top: 0.5rem;
 }
 
-.how-to-use-content.show { display: block; }
+.how-to-use-content.show { 
+  display: block; 
+}
 
 /* Sound Toggle */
 .sound-toggle {
@@ -1121,7 +1094,9 @@ h2 {
   cursor: pointer;
 }
 
-#review-mode-view.active .sound-toggle { display: flex; }
+#review-mode-view.active .sound-toggle { 
+  display: flex; 
+}
 
 /* Loading Spinner */
 .loading-spinner {
@@ -1152,7 +1127,9 @@ h2 {
   transition: opacity 0.2s;
 }
 
-.tooltip.show { opacity: 1; }
+.tooltip.show { 
+  opacity: 1; 
+}
 
 /* Confirmation Dialog */
 .confirmation-dialog {
@@ -1170,7 +1147,9 @@ h2 {
   transition: opacity 0.3s ease;
 }
 
-.confirmation-dialog.show { opacity: 1; }
+.confirmation-dialog.show { 
+  opacity: 1; 
+}
 
 /* Toast */
 .toast {
@@ -1248,7 +1227,9 @@ h2 {
   cursor: pointer;
 }
 
-.tutorial-steps { margin: 2rem 0; }
+.tutorial-steps { 
+  margin: 2rem 0; 
+}
 
 .tutorial-step {
   display: none;
@@ -1287,7 +1268,9 @@ h2 {
   cursor: pointer;
 }
 
-.indicator.active { background-color: var(--highlight); }
+.indicator.active { 
+  background-color: var(--highlight); 
+}
 
 /* Offline Warning */
 .offline-warning {
@@ -1411,13 +1394,13 @@ h2 {
   }
   
   /* Matching Game */
-    .matching-game-columns {
-        padding: 0 0.3rem 80px; /* Reduced padding */
-        flex-direction: row;
-        gap: 0.3rem; /* Reduced gap */
-        align-items: flex-start;
-        margin-top: 0;
-    }
+  .matching-game-columns {
+    padding: 0 0.3rem 80px;
+    flex-direction: row;
+    gap: 0.3rem;
+    align-items: flex-start;
+    margin-top: 0;
+  }
   
   .matching-column {
     display: flex;
@@ -1434,16 +1417,17 @@ h2 {
   
   /* Review Container */
   .review-container {
-        height: calc(100vh - 60px); /* More compact height */
-        border-radius: 0;
-        margin-top: 0; /* Remove top margin */
-    }
+    height: calc(100vh - 60px);
+    border-radius: 0;
+    margin-top: 0;
+  }
   
   .review-question {
     font-size: 1.8rem;
     min-height: 90px;
   }
-.hard-mode-buttons {
+  
+  .hard-mode-buttons {
     position: fixed;
     bottom: 0;
     left: 0;
@@ -1464,14 +1448,16 @@ h2 {
     right: -100%;
   }
   
-  .settings-panel.open { right: 0; }
+  .settings-panel.open { 
+    right: 0; 
+  }
   
   /* Review Header */
   .review-header {
-       position: sticky;
-        top: 0;
-        z-index: 10;
-        padding: 0.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 0.5rem;
   }
   
   .review-container {
