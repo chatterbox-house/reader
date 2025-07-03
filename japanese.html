@@ -2044,6 +2044,61 @@ h2 {
 </div>
 
     <script>
+   async function importUrlContent(url) {
+    try {
+        showToast('Fetching content...', 'info');
+        
+        // Use a proxy to avoid CORS issues
+        const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+        const response = await fetch(proxyUrl);
+        
+        if (!response.ok) throw new Error('Failed to fetch content');
+        
+        let html = await response.text();
+        
+        // Create a temporary DOM element to parse the HTML
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        // Remove script and style elements
+        const scripts = doc.querySelectorAll('script, style, noscript, iframe, img');
+        scripts.forEach(el => el.remove());
+        
+        // Get text content from main content areas (prioritize article, main, etc.)
+        let text = '';
+        const contentSelectors = ['article', 'main', '.post-content', '.entry-content', 'body'];
+        
+        for (const selector of contentSelectors) {
+            const element = doc.querySelector(selector);
+            if (element) {
+                text = element.textContent;
+                break;
+            }
+        }
+        
+        // Fallback to body if no specific content found
+        if (!text) {
+            text = doc.body.textContent;
+        }
+        
+        // Clean up the text
+        text = text.replace(/\s+/g, ' ').trim();
+        
+        if (!text) throw new Error('No text content found');
+        
+        // Put the text in the input field
+        elements.textInput.value = text;
+        elements.charCount.textContent = text.length;
+        
+        // Switch to reader view
+        showView('text-import-view');
+        showToast('Content loaded! Click "Process Text" to start reading', 'success');
+        
+    } catch (error) {
+        console.error('Import error:', error);
+        showToast('Failed to import: ' + error.message, 'error');
+    }
+}
 // App state
 const state = {
     currentView: 'text-import',
@@ -2446,14 +2501,15 @@ function renderSavedUrls() {
             <span style="font-size: 0.8rem; color: var(--text-secondary); margin-right: 0.5rem;">
                 ${new Date(url.date).toLocaleDateString()}
             </span>
-            <a href="${url.url}" target="_blank" class="nav-btn" style="padding: 0.3rem 0.6rem;">Open</a>
+            <button class="nav-btn" style="background-color: var(--highlight); padding: 0.3rem 0.6rem;" 
+                data-url="${url.url}" aria-label="Import URL">Import</button>
             <button class="nav-btn" style="background-color: var(--danger); padding: 0.3rem 0.6rem;" 
                 data-url-id="${url.id}" aria-label="Delete URL">✕</button>
         `;
         
         container.appendChild(item);
     });
-    
+ 
     // Add event listeners to delete buttons
     container.querySelectorAll('[data-url-id]').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -4111,8 +4167,16 @@ updateVocabTabCounter();
 // On page load:
 document.addEventListener('DOMContentLoaded', updateVocabTabCounter);
 function setupEventListeners() {
+// Handle Import button clicks
+document.getElementById('bookmarks-list').addEventListener('click', (e) => {
+    if (e.target.hasAttribute('data-url')) {
+        const url = e.target.getAttribute('data-url');
+        importUrlContent(url);
+    }
+}); // <-- Added missing closing brace and parenthesis
+
 // 1. First declare modal variables
-  const tutorialModal = document.getElementById('tutorial-modal');
+const tutorialModal = document.getElementById('tutorial-modal');
   const closeModal = document.getElementById('close-modal');
   const tutorialSteps = document.querySelectorAll('.tutorial-step');
   const indicators = document.querySelectorAll('.indicator');
