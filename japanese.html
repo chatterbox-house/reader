@@ -748,18 +748,37 @@ h2 {
     text-align: center;
     transition: all 0.2s ease;
     margin-bottom: 0.5rem;
-    font-size: calc(var(--font-size) * 1.5);
     min-height: calc(var(--font-size) * 4);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    word-break: break-word;
+    word-break: keep-all;
     white-space: normal;
     overflow-wrap: break-word;
     flex: 1;
     box-sizing: border-box;
     max-width: 100%;
+    width: 100%;
+}
+
+.word-card[data-type="japanese"] {
+    font-size: calc(var(--font-size) * 1.8);
+    letter-spacing: 1px;
+    line-height: 1.4;
+}
+
+.word-card[data-type="english"] {
+    font-size: calc(var(--font-size) * 1.1);
+    line-height: 1.3;
+}
+
+.word-card .content {
+    padding: 0.5rem;
+    width: 100%;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    hyphens: auto;
 }
 
 .word-card:hover {
@@ -1413,18 +1432,16 @@ h2 {
     }
     
     .word-card {
-        min-height: calc(var(--font-size) * 3.5) !important; /* Smaller but proportional */
+        min-height: calc(var(--font-size) * 3) !important;
         padding: 0.5rem;
-        font-size: calc(var(--font-size) * 1.3) !important; /* Now respects font size */
-        word-break: keep-all;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
     }
-.word-card[data-type="japanese"] {
-    font-size: calc(var(--font-size) * 1.8) !important; /* Even larger for Japanese */
-    letter-spacing: 1px; /* Improves readability */
-}
+    
+    .word-card[data-type="japanese"] {
+        font-size: calc(var(--font-size) * 1.1) !important;
+    }
+    
+    .word-card[data-type="english"] {
+       
   
   /* Review Container */
 @media (max-width: 600px) {
@@ -3790,16 +3807,21 @@ function createWordCard(word) {
     card.dataset.type = word.type;
     card.dataset.streak = word.streak || 0;
     
-    // Create content container
+    // Create content container with better wrapping
     const content = document.createElement('div');
-    content.style.flex = '1';
-    content.style.display = 'flex';
-    content.style.alignItems = 'center';
-    content.style.justifyContent = 'center';
-    content.style.width = '100%';
-    content.style.padding = '10px';
-    content.style.wordBreak = 'break-word';
+    content.className = 'content';
     content.textContent = word.text;
+    
+    // Adjust font size based on text length (for Japanese)
+    if (word.type === 'japanese') {
+        if (word.text.length > 6) { // Longer phrases get smaller font
+            content.style.fontSize = '0.9em';
+        } else if (word.text.length > 3) { // Medium length
+            content.style.fontSize = '1em';
+        } else { // Short kanji
+            content.style.fontSize = '1.2em';
+        }
+    }
     
     card.appendChild(content);
     
