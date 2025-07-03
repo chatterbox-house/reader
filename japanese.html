@@ -24,14 +24,14 @@
   --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   --font-size: 16px;
   --line-height: 1.6;
-  --font-family: 'Georgia', 'Times New Roman', serif;
+    --font-family: 'Georgia', 'Times New Roman', serif;
 }
 
-/* Theme Variants */
 [data-theme="light"] {
   --primary: #f8f9fa;
   --secondary: #e9ecef;
   --accent: #dee2e6;
+  --highlight: #e94560;
   --text: #212529;
   --text-secondary: #495057;
   --card-bg: rgba(255, 255, 255, 0.8);
@@ -57,44 +57,44 @@
 }
 
 /* Base Elements */
-*, *::before, *::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 html, body {
+  overflow-x: hidden;
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
 }
 
 body {
-  min-height: 100vh;
   background-color: var(--primary);
   color: var(--text);
-  font-family: var(--font-family);
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
   font-size: var(--font-size);
   line-height: var(--line-height);
+  font-family: var(--font-family);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  transition: background-color 0.3s ease;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 /* Layout & Containers */
 .app-container {
   width: 100%;
-  height: 100vh;
   overflow-x: hidden;
+  height: 100vh;
   overscroll-behavior-y: contain;
 }
 
 main {
+  padding: 1rem;
   max-width: 800px;
   margin: 0 auto;
-  padding: 1rem;
 }
 
 .view {
@@ -108,15 +108,15 @@ main {
 
 /* Header & Navigation */
 header {
+  background-color: var(--secondary);
+  padding: 1rem;
   position: sticky;
   top: 0;
   z-index: 100;
+  box-shadow: var(--shadow);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  background-color: var(--secondary);
-  box-shadow: var(--shadow);
   transition: transform 0.3s ease;
 }
 
@@ -144,13 +144,13 @@ header.hidden {
 .nav-btn {
   background: none;
   border: none;
+  color: var(--text-secondary);
   padding: 0.5rem 0.8rem;
   border-radius: 20px;
-  font-family: var(--font-family);
   font-size: 0.9rem;
+  font-family: 'Georgia', 'Times New Roman', serif;
   font-weight: 500;
   letter-spacing: 0.5px;
-  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -162,17 +162,17 @@ header.hidden {
 
 .theme-toggle, 
 .settings-btn {
-  width: 40px;
-  height: 40px;
   background: none;
   border: none;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 1.2rem;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text);
-  font-size: 1.2rem;
-  cursor: pointer;
   transition: background-color 0.3s;
 }
 
@@ -192,10 +192,10 @@ header.hidden {
   right: -300px;
   width: 300px;
   height: 100vh;
-  padding: 1.5rem;
   background-color: var(--secondary);
   box-shadow: var(--shadow);
   z-index: 1000;
+  padding: 1.5rem;
   transition: right 0.3s ease;
   overflow-y: auto;
 }
@@ -223,12 +223,12 @@ header.hidden {
 }
 
 .settings-title {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: var(--highlight);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
-  color: var(--highlight);
 }
 
 .settings-group { 
@@ -246,11 +246,11 @@ header.hidden {
 .settings-range {
   width: 100%;
   padding: 0.5rem;
-  margin-bottom: 1rem;
   background-color: var(--accent);
   border: 1px solid var(--highlight);
   border-radius: 8px;
   color: var(--text);
+  margin-bottom: 1rem;
 }
 
 .settings-range {
@@ -263,6 +263,7 @@ header.hidden {
 
 .settings-range::-webkit-slider-thumb {
   -webkit-appearance: none;
+  appearance: none;
   width: 18px;
   height: 18px;
   border-radius: 50%;
@@ -336,26 +337,27 @@ input:checked + .toggle-slider:before {
 
 /* Hero Section */
 .hero-section {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--highlight) 100%);
+  border-radius: 12px;
   padding: 2rem;
   margin-bottom: 2rem;
-  border-radius: 12px;
   text-align: center;
   color: white;
   box-shadow: var(--shadow);
-  background: linear-gradient(135deg, var(--accent) 0%, var(--highlight) 100%);
 }
 
 .hero-content h1 {
-  margin-bottom: 1rem;
   font-size: 2.2rem;
+  margin-bottom: 1rem;
+  font-family: 'Georgia', 'Times New Roman', serif;
   font-weight: 600;
   letter-spacing: 0.5px;
   line-height: 1.3;
 }
 
 .hero-subtitle {
-  margin-bottom: 1.5rem;
   font-size: 1.2rem;
+  margin-bottom: 1.5rem;
   opacity: 0.9;
 }
 
@@ -378,34 +380,34 @@ input:checked + .toggle-slider:before {
 
 /* Text Import & Translation */
 .text-import-container {
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-  border-radius: 12px;
   background-color: var(--card-bg);
+  border-radius: 12px;
+  padding: 1.5rem;
   box-shadow: var(--shadow);
+  margin-bottom: 1rem;
   position: relative;
   overflow: hidden;
 }
 
-h2, h3 {
+h2 {
   margin-bottom: 1rem;
   color: var(--highlight);
+  font-family: 'Georgia', 'Times New Roman', serif;
   font-weight: 600;
   letter-spacing: 0.3px;
-  font-family: var(--font-family);
 }
 
 .text-input {
   width: 100%;
   min-height: 150px;
-  padding: 1rem;
-  margin-bottom: 1rem;
   background-color: var(--secondary);
   border: 1px solid var(--accent);
   border-radius: 8px;
+  padding: 1rem;
   color: var(--text);
   font-size: 1rem;
   resize: vertical;
+  margin-bottom: 1rem;
 }
 
 .text-input:focus {
@@ -415,9 +417,9 @@ h2, h3 {
 
 .char-count {
   text-align: right;
-  margin: 1.5rem 0 1rem 0;
   font-size: 0.85rem;
   color: var(--text-secondary);
+  margin: 1.5rem 0 1rem 0;
 }
 
 .input-actions {
@@ -434,20 +436,20 @@ h2, h3 {
 
 /* Buttons */
 .btn {
+  background-color: var(--highlight);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   min-height: 56px;
-  padding: 0.8rem 1.5rem;
-  border: none;
-  border-radius: 30px;
-  font-size: 1rem;
-  font-weight: 600;
-  color: white;
-  background-color: var(--highlight);
-  cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .btn:disabled {
@@ -469,35 +471,35 @@ h2, h3 {
 }
 
 .mode-toggle-btn {
-  padding: 0.8rem 1.5rem;
+  background-color: var(--accent);
+  color: var(--text);
   border: none;
+  padding: 0.8rem 1.5rem;
   border-radius: 30px;
   font-size: 1rem;
-  color: var(--text);
-  background-color: var(--accent);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .mode-toggle-btn.active {
-  color: white;
   background-color: var(--highlight);
+  color: white;
 }
 
 /* Sentence Display */
 .sentence-display {
-  min-height: 200px;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-  border-radius: 12px;
   background-color: var(--card-bg);
-  box-shadow: var(--shadow);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
   font-size: calc(var(--font-size) * 1.5);
-  line-height: var(--line-height);
+  min-height: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow);
+  line-height: var(--line-height);
   user-select: text;
   position: relative;
   overflow-wrap: break-word;
@@ -507,7 +509,7 @@ h2, h3 {
   max-width: 100%;
 }
 
-.sentence-display.current-sentence {
+.current-sentence {
   border: 2px solid var(--highlight);
   background-color: rgba(233, 69, 96, 0.1);
 }
@@ -521,21 +523,21 @@ h2, h3 {
 
 /* Word Selection */
 .word-selection-box {
+  background-color: var(--card-bg);
+  border-radius: 12px;
   padding: 1rem;
   margin-bottom: 1rem;
-  border-radius: 12px;
-  background-color: var(--card-bg);
   box-shadow: var(--shadow);
   display: none;
 }
 
 .selected-word {
-  padding: 0.5rem;
-  margin-bottom: 1rem;
-  border-radius: 8px;
   font-size: 2rem;
   text-align: center;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
   background-color: var(--secondary);
+  border-radius: 8px;
 }
 
 .word-selection-box input {
@@ -553,27 +555,27 @@ h2, h3 {
 .sentence-controls {
   position: sticky;
   bottom: 0;
+  background-color: var(--secondary);
   padding: 1rem;
   display: flex;
   justify-content: space-between;
-  background-color: var(--secondary);
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
   box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .control-btn {
+  background: var(--accent);
+  border: none;
   width: 60px;
   height: 60px;
-  border: none;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--accent);
+  cursor: pointer;
   color: var(--text);
   font-size: 1.5rem;
-  cursor: pointer;
   transition: all 0.2s ease;
 }
 
@@ -583,32 +585,32 @@ h2, h3 {
 }
 
 .lang-selector {
-  padding: 0.5rem 1rem;
-  margin-left: 0.5rem;
-  border-radius: 20px;
   background-color: var(--secondary);
   color: var(--text);
   border: 1px solid var(--accent);
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  margin-left: 0.5rem;
   font-size: 0.9rem;
 }
 
 /* Translation Display */
 .translation-display {
+  background-color: var(--card-bg);
+  border-radius: 12px;
   padding: 1rem;
   margin: 1rem 0;
-  border-radius: 12px;
-  background-color: var(--card-bg);
   box-shadow: var(--shadow);
   font-size: 1.2rem;
   display: none;
 }
 
 .copy-translation {
-  margin-left: 0.5rem;
   background: none;
   border: none;
   color: var(--text-secondary);
   cursor: pointer;
+  margin-left: 0.5rem;
   font-size: 0.9rem;
 }
 
@@ -625,10 +627,10 @@ h2, h3 {
 }
 
 .bucket-card {
-  padding: 1rem;
-  border-radius: 12px;
-  text-align: center;
   background-color: var(--card-bg);
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
   box-shadow: var(--shadow);
   cursor: pointer;
   transition: transform 0.2s ease;
@@ -645,9 +647,9 @@ h2, h3 {
 .bucket-card.retired { border-top: 4px solid var(--text-secondary); }
 
 .bucket-count {
-  margin-bottom: 0.5rem;
   font-size: 1.8rem;
   font-weight: bold;
+  margin-bottom: 0.5rem;
 }
 
 .bucket-label {
@@ -657,21 +659,20 @@ h2, h3 {
 
 /* Review Mode */
 .review-container {
-  height: calc(100vh - 180px);
-  padding: 0;
-  margin: 0;
-  border-radius: 12px;
-  background-color: var(--card-bg);
-  box-shadow: var(--shadow);
-  display: flex;
-  flex-direction: column;
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 0;
+    margin: 0;
+    box-shadow: var(--shadow);
+    height: calc(100vh - 180px); /* Increased space at bottom */
+    display: flex;
+    flex-direction: column;
 }
-
 .review-header {
-  padding: 0.3rem 0.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 0.3rem 0.5rem;
   background-color: var(--secondary);
   position: sticky;
   top: 0;
@@ -682,8 +683,8 @@ h2, h3 {
 
 .review-progress {
   font-size: 0.9rem;
-  font-weight: bold;
   color: var(--text-secondary);
+  font-weight: bold;
 }
 
 .hide-header-btn {
@@ -691,15 +692,15 @@ h2, h3 {
   top: 0.5rem;
   right: 0.5rem;
   z-index: 101;
+  background-color: var(--highlight);
+  color: white;
+  border: none;
   width: 30px;
   height: 30px;
-  border: none;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--highlight);
-  color: white;
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -710,55 +711,52 @@ h2, h3 {
 }
 
 .matching-game-container {
-  flex: 1;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  padding-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin: 0;
+    overflow-y: auto;
+    padding-bottom: 20px; /* Extra space at bottom */
 }
 
 .matching-game-columns {
-  flex: 1;
-  display: flex;
-  gap: 0.5rem;
-  min-height: 0;
-  padding: 0.5rem;
-  overflow-y: auto;
+    display: flex;
+    flex: 1;
+    gap: 0.5rem;
+    min-height: 0;
+    padding: 0.5rem;
+    overflow-y: auto;
 }
 
 .matching-column {
-  flex: 1;
-  padding: 0.5rem;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  gap: 0.5rem;
-  justify-content: center;
-  align-items: center;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: 0.5rem;
+    gap: 0.5rem;
+    justify-content: flex-start;
+    align-items: center;
 }
 
 /* Word Cards */
 .word-card {
-  position: relative;
-  padding: 0.8rem;
-  margin-bottom: 0.5rem;
-  border-radius: 10px;
-  font-size: calc(var(--font-size) * 2);
-  min-height: calc(var(--font-size) * 4);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  word-break: keep-all;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex: 1;
-  box-sizing: border-box;
+    position: relative;
+    padding: 0.8rem;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+    margin-bottom: 0.5rem;
+    font-size: calc(var(--font-size) * 1.25); /* Now properly using the variable */
+    min-height: calc(var(--font-size) * 4); /* Makes height proportional to font */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    word-break: break-word;
+    flex: 1;
+    box-sizing: border-box;
 }
 
 .word-card:hover {
@@ -767,18 +765,18 @@ h2, h3 {
 }
 
 .word-card.selected {
-  transform: scale(0.98);
   background-color: var(--highlight);
+  transform: scale(0.98);
 }
 
 .word-card.correct {
-  opacity: 0.7;
   background-color: var(--success);
+  opacity: 0.7;
 }
 
 .word-card.incorrect {
-  opacity: 0.7;
   background-color: var(--danger);
+  opacity: 0.7;
 }
 
 .streak-indicator {
@@ -787,8 +785,8 @@ h2, h3 {
   left: 0;
   right: 0;
   height: 4px;
-  border-radius: 0 0 12px 12px;
   background-color: var(--secondary);
+  border-radius: 0 0 12px 12px;
   overflow: hidden;
 }
 
@@ -799,56 +797,58 @@ h2, h3 {
 }
 
 /* Hard Mode */
-.hard-mode-buttons {
+.hard-mode-buttons, 
+.shuffle-btn {
   position: absolute;
-  bottom: 80px;
+  bottom: 1rem;
   left: 0;
   right: 0;
   padding: 0 1rem;
+}
+
+.hard-mode-buttons {
   display: flex;
   gap: 1rem;
   justify-content: center;
   margin-top: 1rem;
 }
 
-.exit-hard-btn {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 50px;
-  height: 50px;
-  border: none;
-  border-radius: 50%;
+.hard-mode-btn {
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hard-mode-btn.knew-it {
+  background-color: var(--success);
+  color: white;
+}
+
+.hard-mode-btn.didnt-know {
   background-color: var(--danger);
   color: white;
-  font-size: 1.5rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow);
-  z-index: 100;
 }
 
-.exit-hard-btn:hover {
-  background-color: #d33;
-  transform: translateX(-50%) scale(1.05);
+.hard-mode-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.shuffle-btn, #exit-review {
-  width: 90%;
-  max-width: 300px;
-  margin: 0.5rem auto;
-  display: block;
-  background-color: var(--accent);
+.shuffle-btn {
+    background-color: var(--accent);
+    margin: 0 auto 1rem auto;
+    display: block;
+    width: 90%;
+    max-width: 300px;
 }
 
 /* Review Question */
 .review-question {
-  min-height: 100px;
-  margin-bottom: 1.5rem;
   font-size: calc(var(--font-size) * 1.5);
+  margin-bottom: 1.5rem;
+  min-height: 100px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -857,10 +857,10 @@ h2, h3 {
 
 /* Progress Stats */
 .progress-stats {
+  background-color: var(--card-bg);
+  border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  border-radius: 12px;
-  background-color: var(--card-bg);
   box-shadow: var(--shadow);
 }
 
@@ -882,10 +882,10 @@ h2, h3 {
   width: 60px;
   height: 60px;
   border-radius: 50%;
+  background: var(--secondary);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--secondary);
   font-size: 1.5rem;
   font-weight: bold;
   color: var(--highlight);
@@ -895,8 +895,8 @@ h2, h3 {
 .progress-bar-container {
   width: 100%;
   height: 10px;
-  border-radius: 5px;
   background: var(--secondary);
+  border-radius: 5px;
   overflow: hidden;
 }
 
@@ -911,7 +911,6 @@ h2, h3 {
   color: var(--text-secondary);
   text-align: center;
 }
-
 /* Stats Display */
 .stat-item {
   display: flex;
@@ -956,27 +955,27 @@ h2, h3 {
 .jump-input {
   flex: 1;
   padding: 0.5rem;
-  border-radius: 8px;
   background-color: var(--secondary);
   border: 1px solid var(--accent);
+  border-radius: 8px;
   color: var(--text);
 }
 
 .jump-btn {
   padding: 0.5rem 1rem;
+  background-color: var(--accent);
   border: none;
   border-radius: 8px;
-  background-color: var(--accent);
   color: var(--text);
   cursor: pointer;
 }
 
 /* Testimonials */
 .testimonials-container {
+  background-color: var(--card-bg);
+  border-radius: 12px;
   padding: 1.5rem;
   margin: 2rem 0;
-  border-radius: 12px;
-  background-color: var(--card-bg);
   box-shadow: var(--shadow);
 }
 
@@ -993,9 +992,9 @@ h2, h3 {
 }
 
 .testimonial-card {
+  background-color: var(--secondary);
   padding: 1.5rem;
   border-radius: 8px;
-  background-color: var(--secondary);
   border-left: 4px solid var(--highlight);
 }
 
@@ -1012,16 +1011,16 @@ h2, h3 {
 
 /* Resources */
 .resources-container {
+  background-color: var(--card-bg);
+  border-radius: 12px;
   padding: 1.5rem;
   margin-top: 1rem;
-  border-radius: 12px;
-  background-color: var(--card-bg);
   box-shadow: var(--shadow);
 }
 
 .resources-title {
-  margin-bottom: 1rem;
   font-size: 1.2rem;
+  margin-bottom: 1rem;
   color: var(--highlight);
   display: flex;
   align-items: center;
@@ -1035,12 +1034,12 @@ h2, h3 {
 }
 
 .resource-link {
-  padding: 0.8rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  border-radius: 8px;
+  padding: 0.8rem;
   background-color: var(--secondary);
+  border-radius: 8px;
   color: var(--text);
   text-decoration: none;
   transition: transform 0.2s ease;
@@ -1053,16 +1052,16 @@ h2, h3 {
 
 /* How To Use */
 .how-to-use {
+  background-color: var(--card-bg);
+  border-radius: 12px;
   padding: 1rem;
   margin-bottom: 1rem;
-  border-radius: 12px;
-  background-color: var(--card-bg);
   box-shadow: var(--shadow);
 }
 
 .how-to-use-title {
-  margin-bottom: 0.5rem;
   font-weight: bold;
+  margin-bottom: 0.5rem;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
@@ -1086,12 +1085,11 @@ h2, h3 {
   right: 1rem;
   width: 50px;
   height: 50px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   background-color: var(--highlight);
   color: white;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
   font-size: 1.2rem;
   z-index: 100;
   box-shadow: var(--shadow);
@@ -1104,24 +1102,24 @@ h2, h3 {
 
 /* Loading Spinner */
 .loading-spinner {
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top: 3px solid var(--highlight);
   width: 20px;
   height: 20px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  border-top: 3px solid var(--highlight);
-  border-radius: 50%;
+  animation: spin 1s linear infinite;
   display: inline-block;
   margin-left: 10px;
   vertical-align: middle;
-  animation: spin 1s linear infinite;
 }
 
 /* Tooltip */
 .tooltip {
   position: absolute;
-  padding: 0.5rem;
-  border-radius: 6px;
   background-color: var(--secondary);
   color: var(--text);
+  padding: 0.5rem;
+  border-radius: 6px;
   box-shadow: var(--shadow);
   z-index: 1000;
   font-size: 0.9rem;
@@ -1160,14 +1158,14 @@ h2, h3 {
   position: fixed;
   bottom: 1rem;
   left: 50%;
-  padding: 1rem 2rem;
-  border-radius: 30px;
+  transform: translateX(-50%) translateY(100px);
   background-color: var(--secondary);
   color: var(--text);
+  padding: 1rem 2rem;
+  border-radius: 30px;
   box-shadow: var(--shadow);
   z-index: 1000;
   opacity: 0;
-  transform: translateX(-50%) translateY(100px);
   transition: all 0.3s ease;
 }
 
@@ -1209,15 +1207,15 @@ h2, h3 {
 }
 
 .modal-content {
-  width: 90%;
-  max-width: 800px;
-  max-height: 90vh;
-  padding: 2rem;
-  border-radius: 12px;
   background-color: var(--primary);
-  box-shadow: var(--shadow);
-  position: relative;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 800px;
+  width: 90%;
+  max-height: 90vh;
   overflow-y: auto;
+  position: relative;
+  box-shadow: var(--shadow);
 }
 
 .close-modal {
@@ -1247,8 +1245,8 @@ h2, h3 {
 
 .tutorial-step img {
   max-width: 100%;
-  margin-top: 1rem;
   border-radius: 8px;
+  margin-top: 1rem;
   border: 1px solid var(--accent);
 }
 
@@ -1281,12 +1279,12 @@ h2, h3 {
   position: fixed;
   top: 1rem;
   left: 50%;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
+  transform: translateX(-50%);
   background-color: var(--danger);
   color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
   z-index: 1000;
-  transform: translateX(-50%);
   display: none;
 }
 
@@ -1398,61 +1396,74 @@ h2, h3 {
   }
   
   /* Matching Game */
-  .matching-game-columns {
-    gap: 0.3rem;
-    padding: 0.3rem;
-  }
-  
-  .word-card {
-    min-height: calc(var(--font-size) * 3.5) !important;
-    padding: 0.3rem;
-    font-size: calc(var(--font-size) * 1.5) !important;
-    max-width: 90%;
-  }
+    .matching-game-columns {
+        gap: 0.3rem;
+        padding: 0.3rem;
+    }
+    
+    .word-card {
+        min-height: calc(var(--font-size) * 3.5) !important; /* Smaller but proportional */
+        padding: 0.5rem;
+        font-size: calc(var(--font-size) * 1.15) !important; /* Now respects font size */
+    }
   
   /* Review Container */
-  .review-container {
-    height: calc(100vh - 100px);
-    padding: 0.5rem;
-  }
-  
-  .sentence-display {
-    min-height: 140px;
-    padding: 1rem;
-    font-size: 1.2rem;
-    margin-top: 10px;
-  }
-  
-  .shuffle-btn, #exit-review {
-    width: 95%;
-    margin: 0.5rem auto;
-  }
-  
-  .review-question {
-    display: none;
-  }
-  
-  .hard-mode-buttons {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .hard-mode-btn {
-    width: 100%;
-  }
-  
-  #exit-hard-btn {
-    display: block !important;
-  }
-  
-  .hard-mode-buttons {
-    position: relative;
-    bottom: auto;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding: 1rem;
-    margin-top: 1rem;
-  }
+@media (max-width: 600px) {
+    .review-container {
+        height: calc(100vh - 100px);
+        padding: 0.5rem;
+    }
+    
+    .sentence-display {
+        min-height: 140px;
+        padding: 1rem;
+        font-size: 1.2rem;
+        margin-top: 10px;
+    }
+    
+    .matching-game-columns {
+        gap: 0.3rem;
+        padding: 0.3rem;
+    }
+    
+    .word-card {
+        min-height: calc(var(--font-size) * 3.5) !important;
+        padding: 0.5rem;
+        font-size: calc(var(--font-size) * 1.15) !important;
+    }
+    
+        .shuffle-btn {
+        position: static;
+        margin: 0 auto 1rem auto;
+        width: 90%;
+    }
+    
+    .review-question {
+        display: none;
+    }
+    
+    .hard-mode-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .hard-mode-btn {
+        width: 100%;
+    }
+    /* New style for hard mode exit button */
+    #exit-hard-btn {
+        display: block !important;
+    }
+    
+    .hard-mode-buttons {
+        position: relative;
+        bottom: auto;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+}
   
   /* Settings Panel */
   .settings-panel {
@@ -1472,6 +1483,10 @@ h2, h3 {
     padding: 0.5rem;
   }
   
+  .review-container {
+    margin-top: 0;
+  }
+  
   /* Mobile-specific button styles */
   #vocab-review-view .btn {
     width: 100%;
@@ -1489,7 +1504,6 @@ h2, h3 {
   }
 }
 </style>
-
 
 </head>
 <body>
@@ -1831,27 +1845,32 @@ h2, h3 {
             <section id="review-mode-view" class="view">
     <button id="hide-header-btn" class="hide-header-btn" onclick="toggleHeaderVisibility()">↑</button>
     <div class="review-container">
-        <!-- Review question (hidden in matching game) -->
-<div class="review-question" id="review-question" style="display: none;"></div>
 
-<!-- Matching game container -->
+        <div class="review-question" id="review-question"></div>
+      
+        <button class="btn shuffle-btn" id="shuffle-cards" aria-label="Shuffle cards">Shuffle Cards</button>
 <div id="matching-game-container" class="matching-game-container" style="display: none;">
-    <!-- Shuffle button inside scrollable container -->
-    <button class="btn shuffle-btn" id="shuffle-cards" aria-label="Shuffle cards">Shuffle Cards</button>
-
-    <!-- Cards -->
     <div class="matching-game-columns">
-        <div class="matching-column" id="left-column"></div>
-        <div class="matching-column" id="right-column"></div>
+        <div class="matching-column" id="left-column">
+      
+        </div>
+        <div class="matching-column" id="right-column">
+
+        </div>
     </div>
+<button class="btn" id="exit-review" aria-label="Exit review" style="margin: 1rem auto 3rem auto; display: block;">Exit Review</button>
+</div>
         
-        <!-- Hard mode container (unchanged) -->
         <div id="hard-mode-container" class="hard-mode-buttons" style="display: none;">
+    <!-- New exit button for mobile -->
+    <button class="btn exit-hard-btn" id="exit-hard-btn" style="width: 100%; margin-bottom: 1rem; display: none;">
+        Exit Review
+    </button>
+    
     <button class="hard-mode-btn knew-it" id="knew-it-btn" aria-label="I know this">I know this</button>
     <button class="hard-mode-btn didnt-know" id="didnt-know-btn" aria-label="Don't know">Don't know</button>
     <button class="hard-mode-btn skip-btn" id="skip-btn" aria-label="Skip word">Skip</button>
 </div>
-<button class="exit-hard-btn" id="universal-exit-btn" aria-label="Exit review">✕</button>
     
     
 </section>
@@ -3482,8 +3501,8 @@ function setupMatchingGame() {
     elements.leftColumn.innerHTML = '';
     elements.rightColumn.innerHTML = '';
     
-    // Get words for this round (10 cards - 5 pairs)
-const wordsToShow = state.reviewWords.slice(state.currentReviewIndex, state.currentReviewIndex + 5);
+    // Get words for this round (max 5)
+    const wordsToShow = state.reviewWords.slice(state.currentReviewIndex, state.currentReviewIndex + 5);
     state.currentRoundWords = wordsToShow;
 
     // Show matching game container and shuffle button
@@ -3552,8 +3571,7 @@ elements.hardModeContainer.style.display = 'none';
             elements.rightColumn.appendChild(card);
         });
     }
-    // Show universal exit button
-document.getElementById('universal-exit-btn').style.display = 'flex';
+    
     // Update progress
 updateReviewProgress();
     updateProgressDisplay();
@@ -3600,6 +3618,8 @@ function syncScroll(e) {
     setTimeout(() => {
         otherColumn.addEventListener('scroll', syncScroll);
     }, 10);
+
+
 }
 
 function updateProgressDisplay() {
@@ -3634,11 +3654,7 @@ function createWordCard(word) {
     content.style.justifyContent = 'center';
     content.style.width = '100%';
     content.style.padding = '10px';
-        content.style.wordBreak = 'keep-all';
-    content.style.whiteSpace = 'nowrap';
-    content.style.overflow = 'hidden';
-    content.style.textOverflow = 'ellipsis';
-    content.style.padding = '0 5px';
+    content.style.wordBreak = 'break-word';
     content.textContent = word.text;
     
     card.appendChild(content);
@@ -3791,9 +3807,6 @@ function setupHardMode() {
 elements.shuffleCardsBtn.style.display = 'none';
 elements.matchingGameContainer.style.display = 'none';
 elements.hardModeContainer.style.display = 'flex';
-
-// Show exit button
-document.getElementById('universal-exit-btn').style.display = 'flex';
     
     // Check if review is complete
     if (state.currentReviewIndex >= state.reviewWords.length) {
@@ -4327,6 +4340,19 @@ indicators.forEach((indicator, index) => {
   });
 });
 
+function showStep(stepIndex) {
+  tutorialSteps.forEach((step, index) => {
+    step.classList.toggle('active', index === stepIndex);
+  });
+  
+  indicators.forEach((indicator, index) => {
+    indicator.classList.toggle('active', index === stepIndex);
+  });
+  
+  prevBtn.disabled = stepIndex === 0;
+  nextBtn.disabled = stepIndex === tutorialSteps.length - 1;
+}
+
 // Demo text button
 document.getElementById('try-demo-btn').addEventListener('click', () => {
   const demoText = `日本の文化は世界的に有名です。寿司やアニメ、桜などが特に人気があります。
@@ -4632,22 +4658,15 @@ document.getElementById('lookup-word').addEventListener('click', async () => {
     });
 
     // Review mode
-// Universal exit button handler
-document.getElementById('universal-exit-btn').addEventListener('click', () => {
-    // Hide the exit button
-    document.getElementById('universal-exit-btn').style.display = 'none';
-    
+elements.exitReviewBtn.addEventListener('click', () => {
+// Add click handler for the new mobile exit button
+document.getElementById('exit-hard-btn').addEventListener('click', () => {
     // Show header when exiting review
     document.querySelector('header').classList.remove('hidden');
     document.getElementById('hide-header-btn').classList.remove('visible');
     
-    // Reset any review state
-    state.currentHardStreak = 0;
-    state.currentReviewIndex = 0;
-    
-    // Return to vocab review view
+    state.currentHardStreak = 0; // Reset streak when exiting
     showView('vocab-review-view');
-    updateBucketCounts();
 });
     // Show header when exiting review
     document.querySelector('header').classList.remove('hidden');
@@ -4655,7 +4674,7 @@ document.getElementById('universal-exit-btn').addEventListener('click', () => {
     
     state.currentHardStreak = 0; // Reset streak when exiting
     showView('vocab-review-view');
-};
+});
 
     // Hard mode buttons
     elements.knewItBtn.addEventListener('click', () => {
@@ -4740,6 +4759,7 @@ if (state.currentView === 'review-mode-view' && state.reviewMode === 'hard') {
         state.isOnline = false;
         elements.offlineWarning.style.display = 'block';
     });
+}
 
 // Initialize the app
 async function initApp() {
