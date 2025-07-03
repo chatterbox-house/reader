@@ -1521,6 +1521,18 @@ h2 {
     color: white !important;
     border: 2px solid white !important;
   }
+#new-words-count {
+    background-color: var(--highlight);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    margin-left: 5px;
+}
 }
 </style>
 
@@ -1535,7 +1547,10 @@ h2 {
     </div>
     <div class="nav-tabs">        <button class="nav-btn" data-view="home" aria-label="Home">🏠 Home</button>
         <button class="nav-btn active" data-view="text-import" aria-label="Reader">Reader</button>
-        <button class="nav-btn" data-view="vocab-review" aria-label="Vocab">Vocab</button>
+        <button class="nav-btn" data-view="vocab-review" aria-label="Vocab">
+    <span id="vocab-tab-text">Vocab</span>
+    <span id="new-words-count" style="display: none;"></span>
+</button>
         <button class="nav-btn" data-view="bookmarks-view" aria-label="Library">Library</button> 
     </div>
     <div class="header-buttons">
@@ -1617,7 +1632,7 @@ h2 {
         
         <main>
             <section id="text-import-view" class="view active">
-<div class="how-to-use" style="background: var(--highlight); color: white;">
+<div class="how-to-use" style="background: var(--highlight); color: white; display: none;" id="quick-start-guide">
     <div class="how-to-use-title" id="how-to-use-toggle" style="padding: 1rem;">
         <span style="font-weight: bold; font-size: 1.2rem;">Quick Start Guide (Click to Expand)</span>
         <span>▼</span>
@@ -1645,7 +1660,7 @@ h2 {
     </div>
 </div>
                 
-<div class="hero-section fade-in">
+<div class="hero-section fade-in" style="display: none;" id="hero-section">
   <div class="hero-content">
     <h1>Master Japanese Through Reading</h1>
     <p class="hero-subtitle">Paste any Japanese text and instantly get vocabulary help, translations, and flashcards</p>
@@ -2100,7 +2115,15 @@ bookmarks: JSON.parse(localStorage.getItem('bookmarks_ja')) || [],
         {id: '20', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-20.html', title: 'Chapter 20', date: new Date().toISOString()}
     ]
 };
-
+// Initialize database when page loads
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        db = await openDatabase();
+        updateVocabTabCounter(); // Now this will work
+    } catch (error) {
+        console.error('Failed to initialize database:', error);
+    }
+});
 // Initialize audio context and sounds
 function initAudio() {
     try {
@@ -3161,6 +3184,16 @@ async function translateSentence(sentence) {
     }
 }
 
+// Show/hide tutorial elements based on first visit
+const firstVisit = localStorage.getItem('firstVisit_ja') === null;
+if (firstVisit) {
+    document.getElementById('quick-start-guide').style.display = 'block';
+    document.getElementById('hero-section').style.display = 'block';
+    localStorage.setItem('firstVisit_ja', 'false');
+} else {
+    document.getElementById('quick-start-guide').style.display = 'none';
+    document.getElementById('hero-section').style.display = 'none';
+}
 // TTS functionality
 function speakText(text) {
     if ('speechSynthesis' in window) {
@@ -4044,7 +4077,39 @@ function toggleTheme() {
 
 // Check clipboard for text to paste
 
+// Function to update vocab tab counter
+async function updateVocabTabCounter() {
+    try {
+        // Initialize DB if not already done
+        if (!db) {
+            db = await openDatabase();
+        }
+        const counts = await countVocabByBucket();
+        const newWords = counts.new || 0;
+        const counter = document.getElementById('new-words-count');
+        
+        if (newWords > 0) {
+            counter.textContent = newWords;
+            counter.style.display = 'inline-flex';
+            document.getElementById('vocab-tab-text').textContent = 'Vocab';
+        } else {
+            counter.style.display = 'none';
+            document.getElementById('vocab-tab-text').textContent = 'Vocab';
+        }
+    } catch (error) {
+        console.error('Error updating vocab counter:', error);
+    }
+}
 
+// Call this whenever vocab changes (add these calls):
+// After adding a new word (in the addVocabWord function):
+updateVocabTabCounter();
+
+// After deleting words (in your delete functions):
+updateVocabTabCounter();
+
+// On page load:
+document.addEventListener('DOMContentLoaded', updateVocabTabCounter);
 function setupEventListeners() {
 // 1. First declare modal variables
   const tutorialModal = document.getElementById('tutorial-modal');
@@ -4137,8 +4202,8 @@ document.querySelector('.nav-btn[data-view="bookmarks-view"]').addEventListener(
     showView('bookmarks-view');
     renderSavedUrls();
 });
-// Welcome modal for first-time users
-const firstTime = localStorage.getItem('firstTime_ja') !== 'false';
+<!-- Welcome modal for first-time users -->
+const firstTime = localStorage.getItem('firstTime_ja') === null;
 if (firstTime) {
     document.getElementById('welcome-modal').style.display = 'flex';
     localStorage.setItem('firstTime_ja', 'false');
