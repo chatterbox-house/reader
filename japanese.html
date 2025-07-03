@@ -3477,6 +3477,14 @@ if (state.readingStats.wordsLearned === 100) {
 
 // Vocabulary review functions
 async function startReview(bucket) {
+    // Clear any previous review elements
+    elements.reviewQuestion.innerHTML = '';
+    elements.leftColumn.innerHTML = '';
+    elements.rightColumn.innerHTML = '';
+    elements.reviewQuestion.style.display = 'none';
+    elements.matchingGameContainer.style.display = 'none';
+    elements.hardModeContainer.style.display = 'none';
+    
     state.reviewMode = bucket;
     state.reviewWords = await getVocabByBucket(bucket);
     
@@ -3498,7 +3506,34 @@ async function startReview(bucket) {
         setupMatchingGame();
     }
 }
+function exitReview() {
+    // Clear all review elements
+    elements.reviewQuestion.innerHTML = '';
+    elements.leftColumn.innerHTML = '';
+    elements.rightColumn.innerHTML = '';
+    elements.reviewQuestion.style.display = 'none';
+    elements.matchingGameContainer.style.display = 'none';
+    elements.hardModeContainer.style.display = 'none';
+    
+    // Show header when exiting review
+    document.querySelector('header').classList.remove('hidden');
+    document.getElementById('hide-header-btn').classList.remove('visible');
+    
+    state.currentHardStreak = 0; // Reset streak when exiting
+    showView('vocab-review-view');
+}
+
+// Update event listeners to use the new exitReview function
+elements.exitReviewBtn.addEventListener('click', exitReview);
+document.getElementById('exit-hard-btn').addEventListener('click', exitReview);
+
 function setupMatchingGame() {
+    // Clear any previous content
+    elements.reviewQuestion.innerHTML = '';
+    elements.leftColumn.innerHTML = '';
+    elements.rightColumn.innerHTML = '';
+    elements.reviewQuestion.style.display = 'none';
+    
     // Hide header when matching game starts
     const header = document.querySelector('header');
     header.classList.add('hidden');
@@ -3508,9 +3543,10 @@ function setupMatchingGame() {
     hideHeaderBtn.classList.add('visible');
     hideHeaderBtn.textContent = '↓';
 
-    // Clear previous cards
-    elements.leftColumn.innerHTML = '';
-    elements.rightColumn.innerHTML = '';
+    // Show matching game container and shuffle button
+    elements.shuffleCardsBtn.style.display = 'block';
+    elements.matchingGameContainer.style.display = 'flex';
+    elements.hardModeContainer.style.display = 'none';
     
     // Get words for this round (max 5)
     const wordsToShow = state.reviewWords.slice(state.currentReviewIndex, state.currentReviewIndex + 5);
@@ -4646,21 +4682,29 @@ document.getElementById('lookup-word').addEventListener('click', async () => {
     });
 
     // Vocabulary review
-    document.querySelectorAll('.bucket-card').forEach(card => {
-        card.addEventListener('click', () => {
-            document.querySelectorAll('.bucket-card').forEach(c => {
-                c.style.opacity = '1';
-                c.style.transform = 'scale(1)';
-            });
-            
-            card.style.opacity = '0.9';
-            card.style.transform = 'scale(0.98)';
-            state.reviewMode = card.dataset.bucket;
-            
-            elements.startReviewBtn.disabled = false;
-            elements.startReviewBtn.textContent = `Review ${card.dataset.bucket} words`;
+document.querySelectorAll('.bucket-card').forEach(card => {
+    card.addEventListener('click', () => {
+        // Clear any previous review elements
+        elements.reviewQuestion.innerHTML = '';
+        elements.leftColumn.innerHTML = '';
+        elements.rightColumn.innerHTML = '';
+        elements.reviewQuestion.style.display = 'none';
+        elements.matchingGameContainer.style.display = 'none';
+        elements.hardModeContainer.style.display = 'none';
+        
+        document.querySelectorAll('.bucket-card').forEach(c => {
+            c.style.opacity = '1';
+            c.style.transform = 'scale(1)';
         });
+        
+        card.style.opacity = '0.9';
+        card.style.transform = 'scale(0.98)';
+        state.reviewMode = card.dataset.bucket;
+        
+        elements.startReviewBtn.disabled = false;
+        elements.startReviewBtn.textContent = `Review ${card.dataset.bucket} words`;
     });
+});
     
     elements.startReviewBtn.addEventListener('click', () => {
         if (state.reviewMode) {
