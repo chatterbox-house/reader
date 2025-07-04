@@ -109,7 +109,7 @@ main {
 
 header {
   background-color: var(--secondary);
-  padding: 1rem;
+  padding: 0.5rem;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -117,17 +117,20 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  min-height: 50px; /* Fixed height for consistency */
 }
 
 .logo {
   display: flex;
   align-items: center;
-  height: 40px;
+  height: 30px; /* Reduced from 40px */
 }
 
 .logo img {
   height: 100%;
   width: auto;
+  border-radius: 2px; /* Smaller radius */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1); /* Lighter shadow */
 }
 
 .nav-tabs {
@@ -1276,42 +1279,47 @@ h2 {
 /* Responsive Styles */
 @media (max-width: 600px) {
     header {
-        padding: 0.5rem;
-        gap: 0.5rem;
-        flex-wrap: wrap;
+        padding: 0.3rem;
+        gap: 0.3rem;
+        flex-wrap: nowrap; /* Prevent wrapping */
+        min-height: 40px; /* Smaller fixed height */
     }
     
     .logo {
-        height: 30px;
-        max-width: 30%;
-        order: 1;
+        height: 25px; /* Even smaller logo */
+        max-width: 25%; /* Less space for logo */
     }
     
     .nav-tabs {
-        flex: 1 100%;
-        order: 3;
+        flex: 1;
+        order: 2; /* Changed order */
         justify-content: center;
         gap: 0.2rem;
-        margin-top: 0.5rem;
+        margin-top: 0;
+        overflow-x: auto; /* Allow horizontal scrolling if needed */
+        white-space: nowrap; /* Keep buttons in one line */
     }
     
     .nav-btn {
-        padding: 0.4rem 0.6rem !important;
-        font-size: 0.75rem !important;
+        padding: 0.3rem 0.5rem !important;
+        font-size: 0.7rem !important;
+        min-width: max-content; /* Ensure buttons don't shrink */
     }
     
     .header-buttons {
-        order: 2;
-        margin-left: auto;
+        order: 3;
+        margin-left: 0;
+        display: flex;
     }
     
     .theme-toggle, 
     .settings-btn {
-        width: 32px !important;
-        height: 32px !important;
-        font-size: 0.9rem !important;
-        margin-left: 0.25rem !important;
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 0.8rem !important;
+        margin-left: 0.1rem !important;
     }
+}
   
   /* Main Content */
   .sentence-display {
@@ -1505,10 +1513,10 @@ h2 {
     <div class="app-container">
 <header>
     <div class="logo">
-        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/Flag_of_Japan.svg/1200px-Flag_of_Japan.svg.png" 
-             alt="Japanese Flag" 
-             style="height: 40px; width: auto; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-    </div>
+    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/Flag_of_Japan.svg/1200px-Flag_of_Japan.svg.png" 
+         alt="Japanese Flag" 
+         style="height: 100%; width: auto; border-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+</div>
     <div class="nav-tabs">        <button class="nav-btn" data-view="home" aria-label="Exit">🚪 Exit</button>
         <button class="nav-btn active" data-view="text-import" aria-label="Reader">Reader</button>
         <button class="nav-btn" data-view="vocab-review" aria-label="Vocab">
