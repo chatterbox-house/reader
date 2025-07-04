@@ -665,28 +665,6 @@ h2 {
   font-weight: bold;
 }
 
-.hide-header-btn {
-  position: fixed;
-  top: 0.5rem;
-  right: 0.5rem;
-  z-index: 101;
-  background-color: var(--highlight);
-  color: white;
-  border: none;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.hide-header-btn.visible { 
-  opacity: 1; 
-}
 
 .matching-game-container {
     display: flex;
@@ -1835,7 +1813,7 @@ h2 {
             </section>
         
             <section id="review-mode-view" class="view">
-    <button id="hide-header-btn" class="hide-header-btn" onclick="toggleHeaderVisibility()">↑</button>
+    
     <div class="review-container">
 
         <div class="review-question" id="review-question"></div>
@@ -3588,16 +3566,7 @@ function setupMatchingGame() {
     elements.leftColumn.innerHTML = '';
     elements.rightColumn.innerHTML = '';
     elements.reviewQuestion.style.display = 'none';
-    
-    // Hide header when matching game starts
-const header = document.querySelector('header');
-header.classList.add('hidden');
-
-// Show the show-header button
-const hideHeaderBtn = document.getElementById('hide-header-btn');
-hideHeaderBtn.classList.add('visible');
-hideHeaderBtn.textContent = '↓';
-hideHeaderBtn.onclick = toggleHeaderVisibility; // Add this line
+   
 
     // Show matching game container and shuffle button
     elements.shuffleCardsBtn.style.display = 'block';
@@ -3730,18 +3699,7 @@ function updateProgressDisplay() {
     // Or keep minimal logic if needed elsewhere:
     state.currentProgress = (state.currentReviewIndex / state.reviewWords.length) * 100;
 }
-function toggleHeaderVisibility() {
-    const header = document.querySelector('header');
-    const hideHeaderBtn = document.getElementById('hide-header-btn');
-    
-    if (header.classList.contains('hidden')) {
-        header.classList.remove('hidden');
-        hideHeaderBtn.textContent = '↓';
-    } else {
-        header.classList.add('hidden');
-        hideHeaderBtn.textContent = '↑';
-    }
-}
+
 function createWordCard(word) {
     const card = document.createElement('div');
     card.className = 'word-card';
@@ -4191,7 +4149,7 @@ document.getElementById('paste-btn-translate').addEventListener('click', async (
     }
 });
 // Add this near other event listener setups
-document.getElementById('hide-header-btn').addEventListener('click', toggleHeaderVisibility);
+
 // Translate section: Voice input button
 document.getElementById('voice-input-btn-translate').addEventListener('click', function() {
     const lang = navigator.language || 'en-US';
