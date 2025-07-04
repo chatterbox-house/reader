@@ -1619,6 +1619,16 @@ max-width: 100%;
 .use-sentence-btn:hover {
     text-decoration: underline;
 }
+#import-5-btn, #import-all-btn {
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+#sentence-count {
+    font-weight: bold;
+    color: var(--text);
+    margin-left: 0.3rem;
+}
 }
 </style>
 
@@ -1799,10 +1809,12 @@ max-width: 100%;
     
     <div id="sentence-results" style="display: none;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-        <h3 style="color: var(--highlight); margin: 0;">Found Sentences:</h3>
-        <button class="btn" id="import-all-btn" style="background-color: var(--highlight); padding: 0.3rem 0.6rem;">
-            Import All (Max 5)
-        </button>
+        <h3 style="color: var(--highlight); margin: 0;">
+            Found Sentences: <span id="sentence-count">0</span>
+        </h3>
+        <button class="btn" id="import-all-btn" style="background-color: var(--highlight); padding: 0.3rem 0.6rem; margin-left: auto;">
+    Import All
+</button>
     </div>
     <div id="sentence-results-list" style="max-height: 300px; overflow-y: auto; background: var(--secondary); 
           border-radius: 8px; padding: 0.5rem;"></div>
@@ -2506,7 +2518,9 @@ if (!displayText && bookmark.sentence) {
             container.appendChild(historyItem);
         });
     }
-    
+
+    // Add these event listeners
+document.getElementById('import-all-btn').addEventListener('click', importAllSentences);
     // Add event listeners
     container.querySelectorAll('[data-bookmark-id]').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -5162,11 +5176,13 @@ async function searchSentences() {
         }
         
         if (sentences.length === 0) {
-            statusElement.textContent = 'No sentences found containing this word.';
-            return;
-        }
-        
-        // Display results
+        statusElement.textContent = 'No sentences found containing this word.';
+        document.getElementById('sentence-count').textContent = '0';
+        return;
+    }
+    
+    // Display results
+    document.getElementById('sentence-count').textContent = sentences.length;
         sentences.forEach(sentence => {
             const item = document.createElement('div');
             item.className = 'sentence-result-item';
@@ -5296,16 +5312,35 @@ document.getElementById('import-all-btn').addEventListener('click', importAllSen
 
 function importAllSentences() {
     const sentenceItems = document.querySelectorAll('.sentence-result-item');
-    if (sentenceItems.length === 0) {
+    const sentencesToImport = [];
+    
+    sentenceItems.forEach(item => {
+        const japanese = item.querySelector('.sentence-japanese').textContent;
+        sentencesToImport.push(japanese);
+    });
+
+    if (sentencesToImport.length === 0) {
         showToast('No sentences to import', 'error');
         return;
     }
 
-    // Get up to 5 sentences
-    const sentencesToImport = [];
-    const maxSentences = Math.min(5, sentenceItems.length);
+    const combinedText = sentencesToImport.join('\n\n');
+    document.getElementById('text-input').value = combinedText;
+    document.getElementById('char-count').textContent = combinedText.length;
+    showToast(`Imported ${sentencesToImport.length} sentences!`, 'success');
+}
+function importSentences() {
+    const sentenceItems = document.querySelectorAll('.sentence-result-item');
+    const totalCount = sentenceItems.length;
     
-    for (let i = 0; i < maxSentences; i++) {
+    if (totalCount === 0) {
+        showToast('No sentences to import', 'error');
+        return;
+    }
+
+    // Get all sentences
+    const sentencesToImport = [];
+    for (let i = 0; i < totalCount; i++) {
         const japanese = sentenceItems[i].querySelector('.sentence-japanese').textContent;
         sentencesToImport.push(japanese);
     }
@@ -5317,7 +5352,7 @@ function importAllSentences() {
     document.getElementById('text-input').value = combinedText;
     document.getElementById('char-count').textContent = combinedText.length;
     
-    showToast(`Imported ${maxSentences} sentences!`, 'success');
+    showToast(`Imported ${totalCount} ${totalCount === 1 ? 'sentence' : 'sentences'}!`, 'success');
 }
 function handleTouchEnd(e) {
   const touchEndX = e.changedTouches[0].screenX;
