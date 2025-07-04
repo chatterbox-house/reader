@@ -1560,6 +1560,65 @@ max-width: 100%;
     font-size: calc(var(--font-size) * 3);
   }
 }
+/* Sentence Search Results */
+.sentence-result-item {
+    padding: 0.8rem;
+    margin-bottom: 0.5rem;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.sentence-result-item:hover {
+    background-color: var(--accent);
+}
+
+.sentence-japanese {
+    font-size: 1.2rem;
+    margin-bottom: 0.3rem;
+    word-break: keep-all;
+}
+
+.sentence-english {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.sentence-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.copy-sentence-btn {
+    background: none;
+    border: none;
+    color: var(--highlight);
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.copy-sentence-btn:hover {
+    text-decoration: underline;
+}
+
+.use-sentence-btn {
+    background: none;
+    border: none;
+    color: var(--success);
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.use-sentence-btn:hover {
+    text-decoration: underline;
+}
 }
 </style>
 
@@ -1725,6 +1784,26 @@ max-width: 100%;
         View History
     </button>
 </div>
+</div>
+<!-- Sentence Search Container -->
+<div class="text-import-container" style="border: 2px dotted #9C27B0; margin-bottom: 1rem;">
+    <h2 style="color: #9C27B0;">Search Example Sentences <span role="img" aria-label="Search">🔍</span></h2>
+    <p>Find example sentences containing specific Japanese words</p>
+    
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+        <input type="text" id="sentence-search-input" placeholder="Enter a Japanese word (e.g. 猫)" 
+               style="flex: 1; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--accent); 
+                      background: var(--secondary); color: var(--text);">
+        <button class="btn" id="search-sentences-btn" style="background-color: #9C27B0;">Search</button>
+    </div>
+    
+    <div id="sentence-results" style="display: none;">
+        <h3 style="margin-bottom: 0.5rem; color: var(--highlight);">Found Sentences:</h3>
+        <div id="sentence-results-list" style="max-height: 300px; overflow-y: auto; background: var(--secondary); 
+              border-radius: 8px; padding: 0.5rem;"></div>
+    </div>
+    
+    <div id="sentence-search-status" style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);"></div>
 </div>
 
 <div class="resources-container">
@@ -5050,7 +5129,150 @@ if (state.sentences.length > 0) {
         }
     }
 }
+// Sentence Search Functionality
+document.getElementById('search-sentences-btn').addEventListener('click', searchSentences);
 
+async function searchSentences() {
+    const searchInput = document.getElementById('sentence-search-input').value.trim();
+    if (!searchInput) {
+        showToast('Please enter a word to search', 'error');
+        return;
+    }
+
+    const statusElement = document.getElementById('sentence-search-status');
+    const resultsContainer = document.getElementById('sentence-results');
+    const resultsList = document.getElementById('sentence-results-list');
+    
+    resultsList.innerHTML = '';
+    statusElement.textContent = 'Searching...';
+    resultsContainer.style.display = 'none';
+    
+    try {
+        // Try Tanaka Corpus first
+        let sentences = await searchTanakaCorpus(searchInput);
+        
+        if (sentences.length === 0) {
+            // Fallback to Jisho if no results
+            sentences = await searchJishoSentences(searchInput);
+        }
+        
+        if (sentences.length === 0) {
+            statusElement.textContent = 'No sentences found containing this word.';
+            return;
+        }
+        
+        // Display results
+        sentences.forEach(sentence => {
+            const item = document.createElement('div');
+            item.className = 'sentence-result-item';
+            
+            item.innerHTML = `
+                <div class="sentence-japanese">${sentence.japanese}</div>
+                <div class="sentence-english">${sentence.english}</div>
+                <div class="sentence-actions">
+                    <button class="copy-sentence-btn" data-japanese="${sentence.japanese}" 
+                            data-english="${sentence.english}">
+                        📋 Copy
+                    </button>
+                    <button class="use-sentence-btn" data-japanese="${sentence.japanese}">
+                        ✏️ Use in Reader
+                    </button>
+                </div>
+            `;
+            
+            resultsList.appendChild(item);
+        });
+        
+        // Add event listeners to the new buttons
+        resultsList.querySelectorAll('.copy-sentence-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const japanese = e.target.getAttribute('data-japanese');
+                const english = e.target.getAttribute('data-english');
+                navigator.clipboard.writeText(`${japanese}\n${english}`);
+                showToast('Sentence copied to clipboard!', 'success');
+            });
+        });
+        
+        resultsList.querySelectorAll('.use-sentence-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const japanese = e.target.getAttribute('data-japanese');
+                document.getElementById('text-input').value = japanese;
+                document.getElementById('char-count').textContent = japanese.length;
+                showToast('Sentence loaded into reader. Click "Process Text" to continue.', 'success');
+            });
+        });
+        
+        resultsContainer.style.display = 'block';
+        statusElement.textContent = `Found ${sentences.length} sentence(s) containing "${searchInput}"`;
+        
+    } catch (error) {
+        console.error('Sentence search error:', error);
+        statusElement.textContent = 'Error searching for sentences. Please try again.';
+        showToast('Search failed: ' + error.message, 'error');
+    }
+}
+
+// Search Tanaka Corpus (CORS-friendly)
+async function searchTanakaCorpus(word) {
+    try {
+        // First try the ManyThings.org Tanaka Corpus
+        const firstChar = word.charAt(0).toLowerCase();
+        const response = await fetch(
+            `https://www.manythings.org/japanese/sentences/data/${firstChar}/${word}.json`
+        );
+        
+        if (!response.ok) {
+            if (response.status === 404) {
+                return []; // No results found
+            }
+            throw new Error('Failed to fetch from Tanaka Corpus');
+        }
+        
+        const data = await response.json();
+        return data.map(item => ({
+            japanese: item.japanese,
+            english: item.english
+        }));
+        
+    } catch (error) {
+        console.log('Tanaka Corpus search failed, trying fallback:', error);
+        // If Tanaka fails, try our fallback
+        return searchJishoSentences(word);
+    }
+}
+
+// Fallback Jisho search (requires CORS proxy)
+async function searchJishoSentences(word) {
+    try {
+        const proxyUrl = 'https://api.allorigins.win/raw?url=';
+        const jishoUrl = `https://jisho.org/search/${encodeURIComponent(word)}%20%23sentences`;
+        
+        const response = await fetch(proxyUrl + encodeURIComponent(jishoUrl));
+        const html = await response.text();
+        
+        // Parse HTML to extract sentences
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        const sentences = [];
+        const sentenceElements = doc.querySelectorAll('.sentence_content');
+        
+        sentenceElements.forEach(el => {
+            const japanese = el.querySelector('.japanese_sentence')?.textContent?.trim();
+            const english = el.querySelector('.english_sentence')?.textContent?.trim();
+            
+            if (japanese && english) {
+                sentences.push({ japanese, english });
+            }
+        });
+        
+        return sentences.slice(0, 10); // Return max 10 sentences
+        
+    } catch (error) {
+        console.error('Jisho search error:', error);
+        return [];
+    }
+}
 // Start the app
 window.addEventListener('DOMContentLoaded', initApp);
 // Swipe detection for mobile
