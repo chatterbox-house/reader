@@ -3546,24 +3546,32 @@ async function startReview(bucket) {
 }
 function exitReview() {
     // Clear all review elements
-    elements.reviewQuestion.innerHTML = '';
-    elements.leftColumn.innerHTML = '';
-    elements.rightColumn.innerHTML = '';
-    elements.reviewQuestion.style.display = 'none';
-    elements.matchingGameContainer.style.display = 'none';
-    elements.hardModeContainer.style.display = 'none';
+    if (elements.reviewQuestion) elements.reviewQuestion.innerHTML = '';
+    if (elements.leftColumn) elements.leftColumn.innerHTML = '';
+    if (elements.rightColumn) elements.rightColumn.innerHTML = '';
+    if (elements.reviewQuestion) elements.reviewQuestion.style.display = 'none';
+    if (elements.matchingGameContainer) elements.matchingGameContainer.style.display = 'none';
+    if (elements.hardModeContainer) elements.hardModeContainer.style.display = 'none';
     
     // Show header when exiting review
-    document.querySelector('header').classList.remove('hidden');
-    document.getElementById('hide-header-btn').classList.remove('visible');
+    const header = document.querySelector('header');
+    const hideHeaderBtn = document.getElementById('hide-header-btn');
+    if (header) header.classList.remove('hidden');
+    if (hideHeaderBtn) hideHeaderBtn.classList.remove('visible');
     
     state.currentHardStreak = 0; // Reset streak when exiting
     showView('vocab-review-view');
 }
 
 // Update event listeners to use the new exitReview function
-elements.exitReviewBtn.addEventListener('click', exitReview);
-document.getElementById('exit-hard-btn').addEventListener('click', exitReview);
+if (elements.exitReviewBtn) {
+    elements.exitReviewBtn.addEventListener('click', exitReview);
+}
+
+const exitHardBtn = document.getElementById('exit-hard-btn');
+if (exitHardBtn) {
+    exitHardBtn.addEventListener('click', exitReview);
+}
 
 function setupMatchingGame() {
     // Clear any previous content
@@ -4081,14 +4089,17 @@ async function updateVocabTabCounter() {
         const counts = await countVocabByBucket();
         const newWords = counts.new || 0;
         const counter = document.getElementById('new-words-count');
+        const vocabTabText = document.getElementById('vocab-tab-text');
         
-        if (newWords > 0) {
-            counter.textContent = newWords;
-            counter.style.display = 'inline-flex';
-            document.getElementById('vocab-tab-text').textContent = 'Vocab';
-        } else {
-            counter.style.display = 'none';
-            document.getElementById('vocab-tab-text').textContent = 'Vocab';
+        if (counter && vocabTabText) {
+            if (newWords > 0) {
+                counter.textContent = newWords;
+                counter.style.display = 'inline-flex';
+                vocabTabText.textContent = 'Vocab';
+            } else {
+                counter.style.display = 'none';
+                vocabTabText.textContent = 'Vocab';
+            }
         }
     } catch (error) {
         console.error('Error updating vocab counter:', error);
