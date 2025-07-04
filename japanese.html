@@ -358,6 +358,14 @@ input:checked + .toggle-slider:before {
   position: relative;
   overflow: hidden;
 }
+#translate-container {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+    border: 2px dotted #FFEB3B; /* Yellow dotted border */
+}
 
 h2 {
   margin-bottom: 1rem;
@@ -984,8 +992,9 @@ h2 {
     background-color: var(--card-bg);
     border-radius: 12px;
     padding: 1.5rem;
-    margin: 1rem 0;  /* Changed from margin-top to margin on top and bottom */
+    margin: 1rem 0;
     box-shadow: var(--shadow);
+    border: 2px dotted #4CAF50; /* Green dotted border */
 }
 
 .resources-title {
@@ -3581,13 +3590,14 @@ function setupMatchingGame() {
     elements.reviewQuestion.style.display = 'none';
     
     // Hide header when matching game starts
-    const header = document.querySelector('header');
-    header.classList.add('hidden');
-    
-    // Show the show-header button
-    const hideHeaderBtn = document.getElementById('hide-header-btn');
-    hideHeaderBtn.classList.add('visible');
-    hideHeaderBtn.textContent = '↓';
+const header = document.querySelector('header');
+header.classList.add('hidden');
+
+// Show the show-header button
+const hideHeaderBtn = document.getElementById('hide-header-btn');
+hideHeaderBtn.classList.add('visible');
+hideHeaderBtn.textContent = '↓';
+hideHeaderBtn.onclick = toggleHeaderVisibility; // Add this line
 
     // Show matching game container and shuffle button
     elements.shuffleCardsBtn.style.display = 'block';
@@ -3726,10 +3736,10 @@ function toggleHeaderVisibility() {
     
     if (header.classList.contains('hidden')) {
         header.classList.remove('hidden');
-        hideHeaderBtn.textContent = '↑';
+        hideHeaderBtn.textContent = '↓';
     } else {
         header.classList.add('hidden');
-        hideHeaderBtn.textContent = '↓';
+        hideHeaderBtn.textContent = '↑';
     }
 }
 function createWordCard(word) {
@@ -4180,7 +4190,8 @@ document.getElementById('paste-btn-translate').addEventListener('click', async (
         showToast('Paste failed. Please try again.', 'error');
     }
 });
-
+// Add this near other event listener setups
+document.getElementById('hide-header-btn').addEventListener('click', toggleHeaderVisibility);
 // Translate section: Voice input button
 document.getElementById('voice-input-btn-translate').addEventListener('click', function() {
     const lang = navigator.language || 'en-US';
