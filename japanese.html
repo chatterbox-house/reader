@@ -1798,10 +1798,15 @@ max-width: 100%;
     </div>
     
     <div id="sentence-results" style="display: none;">
-        <h3 style="margin-bottom: 0.5rem; color: var(--highlight);">Found Sentences:</h3>
-        <div id="sentence-results-list" style="max-height: 300px; overflow-y: auto; background: var(--secondary); 
-              border-radius: 8px; padding: 0.5rem;"></div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <h3 style="color: var(--highlight); margin: 0;">Found Sentences:</h3>
+        <button class="btn" id="import-all-btn" style="background-color: var(--highlight); padding: 0.3rem 0.6rem;">
+            Import All (Max 5)
+        </button>
     </div>
+    <div id="sentence-results-list" style="max-height: 300px; overflow-y: auto; background: var(--secondary); 
+          border-radius: 8px; padding: 0.5rem;"></div>
+</div>
     
     <div id="sentence-search-status" style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);"></div>
 </div>
@@ -5167,18 +5172,23 @@ async function searchSentences() {
             item.className = 'sentence-result-item';
             
             item.innerHTML = `
-                <div class="sentence-japanese">${sentence.japanese}</div>
-                <div class="sentence-english">${sentence.english}</div>
-                <div class="sentence-actions">
-                    <button class="copy-sentence-btn" data-japanese="${sentence.japanese}" 
-                            data-english="${sentence.english}">
-                        📋 Copy
-                    </button>
-                    <button class="use-sentence-btn" data-japanese="${sentence.japanese}">
-                        ✏️ Use in Reader
-                    </button>
-                </div>
-            `;
+    <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+        <input type="checkbox" class="sentence-checkbox" style="margin-top: 0.3rem;">
+        <div style="flex: 1;">
+            <div class="sentence-japanese">${sentence.japanese}</div>
+            <div class="sentence-english">${sentence.english}</div>
+            <div class="sentence-actions">
+                <button class="copy-sentence-btn" data-japanese="${sentence.japanese}" 
+                        data-english="${sentence.english}">
+                    📋 Copy
+                </button>
+                <button class="use-sentence-btn" data-japanese="${sentence.japanese}">
+                    ✏️ Use in Reader
+                </button>
+            </div>
+        </div>
+    </div>
+`;
             
             resultsList.appendChild(item);
         });
@@ -5273,6 +5283,7 @@ async function searchJishoSentences(word) {
         return [];
     }
 }
+
 // Start the app
 window.addEventListener('DOMContentLoaded', initApp);
 // Swipe detection for mobile
@@ -5281,7 +5292,33 @@ let touchStartX = 0;
 function handleTouchStart(e) {
   touchStartX = e.changedTouches[0].screenX;
 }
+document.getElementById('import-all-btn').addEventListener('click', importAllSentences);
 
+function importAllSentences() {
+    const sentenceItems = document.querySelectorAll('.sentence-result-item');
+    if (sentenceItems.length === 0) {
+        showToast('No sentences to import', 'error');
+        return;
+    }
+
+    // Get up to 5 sentences
+    const sentencesToImport = [];
+    const maxSentences = Math.min(5, sentenceItems.length);
+    
+    for (let i = 0; i < maxSentences; i++) {
+        const japanese = sentenceItems[i].querySelector('.sentence-japanese').textContent;
+        sentencesToImport.push(japanese);
+    }
+
+    // Combine sentences with line breaks
+    const combinedText = sentencesToImport.join('\n\n');
+    
+    // Put into text input
+    document.getElementById('text-input').value = combinedText;
+    document.getElementById('char-count').textContent = combinedText.length;
+    
+    showToast(`Imported ${maxSentences} sentences!`, 'success');
+}
 function handleTouchEnd(e) {
   const touchEndX = e.changedTouches[0].screenX;
   if (touchEndX < touchStartX - 50) { // Swipe left = next
