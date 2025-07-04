@@ -1516,48 +1516,58 @@ max-width: 100%;
 }
 /* Word Cards - Japanese vs English */
 .word-card[data-type="japanese"] .content {
-  font-size: calc(var(--font-size) * 2.5); /* Larger font for Japanese */
+  font-size: calc(min(3vw, var(--font-size) * 3)); /* Larger dynamic font size */
   line-height: 1.2;
-  max-width: 90%;
+  max-width: 100%;
   overflow-wrap: break-word;
   word-break: keep-all;
+  padding: 0.5rem;
+  box-sizing: border-box;
 }
 
 .word-card[data-type="english"] .content {
-  font-size: calc(var(--font-size) * 1.5); /* Smaller font for English */
+  font-size: calc(min(1.5vw, var(--font-size) * 1.5)); /* Dynamic font size that scales with viewport */
   line-height: 1.3;
   max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  padding: 0.5rem;
+  box-sizing: border-box;
 }
 
 /* Adjust for very long Japanese words */
 .word-card[data-type="japanese"][data-length="1"] .content {
-  font-size: calc(var(--font-size) * 4); /* Extra large for single kanji */
+  font-size: calc(min(4vw, var(--font-size) * 4)); /* Extra large for single kanji */
 }
 
 .word-card[data-type="japanese"][data-length="2"] .content {
-  font-size: calc(var(--font-size) * 3);
+  font-size: calc(min(3.5vw, var(--font-size) * 3.5));
 }
 
 .word-card[data-type="japanese"][data-length="3"] .content {
-  font-size: calc(var(--font-size) * 2.5);
+  font-size: calc(min(3vw, var(--font-size) * 3));
 }
 
 .word-card[data-type="japanese"][data-length="4"] .content {
-  font-size: calc(var(--font-size) * 2);
+  font-size: calc(min(2.5vw, var(--font-size) * 2.5));
 }
 
 .word-card[data-type="japanese"][data-length="5"] .content {
-  font-size: calc(var(--font-size) * 1.8);
+  font-size: calc(min(2vw, var(--font-size) * 2));
 }
 
 /* Mobile adjustments */
 @media (max-width: 600px) {
   .word-card[data-type="japanese"] .content {
-    font-size: calc(var(--font-size) * 2);
+    font-size: calc(min(4vw, var(--font-size) * 2.5));
   }
   
   .word-card[data-type="japanese"][data-length="1"] .content {
-    font-size: calc(var(--font-size) * 3);
+    font-size: calc(min(6vw, var(--font-size) * 4));
+  }
+  
+  .word-card[data-type="english"] .content {
+    font-size: calc(min(3vw, var(--font-size) * 1.8));
   }
 }
 /* Sentence Search Results */
