@@ -1516,58 +1516,48 @@ max-width: 100%;
 }
 /* Word Cards - Japanese vs English */
 .word-card[data-type="japanese"] .content {
-  font-size: calc(min(3vw, var(--font-size) * 3)); /* Larger dynamic font size */
+  font-size: calc(var(--font-size) * 2.5); /* Larger font for Japanese */
   line-height: 1.2;
-  max-width: 100%;
+  max-width: 90%;
   overflow-wrap: break-word;
   word-break: keep-all;
-  padding: 0.5rem;
-  box-sizing: border-box;
 }
 
 .word-card[data-type="english"] .content {
-  font-size: calc(min(1.5vw, var(--font-size) * 1.5)); /* Dynamic font size that scales with viewport */
+  font-size: calc(var(--font-size) * 1.5); /* Smaller font for English */
   line-height: 1.3;
   max-width: 100%;
-  overflow-wrap: break-word;
-  word-break: break-word;
-  padding: 0.5rem;
-  box-sizing: border-box;
 }
 
 /* Adjust for very long Japanese words */
 .word-card[data-type="japanese"][data-length="1"] .content {
-  font-size: calc(min(4vw, var(--font-size) * 4)); /* Extra large for single kanji */
+  font-size: calc(var(--font-size) * 4); /* Extra large for single kanji */
 }
 
 .word-card[data-type="japanese"][data-length="2"] .content {
-  font-size: calc(min(3.5vw, var(--font-size) * 3.5));
+  font-size: calc(var(--font-size) * 3);
 }
 
 .word-card[data-type="japanese"][data-length="3"] .content {
-  font-size: calc(min(3vw, var(--font-size) * 3));
+  font-size: calc(var(--font-size) * 2.5);
 }
 
 .word-card[data-type="japanese"][data-length="4"] .content {
-  font-size: calc(min(2.5vw, var(--font-size) * 2.5));
+  font-size: calc(var(--font-size) * 2);
 }
 
 .word-card[data-type="japanese"][data-length="5"] .content {
-  font-size: calc(min(2vw, var(--font-size) * 2));
+  font-size: calc(var(--font-size) * 1.8);
 }
 
 /* Mobile adjustments */
 @media (max-width: 600px) {
   .word-card[data-type="japanese"] .content {
-    font-size: calc(min(4vw, var(--font-size) * 2.5));
+    font-size: calc(var(--font-size) * 2);
   }
   
   .word-card[data-type="japanese"][data-length="1"] .content {
-    font-size: calc(min(6vw, var(--font-size) * 4));
-  }
-  
-  .word-card[data-type="english"] .content {
-    font-size: calc(min(3vw, var(--font-size) * 1.8));
+    font-size: calc(var(--font-size) * 3);
   }
 }
 /* Sentence Search Results */
@@ -4387,16 +4377,6 @@ document.querySelector('.nav-btn[data-view="bookmarks-view"]').addEventListener(
     showView('bookmarks-view');
     renderSavedUrls();
 });
-<!-- Welcome modal for first-time users -->
-const firstTime = localStorage.getItem('firstTime_ja') === null;
-if (firstTime) {
-    document.getElementById('welcome-modal').style.display = 'flex';
-    localStorage.setItem('firstTime_ja', 'false');
-}
-
-document.getElementById('close-welcome').addEventListener('click', () => {
-    document.getElementById('welcome-modal').style.display = 'none';
-});
 // Close modal when clicking outside
 tutorialModal.addEventListener('click', (e) => {
   if (e.target === tutorialModal) {
@@ -5379,34 +5359,5 @@ function undoDelete(id) {
   }
 }
 </script>
-<div class="welcome-modal" id="welcome-modal">
-  <div class="modal-content" style="max-width: 500px;">
-    <h2>Welcome to Japanese SentenceMODE!</h2>
-    <p>Here's how to get started:</p>
-    <ol style="text-align: left; margin: 1rem 2rem;">
-      <li>Paste Japanese text or translate from English</li>
-      <li>Click any word to save it to your vocabulary</li>
-      <li>Review words with flashcards in the Vocab section</li>
-    </ol>
-    <div style="margin-top: 2rem;">
-      <button class="btn" id="close-welcome" style="background-color: var(--highlight);">Get Started</button>
-    </div>
-  </div>
-</div>
-
-<style>
-.welcome-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-}
-</style>
 </body>
 </html>
