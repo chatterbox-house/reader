@@ -2499,7 +2499,10 @@ function toggleBookmark() {
             translation: currentSentence.cached_translation || '',
             date: new Date().toISOString()
         });
-        document.getElementById('favorite-sentence-btn').classList.add('active');
+        const favoriteBtn = document.getElementById('favorite-sentence-btn');
+if (favoriteBtn) {
+    favoriteBtn.classList.add('active');
+}
         showToast('Added to bookmarks!', 'success');
     } else {
         // Remove from bookmarks
@@ -3359,7 +3362,7 @@ async function translateToJapanese(text, sourceLang) {
 
 async function getCachedTranslation(text, sourceLang, targetLang) {
     return new Promise((resolve, reject) => {
-        const transaction = db.transition([STORE_TRANSLATIONS], 'readonly');
+        const transaction = db.transaction([STORE_TRANSLATIONS], 'readonly');
         const store = transaction.objectStore(STORE_TRANSLATIONS);
         const index = store.index('text');
         
@@ -5340,6 +5343,17 @@ function getFirstChar(word) {
 document.getElementById('search-sentences-btn').addEventListener('click', searchSentences);
 
 async function searchSentences() {
+    const searchBtn = document.getElementById('search-sentences-btn');
+    const statusElement = document.getElementById('sentence-search-status');
+    
+    try {
+        // Show loading state
+        searchBtn.disabled = true;
+        searchBtn.innerHTML = 'Searching... <span class="loading-spinner"></span>';
+        statusElement.textContent = 'Searching...';
+        
+        // Perform the actual search
+        const results = await searchTanakaCorpus(/*...*/);
     const searchInput = document.getElementById('sentence-search-input').value.trim();
     if (!searchInput) {
         showToast('Please enter a word to search', 'error');
@@ -5437,32 +5451,48 @@ async function searchTanakaCorpus(word) {
             return [];
         }
 
-        const proxyUrl = 'https://api.allorigins.win/raw?url=';
-        const firstChar = getFirstChar(word);
-        const tanakaUrl = `https://www.manythings.org/japanese/sentences/data/${firstChar}/${encodeURIComponent(word)}.json`;
+        // First try the new ManyThings API endpoint
+        const newApiUrl = `https://tatoeba.org/en/api_v0/search?from=jpn&to=eng&query=${encodeURIComponent(word)}&trans_to=eng&trans_link=direct&trans_user=&trans_orphan=&trans_unapproved=&trans_has_audio=&sort=relevance`;
         
-        const response = await fetch(proxyUrl + encodeURIComponent(tanakaUrl));
+        let response = await fetch(newApiUrl);
+        
+        // If the new API fails, fall back to the old Tanaka Corpus
+        if (!response.ok) {
+            const proxyUrl = 'https://api.allorigins.win/raw?url=';
+            const firstChar = getFirstChar(word);
+            const tanakaUrl = `https://www.manythings.org/japanese/sentences/data/${firstChar}/${encodeURIComponent(word)}.json`;
+            response = await fetch(proxyUrl + encodeURIComponent(tanakaUrl));
+        }
 
         if (!response.ok) {
-            if (response.status === 404) {
-                return []; // No results found
-            }
-            throw new Error(`HTTP error! status: ${response.status}`);
+            return []; // Return empty array if both APIs fail
         }
 
         const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            const text = await response.text();
-            throw new Error(`Expected JSON but got: ${contentType}`);
+        let data;
+
+        if (contentType && contentType.includes('application/json')) {
+            data = await response.json();
+            
+            // Handle both old and new API response formats
+            if (Array.isArray(data)) {
+                // Old Tanaka Corpus format
+                return data.map(item => ({
+                    japanese: cleanJapaneseText(item.japanese),
+                    english: item.english
+                }));
+            } else if (data.results) {
+                // New Tatoeba API format
+                return data.results.map(item => ({
+                    japanese: cleanJapaneseText(item.text),
+                    english: item.translations[0]?.text || ''
+                }));
+            }
         }
 
-        const data = await response.json();
-        return data.map(item => ({
-            japanese: cleanJapaneseText(item.japanese),
-            english: item.english
-        }));
+        return []; // Fallback if format isn't recognized
     } catch (error) {
-        console.error('Tanaka Corpus search failed:', error);
+        console.error('Sentence search failed:', error);
         return [];
     }
 }
