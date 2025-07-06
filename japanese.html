@@ -2278,7 +2278,7 @@ function cleanJapaneseText(text) {
     text = text.replace(/\s+/g, ' ').trim();
     return text;
 }
-   async function importUrlContent(url) {
+async function importUrlContent(url) {
     try {
         showToast('Fetching content...', 'info');
         
@@ -2298,7 +2298,7 @@ function cleanJapaneseText(text) {
         const scripts = doc.querySelectorAll('script, style, noscript, iframe, img');
         scripts.forEach(el => el.remove());
         
-        // Get text content from main content areas (prioritize article, main, etc.)
+        // Get text content from main content areas
         let text = '';
         const contentSelectors = ['article', 'main', '.post-content', '.entry-content', 'body'];
         
@@ -2320,13 +2320,16 @@ function cleanJapaneseText(text) {
         
         if (!text) throw new Error('No text content found');
         
-        // Put the text in the input field
-        elements.textInput.value = text;
-        elements.charCount.textContent = text.length;
+        // Put the text in the input field and scroll to it
+        const textInput = document.getElementById('text-input');
+        textInput.value = text;
+        document.getElementById('char-count').textContent = text.length;
+        textInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        textInput.focus();
         
-        // Switch to reader view
+        // Switch to import view but don't process automatically
         showView('text-import-view');
-        showToast('Content loaded! Click "Process Text" to start reading', 'success');
+        showToast('Content loaded! Review and click "Process Text" to continue', 'success');
         
     } catch (error) {
         console.error('Import error:', error);
@@ -4716,26 +4719,14 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
             return;
         }
         
-        // Special handling for reader view
-        if (btn.dataset.view === 'text-import') {
-            if (state.hasProcessedText && state.sentences.length > 0) {
-                // If we already have processed text, go straight to reading view
-                showView('reading-view');
-                return;
-            } else {
-                // Otherwise show import view
-                showView('text-import-view');
-                return;
-            }
-        }
-        
-        // Normal view switching for other tabs
+        // Update all nav buttons
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+        
+        // Always show the requested view - no automatic switching
         showView(btn.dataset.view + '-view');
     });
-});
-    // Text import
+});    // Text import
     elements.textInput.addEventListener('input', () => {
         const text = elements.textInput.value;
         elements.charCount.textContent = text.length;
@@ -4926,27 +4917,27 @@ document.getElementById('translate-to-japanese').addEventListener('click', async
         button.innerHTML = '<span>Translating...</span><span class="loading-spinner"></span>';
         button.disabled = true;
         
-        // Show loading state
         showToast('Translating...', 'info');
         
-        // Detect source language from input
         const sourceLang = detectLanguage(text) || 'en';
         const translatedText = await translateToJapanese(text, sourceLang);
         
         if (translatedText) {
-            // Put the translated text in the Japanese input field
-            document.getElementById('text-input').value = translatedText;
+            const textInput = document.getElementById('text-input');
+            textInput.value = translatedText;
             document.getElementById('char-count').textContent = translatedText.length;
             
-// Switch to Japanese input view
-const importButton = document.querySelector('.mode-toggle-btn[data-mode="import"]');
-if (importButton) {
-    importButton.click();
-} else {
-    // Fallback if button doesn't exist
-    showView('text-import-view');
-}
-showToast('Translation complete!', 'success');
+            // Scroll to show the translated text
+            textInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            textInput.focus();
+            
+            showToast('Translation complete! Review and click "Process Text" to continue', 'success');
+            
+            // Switch to import tab but don't process automatically
+            const importButton = document.querySelector('.mode-toggle-btn[data-mode="import"]');
+            if (importButton) {
+                importButton.click();
+            }
         } else {
             showToast('Translation failed. Please try again.', 'error');
         }
@@ -4959,7 +4950,6 @@ showToast('Translation complete!', 'success');
         button.disabled = false;
     }
 });
-
     // Reading view controls
     elements.prevSentenceBtn.addEventListener('click', () => {
         if (state.currentSentenceIndex > 0) {
