@@ -2354,6 +2354,7 @@ selectedCards: [],
 currentTtsUtterance: null,
 wordLookupCache: {},
 bookmarks: JSON.parse(localStorage.getItem('bookmarks_ja')) || [],
+lastSentencePosition: JSON.parse(localStorage.getItem('lastSentencePosition_ja')) || 0,
     savedUrls: JSON.parse(localStorage.getItem('savedUrls_ja')) || [
         {id: '1', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-1.html', title: 'Chapter 1', date: new Date().toISOString()},
         {id: '2', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-2.html', title: 'Chapter 2', date: new Date().toISOString()},
@@ -3567,6 +3568,7 @@ function updateBucketCounts() {
 }
 
 function displaySentence() {
+localStorage.setItem('lastSentencePosition_ja', JSON.stringify(state.currentSentenceIndex));
     if (state.sentences.length === 0) {
         elements.sentenceDisplay.textContent = 'No sentences available.';
         if (elements.translationDisplay) {
@@ -4832,8 +4834,10 @@ localStorage.setItem('bookmarks_ja', JSON.stringify(state.bookmarks));
         try {
             elements.processTextBtn.innerHTML = '<span>Processing...</span><span class="loading-spinner"></span>';
             await addSentences(sentenceObjects);
-            state.sentences = await getAllSentences();
-            state.currentSentenceIndex = 0;
+                    state.sentences = await getAllSentences();
+        // Restore last position if available
+        const savedPosition = JSON.parse(localStorage.getItem('lastSentencePosition_ja')) || 0;
+        state.currentSentenceIndex = Math.min(savedPosition, state.sentences.length - 1);
             
             showView('reading-view');
             displaySentence();
