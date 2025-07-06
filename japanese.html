@@ -1639,7 +1639,7 @@ max-width: 100%;
     color: var(--text);
     margin-left: 0.3rem;
 }
-
+}
 </style>
 
 </head>
@@ -1832,28 +1832,7 @@ max-width: 100%;
     
     <div id="sentence-search-status" style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);"></div>
 </div>
-<div class="text-import-container" style="border: 2px dotted #FF5722; margin-bottom: 1rem;">
-    <h2 style="color: #FF5722;">Practice Difficult Words <span role="img" aria-label="Difficult">💪</span></h2>
-    <p>Search for example sentences containing your difficult words</p>
-    
-    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-        <select id="difficult-word-select" style="flex: 1; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--accent); 
-               background: var(--secondary); color: var(--text);">
-            <option value="">Select a difficult word</option>
-        </select>
-        <button class="btn" id="search-difficult-btn" style="background-color: #FF5722;">Search</button>
-    </div>
-    
-    <div id="difficult-results" style="display: none;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-            <h3 style="color: var(--highlight); margin: 0;">
-                Found Sentences: <span id="difficult-sentence-count">0</span>
-            </h3>
-        </div>
-        <div id="difficult-results-list" style="max-height: 300px; overflow-y: auto; background: var(--secondary); 
-              border-radius: 8px; padding: 0.5rem;"></div>
-    </div>
-</div>
+
 <div class="resources-container">
                     <h3 class="resources-title">📚 Japanese Learning Resources</h3>
                     <div class="resources-list">
@@ -1949,27 +1928,23 @@ max-width: 100%;
                 <p>Select a difficulty level to start reviewing</p>
                 
                 <div class="bucket-container">
-    <div class="bucket-card new" data-bucket="new" aria-label="New words">
-        <div class="bucket-count" id="new-count">0</div>
-        <div class="bucket-label">New Words</div>
-    </div>
-    <div class="bucket-card easy" data-bucket="easy" aria-label="Easy words">
-        <div class="bucket-count" id="easy-count">0</div>
-        <div class="bucket-label">Easy</div>
-    </div>
-    <div class="bucket-card medium" data-bucket="medium" aria-label="Medium words">
-        <div class="bucket-count" id="medium-count">0</div>
-        <div class="bucket-label">Medium</div>
-    </div>
-    <div class="bucket-card hard" data-bucket="hard" aria-label="Hard words">
-        <div class="bucket-count" id="hard-count">0</div>
-        <div class="bucket-label">Hard</div>
-    </div>
-    <div class="bucket-card difficult" data-bucket="difficult" aria-label="Difficult words" style="border-top: 4px solid #ff5722;">
-        <div class="bucket-count" id="difficult-count">0</div>
-        <div class="bucket-label">Difficult</div>
-    </div>
-</div>
+                    <div class="bucket-card new" data-bucket="new" aria-label="New words">
+                        <div class="bucket-count" id="new-count">0</div>
+                        <div class="bucket-label">New Words</div>
+                    </div>
+                    <div class="bucket-card easy" data-bucket="easy" aria-label="Easy words">
+                        <div class="bucket-count" id="easy-count">0</div>
+                        <div class="bucket-label">Easy</div>
+                    </div>
+                    <div class="bucket-card medium" data-bucket="medium" aria-label="Medium words">
+                        <div class="bucket-count" id="medium-count">0</div>
+                        <div class="bucket-label">Medium</div>
+                    </div>
+                    <div class="bucket-card hard" data-bucket="hard" aria-label="Hard words">
+                        <div class="bucket-count" id="hard-count">0</div>
+                        <div class="bucket-label">Hard</div>
+                    </div>
+                </div>
                 
 <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
     <button class="btn" id="start-review" disabled aria-label="Start review" style="flex: 1;">Select a difficulty to start</button>
@@ -2712,13 +2687,12 @@ const elements = {
     translationDisplay: document.getElementById('translation-display'),
     translateBtn: document.getElementById('translate-btn'),
     translationLang: document.getElementById('translation-lang'),
-   bucketCounts: {
-    new: document.getElementById('new-count'),
-    easy: document.getElementById('easy-count'),
-    medium: document.getElementById('medium-count'),
-    hard: document.getElementById('hard-count'),
-    difficult: document.getElementById('difficult-count')
-},
+    bucketCounts: {
+        new: document.getElementById('new-count'),
+        easy: document.getElementById('easy-count'),
+        medium: document.getElementById('medium-count'),
+        hard: document.getElementById('hard-count')
+    },
     startReviewBtn: document.getElementById('start-review'),
     reviewQuestion: document.getElementById('review-question'),
     exitReviewBtn: document.getElementById('exit-review'),
@@ -2936,34 +2910,34 @@ async function openDatabase() {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open(DB_NAME, DB_VERSION);
         
-request.onupgradeneeded = (event) => {
-    const db = event.target.result;
-    
-    if (!db.objectStoreNames.contains(STORE_SENTENCES)) {
-        const sentencesStore = db.createObjectStore(STORE_SENTENCES, { keyPath: 'id' });
-        sentencesStore.createIndex('position', 'position', { unique: true });
-    }
-    
-    if (!db.objectStoreNames.contains(STORE_VOCAB)) {
-        const vocabStore = db.createObjectStore(STORE_VOCAB, { keyPath: 'id' });
-        vocabStore.createIndex('bucket', 'bucket', { unique: false });
-        vocabStore.createIndex('word', 'word', { unique: true });
-        vocabStore.createIndex('favorite', 'favorite', { unique: false });
-    } else {
-        const vocabStore = event.target.transaction.objectStore(STORE_VOCAB);
-        if (!vocabStore.indexNames.contains('word')) {
-            vocabStore.createIndex('word', 'word', { unique: true });
-        }
-        if (!vocabStore.indexNames.contains('favorite')) {
-            vocabStore.createIndex('favorite', 'favorite', { unique: false });
-        }
-    }
-    
-    if (!db.objectStoreNames.contains(STORE_TRANSLATIONS)) {
-        const translationsStore = db.createObjectStore(STORE_TRANSLATIONS, { keyPath: 'id' });
-        translationsStore.createIndex('text', 'text', { unique: true });
-    }
-};
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            
+            if (!db.objectStoreNames.contains(STORE_SENTENCES)) {
+                const sentencesStore = db.createObjectStore(STORE_SENTENCES, { keyPath: 'id' });
+                sentencesStore.createIndex('position', 'position', { unique: true });
+            }
+            
+            if (!db.objectStoreNames.contains(STORE_VOCAB)) {
+                const vocabStore = db.createObjectStore(STORE_VOCAB, { keyPath: 'id' });
+                vocabStore.createIndex('bucket', 'bucket', { unique: false });
+                vocabStore.createIndex('word', 'word', { unique: true });
+                vocabStore.createIndex('favorite', 'favorite', { unique: false });
+            } else {
+                const vocabStore = event.target.transaction.objectStore(STORE_VOCAB);
+                if (!vocabStore.indexNames.contains('word')) {
+                    vocabStore.createIndex('word', 'word', { unique: true });
+                }
+                if (!vocabStore.indexNames.contains('favorite')) {
+                    vocabStore.createIndex('favorite', 'favorite', { unique: false });
+                }
+            }
+            
+            if (!db.objectStoreNames.contains(STORE_TRANSLATIONS)) {
+                const translationsStore = db.createObjectStore(STORE_TRANSLATIONS, { keyPath: 'id' });
+                translationsStore.createIndex('text', 'text', { unique: true });
+            }
+        };
         
         request.onsuccess = (event) => {
             resolve(event.target.result);
@@ -3190,7 +3164,7 @@ function updateVocabWord(word) {
 
 function countVocabByBucket() {
     return new Promise((resolve, reject) => {
-        const buckets = ['new', 'easy', 'medium', 'hard', 'difficult'];
+        const buckets = ['new', 'easy', 'medium', 'hard'];
         const counts = {};
         
         const transaction = db.transaction([STORE_VOCAB], 'readonly');
@@ -3215,13 +3189,7 @@ function countVocabByBucket() {
         });
     });
 }
-// NEW FUNCTION
-function moveWordToDifficult(word) {
-    word.bucket = 'difficult';
-    word.difficultDate = new Date().toISOString(); // Track when word was marked difficult
-    updateVocabWord(word);
-    updateBucketCounts();
-}
+
 // Text processing
 function splitSentences(text) {
     const roughSentences = text.split(/(?<=[。！？\n])/);
@@ -4226,6 +4194,7 @@ function selectCard(cardElement, cardType) {
     }
 }
 
+
 function handleHardModeResponse(knewIt) {
     if (!state.currentHardWord) return;
     
@@ -4237,9 +4206,11 @@ function handleHardModeResponse(knewIt) {
         
         showToast('Word retired! Great job!', 'success');
     } else {
-        // If user doesn't know the word, move it to difficult deck
-        moveWordToDifficult(state.currentHardWord);
-        showToast('Word moved to difficult words', 'error');
+        // If user doesn't know the word, move it back to "new" bucket
+        state.currentHardWord.bucket = 'new';
+        state.currentHardWord.streak = 0; // Reset streak
+        updateVocabWord(state.currentHardWord);
+        showToast('Word moved back to new words', 'error');
     }
     
     // Move to next word
@@ -4252,108 +4223,7 @@ function handleHardModeResponse(knewIt) {
         updateBucketCounts();
     }
 }
-// NEW FUNCTION
-function cleanUpOldDifficultWords() {
-    return new Promise((resolve, reject) => {
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        
-        const transaction = db.transaction([STORE_VOCAB], 'readwrite');
-        const store = transaction.objectStore(STORE_VOCAB);
-        const bucketIndex = store.index('bucket');
-        const request = bucketIndex.getAll(IDBKeyRange.only('difficult'));
-        
-        request.onsuccess = () => {
-            const words = request.result;
-            const deleteRequests = [];
-            
-            words.forEach(word => {
-                if (word.difficultDate && new Date(word.difficultDate) < thirtyDaysAgo) {
-                    deleteRequests.push(store.delete(word.id));
-                }
-            });
-            
-            Promise.all(deleteRequests).then(() => {
-                resolve(deleteRequests.length);
-            }).catch(reject);
-        };
-        
-        request.onerror = (event) => reject(event.target.error);
-    });
-}
-// NEW FUNCTIONS
-async function loadDifficultWords() {
-    try {
-        const words = await getVocabByBucket('difficult');
-        const select = document.getElementById('difficult-word-select');
-        
-        // Clear existing options except the first one
-        while (select.options.length > 1) {
-            select.remove(1);
-        }
-        
-        // Add new options
-        words.forEach(word => {
-            const option = document.createElement('option');
-            option.value = word.word;
-            option.textContent = word.word;
-            select.appendChild(option);
-        });
-        
-        return words;
-    } catch (error) {
-        console.error('Error loading difficult words:', error);
-        return [];
-    }
-}
 
-function setupDifficultWordSearch() {
-    const searchBtn = document.getElementById('search-difficult-btn');
-    const select = document.getElementById('difficult-word-select');
-    
-    // Load difficult words when select is clicked
-    select.addEventListener('focus', loadDifficultWords);
-    
-    // Handle search
-    searchBtn.addEventListener('click', () => {
-        const word = select.value;
-        if (!word) {
-            showToast('Please select a word', 'error');
-            return;
-        }
-        
-        // Use the existing sentence search with the difficult word
-        document.getElementById('sentence-search-input').value = word;
-        document.getElementById('search-sentences-btn').click();
-        
-        // Show results in the difficult results section
-        const resultsList = document.getElementById('difficult-results-list');
-        resultsList.innerHTML = '';
-        document.getElementById('difficult-results').style.display = 'none';
-        
-        // This will be populated when the search completes
-    });
-    
-// Modern replacement for DOMSubtreeModified
-const sentenceResultsEl = document.getElementById('sentence-results');
-if (sentenceResultsEl) {
-    const observer = new MutationObserver(() => {
-        const sentenceResults = document.getElementById('sentence-results-list').innerHTML;
-        document.getElementById('difficult-results-list').innerHTML = sentenceResults;
-        document.getElementById('difficult-sentence-count').textContent = 
-            document.getElementById('sentence-count').textContent;
-        document.getElementById('difficult-results').style.display = 'block';
-    });
-    
-    observer.observe(sentenceResultsEl, {
-        childList: true,
-        subtree: true
-    });
-}
-}
-
-// Call this in initApp()
-setupDifficultWordSearch();
 function shuffleArray(array) {
     const newArray = [...array];
     for (let i = newArray.length - 1; i > 0; i--) {
@@ -4517,7 +4387,22 @@ document.querySelector('.nav-btn[data-view="bookmarks-view"]').addEventListener(
     showView('bookmarks-view');
     renderSavedUrls();
 });
+<!-- Welcome modal for first-time users -->
+const firstTime = localStorage.getItem('firstTime_ja') === null;
+if (firstTime) {
+    document.getElementById('welcome-modal').style.display = 'flex';
+    localStorage.setItem('firstTime_ja', 'false');
+}
 
+document.getElementById('close-welcome').addEventListener('click', () => {
+    document.getElementById('welcome-modal').style.display = 'none';
+});
+// Close modal when clicking outside
+tutorialModal.addEventListener('click', (e) => {
+  if (e.target === tutorialModal) {
+    tutorialModal.classList.remove('active');
+  }
+});
 async function startVoiceInput(lang, targetId, buttonElement) {
     try {
         if (!('webkitSpeechRecognition' in window)) {
@@ -5183,7 +5068,7 @@ if (state.currentView === 'review-mode-view' && state.reviewMode === 'hard') {
         elements.offlineWarning.style.display = 'none';
     });
 
-     window.addEventListener('offline', () => {
+    window.addEventListener('offline', () => {
         state.isOnline = false;
         elements.offlineWarning.style.display = 'block';
     });
@@ -5192,26 +5077,20 @@ if (state.currentView === 'review-mode-view' && state.reviewMode === 'hard') {
 // Initialize the app
 async function initApp() {
     try {
-        // Also show quick start guide
-        document.getElementById('quick-start-guide').style.display = 'block';
-        document.getElementById('hero-section').style.display = 'block';
-        
         db = await openDatabase();
-        // Clean up old difficult words
-        await cleanUpOldDifficultWords();
         
         state.sentences = await getAllSentences();
         
-        // Always show reader tab first
-        document.querySelector('.nav-btn[data-view="text-import"]').classList.add('active');
-        document.querySelector('.nav-btn[data-view="vocab-review"]').classList.remove('active');
-        showView('text-import-view');
+// Always show reader tab first
+document.querySelector('.nav-btn[data-view="text-import"]').classList.add('active');
+document.querySelector('.nav-btn[data-view="vocab-review"]').classList.remove('active');
+showView('text-import-view');
 
-        // Optional: Still load sentences if they exist
-        if (state.sentences.length > 0) {
-            // You can keep this if you want to do something with existing sentences
-            // But we won't switch to vocab view automatically
-        }
+// Optional: Still load sentences if they exist
+if (state.sentences.length > 0) {
+    // You can keep this if you want to do something with existing sentences
+    // But we won't switch to vocab view automatically
+}
         
         await updateBucketCounts();
         setupEventListeners();
@@ -5227,9 +5106,12 @@ async function initApp() {
         elements.fontSizeRange.value = state.currentFontSize;
         elements.lineHeightRange.value = state.currentLineHeight;
 
+        
         // Initialize audio
         initAudio();
         elements.soundToggle.textContent = state.soundsEnabled ? '🔊' : '🔇';
+        
+ 
         
         // Pre-warm TTS
         if ('speechSynthesis' in window) {
@@ -5239,6 +5121,8 @@ async function initApp() {
         // Set initial online status
         state.isOnline = navigator.onLine;
         elements.offlineWarning.style.display = state.isOnline ? 'none' : 'block';
+        
+
         
     } catch (error) {
         console.error('Initialization error:', error);
@@ -5495,5 +5379,34 @@ function undoDelete(id) {
   }
 }
 </script>
+<div class="welcome-modal" id="welcome-modal">
+  <div class="modal-content" style="max-width: 500px;">
+    <h2>Welcome to Japanese SentenceMODE!</h2>
+    <p>Here's how to get started:</p>
+    <ol style="text-align: left; margin: 1rem 2rem;">
+      <li>Paste Japanese text or translate from English</li>
+      <li>Click any word to save it to your vocabulary</li>
+      <li>Review words with flashcards in the Vocab section</li>
+    </ol>
+    <div style="margin-top: 2rem;">
+      <button class="btn" id="close-welcome" style="background-color: var(--highlight);">Get Started</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.welcome-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+</style>
 </body>
 </html>
