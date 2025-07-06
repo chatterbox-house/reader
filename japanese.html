@@ -467,13 +467,12 @@ h2 {
   color: white;
 }
 
-/* Sentence Display */
 .sentence-display {
   background-color: var(--card-bg);
   border-radius: 12px;
   padding: 1.5rem;
   text-align: center;
-  font-size: calc(var(--font-size) * 1.5);
+  font-size: calc(var(--font-size) * 1.3); /* Slightly larger than base */
   min-height: 200px;
   display: flex;
   align-items: center;
@@ -484,10 +483,25 @@ h2 {
   user-select: text;
   position: relative;
   overflow-wrap: break-word;
-  word-wrap: break-word;
-  word-break: normal;
+  word-break: break-word; /* Changed from normal to break-word */
   hyphens: auto;
   max-width: 100%;
+  overflow: hidden; /* Changed from auto to hidden */
+}
+
+/* For very long sentences/wider screens */
+.sentence-display {
+  word-break: keep-all; /* Prefer to keep words together */
+  overflow-wrap: anywhere; /* More aggressive breaking when needed */
+}
+
+@media (max-width: 600px) {
+  .sentence-display {
+    font-size: calc(var(--font-size) * 1.1);
+    min-height: 160px;
+    padding: 1rem;
+    word-break: break-word; /* More aggressive breaking on mobile */
+  }
 }
 
 .current-sentence {
@@ -685,6 +699,8 @@ h2 {
     min-height: 0;
     padding: 0.5rem;
     overflow-y: auto;
+    width: 100%;
+    height: 100%;
 }
 
 .matching-column {
@@ -695,8 +711,13 @@ h2 {
     padding: 0.5rem;
     gap: 0.5rem;
     justify-content: flex-start;
-    align-items: center;
-overflow: hidden; /* Prevent overflow */
+    align-items: stretch; /* Changed from center to stretch */
+    overflow: hidden;
+    min-width: 0; /* Allows columns to shrink properly */
+}
+/* Ensure at least 5 cards per column when available */
+.matching-game-container {
+    height: calc(100% - 60px); /* Account for shuffle button */
 }
 
 /* Word Cards */
@@ -708,7 +729,9 @@ overflow: hidden; /* Prevent overflow */
     text-align: center;
     transition: all 0.2s ease;
     margin-bottom: 0.5rem;
-    min-height: calc(var(--font-size) * 4);
+    min-height: 60px; /* Fixed minimum height */
+  height: calc(20% - 0.5rem); /* 5 cards per column with gap */
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -716,28 +739,79 @@ overflow: hidden; /* Prevent overflow */
     word-break: keep-all;
     white-space: normal;
     overflow-wrap: break-word;
-    flex: 1;
-    box-sizing: border-box;
+    flex: 1 1 auto; /* Allow flex growth but not too much */
     max-width: 100%;
     width: 100%;
+    overflow: hidden; /* Prevent content from overflowing */
+}
+/* When there are exactly 5 cards, make them fill the space */
+.matching-column:has(.word-card:nth-child(5):last-child) {
+    justify-content: space-between;
+}
+
+@media (max-width: 600px) {
+    .word-card {
+        min-height: 50px;
+        height: calc(20% - 0.3rem);
+    }
+    
+    .matching-game-columns {
+        gap: 0.3rem;
+        padding: 0.3rem;
+    }
 }
 
 .word-card .content {
-    padding: 0.5rem;
+    padding: 0.3rem;
     width: 100%;
     word-break: keep-all;
     overflow-wrap: break-word;
     hyphens: auto;
-}
-/* Japanese cards can be slightly wider */
-.word-card[data-type="japanese"] {
-    max-width: 110%; /* Allow slightly wider than English */
-    transform-origin: center;
+    max-height: 100%; /* Ensure content fits within card */
 }
 
-/* English cards stay normal width */
-.word-card[data-type="english"] {
-    max-width: 100%;
+/* Japanese text styling - 30% larger than English */
+.word-card[data-type="japanese"] .content {
+    font-size: 1.3em; /* 30% larger than English */
+    line-height: 1.3;
+}
+
+/* English text styling */
+.word-card[data-type="english"] .content {
+    font-size: 1em; /* Base size */
+    line-height: 1.2;
+}
+
+/* Adjust size for very long Japanese words */
+.word-card[data-type="japanese"][data-length="1"] .content {
+    font-size: 1.5em; /* Extra large for single kanji */
+}
+
+.word-card[data-type="japanese"][data-length="2"] .content {
+    font-size: 1.4em;
+}
+
+.word-card[data-type="japanese"][data-length="3"] .content {
+    font-size: 1.3em;
+}
+
+.word-card[data-type="japanese"][data-length="4"] .content {
+    font-size: 1.2em;
+}
+
+.word-card[data-type="japanese"][data-length="5"] .content {
+    font-size: 1.1em;
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+    .word-card[data-type="japanese"] .content {
+        font-size: 1.2em;
+    }
+    
+    .word-card[data-type="japanese"][data-length="1"] .content {
+        font-size: 1.4em;
+    }
 }
 
 .word-card:hover {
@@ -1364,32 +1438,53 @@ overflow: hidden; /* Prevent overflow */
  
 /* Hard Mode Word Styles */
 #review-mode-view .review-question {
-    font-size: 3rem;
+    font-size: var(--font-size);
     min-height: 200px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 2rem;
+    padding: 1.5rem;
     text-align: center;
     line-height: 1.4;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 #review-mode-view .review-question > div:first-child {
-    font-size: 4rem;
+    font-size: calc(var(--font-size) * 2.5);
     font-weight: bold;
     margin-bottom: 1.5rem;
     word-break: keep-all;
-max-width: 100%;
+    max-width: 100%;
     overflow-wrap: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
 /* Size adjustments based on word length */
-#review-mode-view .review-question > div:first-child[data-length="1"] { font-size: 5rem; }
-#review-mode-view .review-question > div:first-child[data-length="2"] { font-size: 4.5rem; }
-#review-mode-view .review-question > div:first-child[data-length="3"] { font-size: 4rem; }
-#review-mode-view .review-question > div:first-child[data-length="4"] { font-size: 3.5rem; }
-#review-mode-view .review-question > div:first-child[data-length="5"] { font-size: 3rem; }
+#review-mode-view .review-question > div:first-child[data-length="1"] { font-size: calc(var(--font-size) * 3); }
+#review-mode-view .review-question > div:first-child[data-length="2"] { font-size: calc(var(--font-size) * 2.8); }
+#review-mode-view .review-question > div:first-child[data-length="3"] { font-size: calc(var(--font-size) * 2.5); }
+#review-mode-view .review-question > div:first-child[data-length="4"] { font-size: calc(var(--font-size) * 2.2); }
+#review-mode-view .review-question > div:first-child[data-length="5"] { font-size: calc(var(--font-size) * 2); }
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+    #review-mode-view .review-question {
+        min-height: 150px;
+        padding: 1rem;
+    }
+    #review-mode-view .review-question > div:first-child {
+        font-size: calc(var(--font-size) * 2);
+    }
+    #review-mode-view .review-question > div:first-child[data-length="1"] { font-size: calc(var(--font-size) * 2.5); }
+    #review-mode-view .review-question > div:first-child[data-length="2"] { font-size: calc(var(--font-size) * 2.3); }
+    #review-mode-view .review-question > div:first-child[data-length="3"] { font-size: calc(var(--font-size) * 2); }
+}
 
 /* Mobile adjustments */
 @media (max-width: 600px) {
@@ -1516,17 +1611,27 @@ max-width: 100%;
 }
 /* Word Cards - Japanese vs English */
 .word-card[data-type="japanese"] .content {
-  font-size: calc(var(--font-size) * 2.5); /* Larger font for Japanese */
+  font-size: calc(var(--font-size) * 1.8); /* Slightly larger for Japanese */
   line-height: 1.2;
-  max-width: 90%;
+  max-width: 100%;
   overflow-wrap: break-word;
   word-break: keep-all;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .word-card[data-type="english"] .content {
-  font-size: calc(var(--font-size) * 1.5); /* Smaller font for English */
+  font-size: var(--font-size); /* Base size for English */
   line-height: 1.3;
   max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 /* Adjust for very long Japanese words */
@@ -3734,21 +3839,24 @@ function setupMatchingGame() {
     elements.leftColumn.innerHTML = '';
     elements.rightColumn.innerHTML = '';
     elements.reviewQuestion.style.display = 'none';
-   
+    elements.hardModeContainer.style.display = 'none';
+    
+    // Get words for this round (max 5)
+    let wordsToShow = state.reviewWords.slice(state.currentReviewIndex, state.currentReviewIndex + 5);
+    
+    // Ensure we always show 5 pairs (10 cards) if available
+    if (wordsToShow.length < 5 && state.reviewWords.length >= 5) {
+        // If we have fewer than 5 words but more available, take from beginning
+        const remainingWords = 5 - wordsToShow.length;
+        wordsToShow = wordsToShow.concat(state.reviewWords.slice(0, remainingWords));
+    }
+    
+    state.currentRoundWords = wordsToShow;
 
     // Show matching game container and shuffle button
     elements.shuffleCardsBtn.style.display = 'block';
     elements.matchingGameContainer.style.display = 'flex';
     elements.hardModeContainer.style.display = 'none';
-    
-    // Get words for this round (max 5)
-    const wordsToShow = state.reviewWords.slice(state.currentReviewIndex, state.currentReviewIndex + 5);
-    state.currentRoundWords = wordsToShow;
-
-    // Show matching game container and shuffle button
-elements.shuffleCardsBtn.style.display = 'block';
-elements.matchingGameContainer.style.display = 'flex';
-elements.hardModeContainer.style.display = 'none';
 
     if (wordsToShow.length === 0) {
         showToast('No words to review!', 'error');
@@ -3812,13 +3920,15 @@ elements.hardModeContainer.style.display = 'none';
         });
     }
     
-    // Update progress
-updateReviewProgress();
+       // Update progress
+    updateReviewProgress();
     updateProgressDisplay();
-}
-     // Add scroll synchronization
+    
+    // Add scroll synchronization
     elements.leftColumn.addEventListener('scroll', syncScroll);
     elements.rightColumn.addEventListener('scroll', syncScroll);
+}
+
 function updateReviewProgress() {
     if (!state.reviewWords || state.reviewWords.length === 0) return;
     
