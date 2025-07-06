@@ -4952,15 +4952,16 @@ document.getElementById('lookup-word').addEventListener('click', async () => {
         // If online, try Jisho API
         if (state.isOnline) {
             const apiUrl = `https://jisho.org/api/v1/search/words?keyword=${encodeURIComponent(word)}`;
+            const proxyUrl = 'https://api.allorigins.win/raw?url=';
             
             let response;
             try {
-                response = await fetch(apiUrl);
-                if (!response.ok) throw new Error('Direct API failed');
-            } catch (directError) {
-                const proxyUrl = 'https://api.allorigins.win/raw?url=';
                 response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
                 if (!response.ok) throw new Error('API request failed');
+            } catch (error) {
+                console.error('Dictionary lookup error:', error);
+                showToast('Dictionary lookup failed. Try again later.', 'error');
+                return;
             }
 
             const data = await response.json();
