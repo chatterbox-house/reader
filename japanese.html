@@ -2308,6 +2308,7 @@ function cleanJapaneseText(text) {
 }
 // App state
 const state = {
+hasProcessedText: false,
     currentView: 'text-import',
     translatedText: '',
     sentences: [],
@@ -3358,14 +3359,26 @@ async function translateToJapanese(text, sourceLang) {
 
 async function getCachedTranslation(text, sourceLang, targetLang) {
     return new Promise((resolve, reject) => {
-        const transaction = db.transaction([STORE_TRANSLATIONS], 'readonly');
+        const transaction = db.transition([STORE_TRANSLATIONS], 'readonly');
         const store = transaction.objectStore(STORE_TRANSLATIONS);
         const index = store.index('text');
+        
+        // Use get() instead of getAll() to get just one match
         const request = index.get(`${sourceLang}|${targetLang}|${text}`);
         
         request.onsuccess = () => {
             if (request.result) {
-                resolve(request.result.translatedText);
+                // Check if translation is recent (within 30 days)
+                const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+                if (request.result.timestamp > thirtyDaysAgo) {
+                    resolve(request.result.translatedText);
+                } else {
+                    // Translation is too old - delete it
+                    const deleteTransaction = db.transaction([STORE_TRANSLATIONS], 'readwrite');
+                    const deleteStore = deleteTransaction.objectStore(STORE_TRANSLATIONS);
+                    deleteStore.delete(request.result.id);
+                    resolve(null);
+                }
             } else {
                 resolve(null);
             }
@@ -3380,16 +3393,35 @@ async function cacheTranslation(text, sourceLang, targetLang, translatedText) {
         const transaction = db.transaction([STORE_TRANSLATIONS], 'readwrite');
         const store = transaction.objectStore(STORE_TRANSLATIONS);
         
-        const translation = {
-            id: generateUUID(),
-            text: `${sourceLang}|${targetLang}|${text}`,
-            translatedText: translatedText,
-            timestamp: new Date().getTime()
+        // First check if translation already exists
+        const index = store.index('text');
+        const request = index.get(`${sourceLang}|${targetLang}|${text}`);
+        
+        request.onsuccess = () => {
+            if (request.result) {
+                // Translation exists - update it
+                const existing = request.result;
+                existing.translatedText = translatedText;
+                existing.timestamp = new Date().getTime();
+                
+                const updateRequest = store.put(existing);
+                updateRequest.onsuccess = () => resolve();
+                updateRequest.onerror = (event) => reject(event.target.error);
+            } else {
+                // New translation - add it
+                const translation = {
+                    id: generateUUID(),
+                    text: `${sourceLang}|${targetLang}|${text}`,
+                    translatedText: translatedText,
+                    timestamp: new Date().getTime()
+                };
+                
+                const addRequest = store.add(translation);
+                addRequest.onsuccess = () => resolve();
+                addRequest.onerror = (event) => reject(event.target.error);
+            }
         };
         
-        const request = store.add(translation);
-        
-        request.onsuccess = () => resolve();
         request.onerror = (event) => reject(event.target.error);
     });
 }
@@ -4640,6 +4672,7 @@ function loadHistoryItem(index) {
 
     // Clear text button
     elements.clearTextBtn.addEventListener('click', () => {
+state.hasProcessedText = false;
         elements.textInput.value = '';
         elements.charCount.textContent = '0';
         showToast('Text cleared', 'success');
@@ -4653,24 +4686,23 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
             return;
         }
         
+        // Special handling for reader view
+        if (btn.dataset.view === 'text-import') {
+            if (state.hasProcessedText && state.sentences.length > 0) {
+                // If we already have processed text, go straight to reading view
+                showView('reading-view');
+                return;
+            } else {
+                // Otherwise show import view
+                showView('text-import-view');
+                return;
+            }
+        }
+        
+        // Normal view switching for other tabs
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         showView(btn.dataset.view + '-view');
-        
-        // Special handling for bookmarks view
-        if (btn.dataset.view === 'bookmarks') {
-            // Load both bookmarks and history
-            const savedBookmarks = localStorage.getItem('bookmarks_ja');
-            const savedHistory = localStorage.getItem('textHistory_ja');
-            
-            if (savedBookmarks) {
-                state.bookmarks = JSON.parse(savedBookmarks);
-            }
-            if (savedHistory) {
-                state.textHistory = JSON.parse(savedHistory);
-            }
-            renderBookmarks();
-        }
     });
 });
     // Text import
@@ -4834,6 +4866,7 @@ localStorage.setItem('bookmarks_ja', JSON.stringify(state.bookmarks));
         try {
             elements.processTextBtn.innerHTML = '<span>Processing...</span><span class="loading-spinner"></span>';
             await addSentences(sentenceObjects);
+state.hasProcessedText = true;
                     state.sentences = await getAllSentences();
         // Restore last position if available
         const savedPosition = JSON.parse(localStorage.getItem('lastSentencePosition_ja')) || 0;
