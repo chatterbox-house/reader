@@ -4743,9 +4743,15 @@ document.getElementById('translate-to-japanese').addEventListener('click', async
             document.getElementById('text-input').value = translatedText;
             document.getElementById('char-count').textContent = translatedText.length;
             
-            // Switch to Japanese input view
-            document.querySelector('.mode-toggle-btn[data-mode="import"]').click();
-            showToast('Translation complete!', 'success');
+// Switch to Japanese input view
+const importButton = document.querySelector('.mode-toggle-btn[data-mode="import"]');
+if (importButton) {
+    importButton.click();
+} else {
+    // Fallback if button doesn't exist
+    showView('text-import-view');
+}
+showToast('Translation complete!', 'success');
         } else {
             showToast('Translation failed. Please try again.', 'error');
         }
@@ -4949,24 +4955,35 @@ document.querySelectorAll('.bucket-card').forEach(card => {
         }
     });
 
-    // Review mode
-elements.exitReviewBtn.addEventListener('click', () => {
-// Add click handler for the new mobile exit button
-document.getElementById('exit-hard-btn').addEventListener('click', () => {
-    // Show header when exiting review
-    document.querySelector('header').classList.remove('hidden');
-    document.getElementById('hide-header-btn').classList.remove('visible');
-    
-    state.currentHardStreak = 0; // Reset streak when exiting
-    showView('vocab-review-view');
-});
-    // Show header when exiting review
-    document.querySelector('header').classList.remove('hidden');
-    document.getElementById('hide-header-btn').classList.remove('visible');
-    
-    state.currentHardStreak = 0; // Reset streak when exiting
-    showView('vocab-review-view');
-});
+// Review mode exit button (main button)
+if (elements.exitReviewBtn) {
+    elements.exitReviewBtn.addEventListener('click', () => {
+        // Show header when exiting review
+        const header = document.querySelector('header');
+        const hideHeaderBtn = document.getElementById('hide-header-btn');
+        
+        if (header) header.classList.remove('hidden');
+        if (hideHeaderBtn) hideHeaderBtn.classList.remove('visible');
+        
+        state.currentHardStreak = 0; // Reset streak when exiting
+        showView('vocab-review-view');
+    });
+}
+
+// Mobile exit button (only if it exists)
+const exitHardBtn = document.getElementById('exit-hard-btn');
+if (exitHardBtn) {
+    exitHardBtn.addEventListener('click', () => {
+        const header = document.querySelector('header');
+        const hideHeaderBtn = document.getElementById('hide-header-btn');
+        
+        if (header) header.classList.remove('hidden');
+        if (hideHeaderBtn) hideHeaderBtn.classList.remove('visible');
+        
+        state.currentHardStreak = 0; // Reset streak when exiting
+        showView('vocab-review-view');
+    });
+}
 
     // Hard mode buttons
     elements.knewItBtn.addEventListener('click', () => {
