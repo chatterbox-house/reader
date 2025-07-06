@@ -3611,23 +3611,22 @@ async function lookupWordInDictionary(word) {
             return localDictionary[word];
         }
 
-        // If online, try Jisho API
+        // If online, try Jisho API through proxy
         if (state.isOnline) {
-            const apiUrl = `https://jisho.org/api/v1/search/words?keyword=${encodeURIComponent(word)}`;
-            
-            let response;
             try {
-                response = await fetch(apiUrl);
-                if (!response.ok) throw new Error('Direct API failed');
-            } catch (directError) {
+                const apiUrl = `https://jisho.org/api/v1/search/words?keyword=${encodeURIComponent(word)}`;
                 const proxyUrl = 'https://api.allorigins.win/raw?url=';
-                response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
+                const response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
+                
                 if (!response.ok) throw new Error('API request failed');
-            }
-
-            const data = await response.json();
-            if (data.data && data.data.length > 0) {
-                return data.data[0].senses[0]?.english_definitions?.join(', ') || 'No definition found';
+                
+                const data = await response.json();
+                if (data.data && data.data.length > 0) {
+                    return data.data[0].senses[0]?.english_definitions?.join(', ') || 'No definition found';
+                }
+            } catch (error) {
+                console.error('Dictionary lookup error:', error);
+                return localDictionary[word] || 'No definition found';
             }
         }
         
