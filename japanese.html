@@ -1922,7 +1922,7 @@ h2 {
 </button>
     </div>
     <div id="sentence-results-list" style="max-height: 300px; overflow-y: auto; background: var(--secondary); 
-          border-radius: 8px; padding: 0.5rem;"></div>
+      border-radius: 8px; padding: 0.5rem; word-break: break-word; white-space: normal; overflow-x: hidden;"></div>
 </div>
     
     <div id="sentence-search-status" style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);"></div>
@@ -2244,6 +2244,13 @@ h2 {
 </div>
 
     <script>
+function cleanJapaneseText(text) {
+    // Remove furigana (text in parentheses)
+    text = text.replace(/\([^)]*\)/g, '');
+    // Remove any remaining extra spaces
+    text = text.replace(/\s+/g, ' ').trim();
+    return text;
+}
    async function importUrlContent(url) {
     try {
         showToast('Fetching content...', 'info');
@@ -3722,10 +3729,15 @@ async function lookupWordInDictionary(word) {
                 const apiUrl = `https://jisho.org/api/v1/search/words?keyword=${encodeURIComponent(word)}`;
                 const proxyUrl = 'https://api.allorigins.win/raw?url=';
                 const response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
-                
-                if (!response.ok) throw new Error('API request failed');
-                
-                const data = await response.json();
+
+// First check if we got JSON
+const contentType = response.headers.get('content-type');
+if (!contentType || !contentType.includes('application/json')) {
+    const text = await response.text();
+    throw new Error(`Expected JSON but got: ${text.substring(0, 100)}...`);
+}
+
+const data = await response.json();
                 if (data.data && data.data.length > 0) {
                     return data.data[0].senses[0]?.english_definitions?.join(', ') || 'No definition found';
                 }
@@ -4558,6 +4570,12 @@ async function startVoiceInput(lang, targetId, buttonElement) {
 }
     // Initialize settings panel
     initSettingsPanel();
+// Initialize view based on initial content
+const initialText = elements.textInput.value.trim();
+if (initialText.length > 0) {
+    const detectedLang = detectLanguage(initialText);
+    toggleTranslationMode(detectedLang !== 'ja');
+}
 // Voice input button
 document.getElementById('voice-input-btn').addEventListener('click', function() {
     startVoiceInput('ja-JP', 'text-input', this);
@@ -4662,10 +4680,10 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
         if (text.trim().length > 0) {
             const detectedLang = detectLanguage(text);
             if (detectedLang === 'ja') {
-                document.querySelector('.mode-toggle-btn[data-mode="import"]').click();
-            } else {
-                document.querySelector('.mode-toggle-btn[data-mode="translate"]').click();
-            }
+    toggleTranslationMode(false); // Show import view
+} else {
+    toggleTranslationMode(true); // Show translate view
+}
         }
     });
 
@@ -5265,6 +5283,22 @@ if (state.sentences.length > 0) {
         }
     }
 }
+function getFirstChar(word) {
+    // Handle empty string or non-string input
+    if (!word || typeof word !== 'string' || word.length === 0) {
+        return 'a'; // default fallback
+    }
+    
+    // Get first character and make lowercase
+    const firstChar = word[0].toLowerCase();
+    
+    // If it's not a letter, return default
+    if (!/[a-z]/.test(firstChar)) {
+        return 'a';
+    }
+    
+    return firstChar;
+}
 // Sentence Search Functionality
 document.getElementById('search-sentences-btn').addEventListener('click', searchSentences);
 
@@ -5304,13 +5338,17 @@ async function searchSentences() {
             const item = document.createElement('div');
             item.className = 'sentence-result-item';
             
-            item.innerHTML = `
-    <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+item.innerHTML = `
+    <div style="display: flex; align-items: flex-start; gap: 0.5rem; width: 100%;">
         <input type="checkbox" class="sentence-checkbox" style="margin-top: 0.3rem;">
-        <div style="flex: 1;">
-            <div class="sentence-japanese">${sentence.japanese}</div>
-            <div class="sentence-english">${sentence.english}</div>
-            <div class="sentence-actions">
+        <div style="flex: 1; min-width: 0;">
+            <div class="sentence-japanese" style="font-size: clamp(14px, 3vw, 18px); word-break: break-word; white-space: normal;">
+                ${cleanJapaneseText(sentence.japanese)}
+            </div>
+            <div class="sentence-english" style="font-size: clamp(12px, 2.5vw, 16px); color: var(--text-secondary); margin-top: 0.5rem;">
+                ${sentence.english}
+            </div>
+            <div class="sentence-actions" style="margin-top: 0.5rem;">
                 <button class="copy-sentence-btn" data-japanese="${sentence.japanese}" 
                         data-english="${sentence.english}">
                     📋 Copy
@@ -5358,26 +5396,36 @@ async function searchSentences() {
 // Search Tanaka Corpus (CORS-friendly)
 async function searchTanakaCorpus(word) {
     try {
-        // Use a CORS proxy
+        if (!word || word.trim().length === 0) {
+            return [];
+        }
+
         const proxyUrl = 'https://api.allorigins.win/raw?url=';
-        const tanakaUrl = `https://www.manythings.org/japanese/sentences/data/${firstChar}/${word}.json`;
+        const firstChar = getFirstChar(word);
+        const tanakaUrl = `https://www.manythings.org/japanese/sentences/data/${firstChar}/${encodeURIComponent(word)}.json`;
         
         const response = await fetch(proxyUrl + encodeURIComponent(tanakaUrl));
-        
+
         if (!response.ok) {
             if (response.status === 404) {
                 return []; // No results found
             }
-            throw new Error('Failed to fetch from Tanaka Corpus');
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            throw new Error(`Expected JSON but got: ${contentType}`);
+        }
+
         const data = await response.json();
         return data.map(item => ({
-            japanese: item.japanese,
+            japanese: cleanJapaneseText(item.japanese),
             english: item.english
         }));
     } catch (error) {
-        console.log('Tanaka Corpus search failed:', error);
+        console.error('Tanaka Corpus search failed:', error);
         return [];
     }
 }
