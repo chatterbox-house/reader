@@ -110,14 +110,24 @@ main {
 header {
   background-color: var(--secondary);
   padding: 0.5rem;
-  position: sticky;
+  position: fixed; /* Changed from sticky to fixed */
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
   box-shadow: var(--shadow);
   display: flex;
   justify-content: space-between;
   align-items: center;
   min-height: 50px; /* Fixed height for consistency */
+}
+
+/* Add this new rule to compensate for the fixed header */
+main {
+  padding-top: 70px; /* Give space for the fixed header */
+  padding: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .logo {
@@ -5342,6 +5352,7 @@ function getFirstChar(word) {
 // Sentence Search Functionality
 document.getElementById('search-sentences-btn').addEventListener('click', searchSentences);
 
+
 async function searchSentences() {
     const searchBtn = document.getElementById('search-sentences-btn');
     const statusElement = document.getElementById('sentence-search-status');
@@ -5352,24 +5363,19 @@ async function searchSentences() {
         searchBtn.innerHTML = 'Searching... <span class="loading-spinner"></span>';
         statusElement.textContent = 'Searching...';
         
-        // Perform the actual search
-        const results = await searchTanakaCorpus(/*...*/);
-    const searchInput = document.getElementById('sentence-search-input').value.trim();
-    if (!searchInput) {
-        showToast('Please enter a word to search', 'error');
-        return;
-    }
+        const searchInput = document.getElementById('sentence-search-input').value.trim();
+        if (!searchInput) {
+            showToast('Please enter a word to search', 'error');
+            return;
+        }
 
-    const statusElement = document.getElementById('sentence-search-status');
-    const resultsContainer = document.getElementById('sentence-results');
-    const resultsList = document.getElementById('sentence-results-list');
-    
-    resultsList.innerHTML = '';
-    statusElement.textContent = 'Searching...';
-    resultsContainer.style.display = 'none';
-    
-    try {
-        // Try Tanaka Corpus first
+        const resultsContainer = document.getElementById('sentence-results');
+        const resultsList = document.getElementById('sentence-results-list');
+        
+        resultsList.innerHTML = '';
+        resultsContainer.style.display = 'none';
+        
+        // Perform the actual search
         let sentences = await searchTanakaCorpus(searchInput);
         
         if (sentences.length === 0) {
@@ -5378,39 +5384,39 @@ async function searchSentences() {
         }
         
         if (sentences.length === 0) {
-        statusElement.textContent = 'No sentences found containing this word.';
-        document.getElementById('sentence-count').textContent = '0';
-        return;
-    }
-    
-    // Display results
-    document.getElementById('sentence-count').textContent = sentences.length;
+            statusElement.textContent = 'No sentences found containing this word.';
+            document.getElementById('sentence-count').textContent = '0';
+            return;
+        }
+        
+        // Display results
+        document.getElementById('sentence-count').textContent = sentences.length;
         sentences.forEach(sentence => {
             const item = document.createElement('div');
             item.className = 'sentence-result-item';
             
-item.innerHTML = `
-    <div style="display: flex; align-items: flex-start; gap: 0.5rem; width: 100%;">
-        <input type="checkbox" class="sentence-checkbox" style="margin-top: 0.3rem;">
-        <div style="flex: 1; min-width: 0;">
-            <div class="sentence-japanese" style="font-size: clamp(14px, 3vw, 18px); word-break: break-word; white-space: normal;">
-                ${cleanJapaneseText(sentence.japanese)}
-            </div>
-            <div class="sentence-english" style="font-size: clamp(12px, 2.5vw, 16px); color: var(--text-secondary); margin-top: 0.5rem;">
-                ${sentence.english}
-            </div>
-            <div class="sentence-actions" style="margin-top: 0.5rem;">
-                <button class="copy-sentence-btn" data-japanese="${sentence.japanese}" 
-                        data-english="${sentence.english}">
-                    📋 Copy
-                </button>
-                <button class="use-sentence-btn" data-japanese="${sentence.japanese}">
-                    ✏️ Use in Reader
-                </button>
-            </div>
-        </div>
-    </div>
-`;
+            item.innerHTML = `
+                <div style="display: flex; align-items: flex-start; gap: 0.5rem; width: 100%;">
+                    <input type="checkbox" class="sentence-checkbox" style="margin-top: 0.3rem;">
+                    <div style="flex: 1; min-width: 0;">
+                        <div class="sentence-japanese" style="font-size: clamp(14px, 3vw, 18px); word-break: break-word; white-space: normal;">
+                            ${cleanJapaneseText(sentence.japanese)}
+                        </div>
+                        <div class="sentence-english" style="font-size: clamp(12px, 2.5vw, 16px); color: var(--text-secondary); margin-top: 0.5rem;">
+                            ${sentence.english}
+                        </div>
+                        <div class="sentence-actions" style="margin-top: 0.5rem;">
+                            <button class="copy-sentence-btn" data-japanese="${sentence.japanese}" 
+                                    data-english="${sentence.english}">
+                                📋 Copy
+                            </button>
+                            <button class="use-sentence-btn" data-japanese="${sentence.japanese}">
+                                ✏️ Use in Reader
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
             
             resultsList.appendChild(item);
         });
@@ -5441,6 +5447,9 @@ item.innerHTML = `
         console.error('Sentence search error:', error);
         statusElement.textContent = 'Error searching for sentences. Please try again.';
         showToast('Search failed: ' + error.message, 'error');
+    } finally {
+        searchBtn.disabled = false;
+        searchBtn.innerHTML = 'Search';
     }
 }
 
