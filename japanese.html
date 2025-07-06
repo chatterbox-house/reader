@@ -4610,8 +4610,10 @@ document.getElementById('bookmarks-list').addEventListener('click', (e) => {
     if (e.target.hasAttribute('data-url')) {
         const url = e.target.getAttribute('data-url');
         importUrlContent(url);
+        // Switch to text import view
+        showView('text-import-view');
     }
-}); // <-- Added missing closing brace and parenthesis
+});
 
 // 1. First declare modal variables
 const tutorialModal = document.getElementById('tutorial-modal');
@@ -5063,13 +5065,13 @@ document.getElementById('translate-to-japanese').addEventListener('click', async
         const translatedText = await translateToJapanese(text, sourceLang);
         
         if (translatedText) {
-            const textInput = document.getElementById('text-input');
-            textInput.value = translatedText;
-            document.getElementById('char-count').textContent = translatedText.length;
-            
-            // Scroll to show the translated text
-            textInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            textInput.focus();
+        const textInput = document.getElementById('text-input');
+        textInput.value = translatedText;
+        document.getElementById('char-count').textContent = translatedText.length;
+        // Switch to text import view and scroll to text input
+        showView('text-import-view');
+        textInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        textInput.focus();
             
             showToast('Translation complete! Review and click "Process Text" to continue', 'success');
             
@@ -5579,13 +5581,18 @@ async function searchSentences() {
         });
         
         resultsList.querySelectorAll('.use-sentence-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const japanese = e.target.getAttribute('data-japanese');
-                document.getElementById('text-input').value = japanese;
-                document.getElementById('char-count').textContent = japanese.length;
-                showToast('Sentence loaded into reader. Click "Process Text" to continue.', 'success');
-            });
-        });
+    btn.addEventListener('click', (e) => {
+        const japanese = e.target.getAttribute('data-japanese');
+        const textInput = document.getElementById('text-input');
+        textInput.value = japanese;
+        document.getElementById('char-count').textContent = japanese.length;
+        // Switch to text import view and scroll to text input
+        showView('text-import-view');
+        textInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        textInput.focus();
+        showToast('Sentence loaded into reader. Click "Process Text" to continue.', 'success');
+    });
+});
         
         resultsContainer.style.display = 'block';
         statusElement.textContent = `Found ${sentences.length} sentence(s) containing "${searchInput}"`;
