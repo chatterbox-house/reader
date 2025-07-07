@@ -171,9 +171,14 @@ Import All
 <div class="resources-container">
     <h3 class="resources-title">📰 Japanese News Feeds</h3>
     <div class="resources-list" id="news-feeds">
-        <!-- NHK Easy News (Japanese) -->
-        <div class="rss-feed" data-url="https://www.nhk.or.jp/r-news/rss.html" data-name="NHK Easy News">
+        <!-- NHK Easy News (Japanese) - Direct Link -->
+        <a href="https://www3.nhk.or.jp/news/easy/" class="rss-feed" target="_blank" rel="noopener noreferrer">
             <span>NHK Easy News</span>
+        </a>
+        
+        <!-- NHK Easy News RSS Feed (No Furigana) -->
+        <div class="rss-feed" data-url="https://nhkeasier.com/feed/?no-furiganas" data-name="NHK Easy News (No Furigana)">
+            <span>NHK Easy News (No Furigana)</span>
             <div class="loading-spinner" style="display: none;"></div>
         </div>
         
@@ -465,31 +470,38 @@ Clear Saved URLs
 <script>
 // RSS Feed functionality
 document.querySelectorAll('.rss-feed').forEach(feed => {
-    feed.addEventListener('click', () => loadRSSFeed(feed));
+    feed.addEventListener('click', (e) => {
+        // Only handle RSS if the element has a data-url attribute
+        if (feed.hasAttribute('data-url')) {
+            e.preventDefault();
+            loadRSSFeed(feed);
+        }
+        // Otherwise it's a direct link and will navigate normally
+    });
 });
 
 document.getElementById('close-rss-results').addEventListener('click', () => {
     document.getElementById('rss-results-container').style.display = 'none';
 });
 
-
 async function loadRSSFeed(feedElement) {
+    if (!feedElement || !feedElement.hasAttribute('data-url')) return;
+    
     const feedUrl = feedElement.getAttribute('data-url');
     const feedName = feedElement.getAttribute('data-name');
     
     try {
         // Show loading state
         const spinner = feedElement.querySelector('.loading-spinner');
-        spinner.style.display = 'inline-block';
-        feedElement.style.opacity = '0.7';
+        if (spinner) spinner.style.display = 'inline-block';
+        if (feedElement.style) feedElement.style.opacity = '0.7';
         
         document.getElementById('rss-feed-name').textContent = `(${feedName})`;
         document.getElementById('rss-results-list').innerHTML = '';
         document.getElementById('rss-results-container').style.display = 'block';
         
-        // Use the fallback-enabled fetcher
-        let xmlText = await getFeedWithFallback(feedUrl, feedName);
-        
+        // Try multiple methods to fetch the feed
+        let xmlText = await tryFetchMethods(feedUrl);
         if (!xmlText) throw new Error('Could not fetch RSS feed content');
         
         // Parse the XML
@@ -500,7 +512,7 @@ async function loadRSSFeed(feedElement) {
         const items = xmlDoc.querySelectorAll('item');
         if (items.length === 0) throw new Error('No articles found in feed');
         
-        // Display articles (same as before)
+        // Display articles
         const resultsList = document.getElementById('rss-results-list');
         resultsList.innerHTML = '';
         
@@ -572,7 +584,7 @@ async function loadRSSFeed(feedElement) {
         if (feedElement) {
             const spinner = feedElement.querySelector('.loading-spinner');
             if (spinner) spinner.style.display = 'none';
-            feedElement.style.opacity = '1';
+            if (feedElement.style) feedElement.style.opacity = '1';
         }
     }
 }
@@ -597,22 +609,34 @@ async function tryFetchMethods(url) {
 }
 
 async function tryDirectFetch(url) {
-    // Try direct fetch first
-    const response = await fetch(url);
-    if (!response.ok) throw new Error('Direct fetch failed');
-    return await response.text();
+    // Try direct fetch first with no-cors mode
+    try {
+        const response = await fetch(url, {
+            mode: 'no-cors',
+            headers: {
+                'Accept': 'application/xml'
+            }
+        });
+        if (!response.ok) throw new Error('Direct fetch failed');
+        return await response.text();
+    } catch (error) {
+        console.log('Direct fetch failed, trying other methods');
+        throw error;
+    }
 }
 
 async function tryCorsProxy(url) {
-    // Try CORS Anywhere proxy
-    const proxyUrl = 'https://cors-anywhere.herokuapp.com/' + url;
-    const response = await fetch(proxyUrl, {
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    });
-    if (!response.ok) throw new Error('CORS proxy fetch failed');
-    return await response.text();
+    // Try CORS Anywhere proxy with updated URL
+    const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
+    try {
+        const response = await fetch(proxyUrl);
+        if (!response.ok) throw new Error('CORS proxy fetch failed');
+        const data = await response.json();
+        return data.contents;
+    } catch (error) {
+        console.log('CORS proxy failed, trying next method');
+        throw error;
+    }
 }
 
 async function tryAllOriginsProxy(url) {
@@ -697,8 +721,13 @@ async function importUrlContent(url) {
 }
 async function getFeedWithFallback(url, feedName) {
     try {
-        // First try direct fetch
-        return await tryDirectFetch(url);
+        // First try with CORS proxy
+        const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+        const response = await fetch(proxyUrl);
+        
+        if (!response.ok) throw new Error('Failed to fetch feed');
+        
+        return await response.text();
     } catch (error) {
         console.log(`Primary feed ${feedName} failed, trying alternatives...`);
         
@@ -726,12 +755,16 @@ async function getFeedWithFallback(url, feedName) {
             ]
         };
 
-        // Try alternatives
+       // Try alternatives with CORS proxy
         for (const altUrl of alternatives[feedName] || []) {
             try {
                 if (altUrl !== url) { // Don't retry the same URL
-                    const result = await tryDirectFetch(altUrl);
-                    if (result) return result;
+                    const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(altUrl);
+                    const response = await fetch(proxyUrl);
+                    
+                    if (response.ok) {
+                        return await response.text();
+                    }
                 }
             } catch (e) {
                 console.log(`Alternative ${feedName} URL failed:`, altUrl, e);
