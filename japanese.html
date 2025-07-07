@@ -201,7 +201,7 @@ Import All
         </div>
         
         <!-- BBC Japanese News -->
-        <div class="rss-feed" data-url="https://www.bbc.com/japanese/index.xml" data-name="BBC Japan">
+        <div class="rss-feed" data-url="https://feeds.bbci.co.uk/japanese/rss.xml" data-name="BBC Japan">
             <span>BBC Japan</span>
             <div class="loading-spinner" style="display: none;"></div>
         </div>
@@ -484,6 +484,9 @@ document.getElementById('close-rss-results').addEventListener('click', () => {
     document.getElementById('rss-results-container').style.display = 'none';
 });
 
+
+
+
 async function loadRSSFeed(feedElement) {
     if (!feedElement || !feedElement.hasAttribute('data-url')) return;
     
@@ -500,9 +503,15 @@ async function loadRSSFeed(feedElement) {
         document.getElementById('rss-results-list').innerHTML = '';
         document.getElementById('rss-results-container').style.display = 'block';
         
-        // Try multiple methods to fetch the feed
-        let xmlText = await tryFetchMethods(feedUrl);
-        if (!xmlText) throw new Error('Could not fetch RSS feed content');
+        // Always use a CORS proxy for RSS feeds
+        const proxyUrl = 'https://api.allorigins.win/raw?url=';
+        const response = await fetch(proxyUrl + encodeURIComponent(feedUrl));
+        
+        if (!response.ok) throw new Error('Failed to fetch RSS feed');
+        
+        const xmlText = await response.text();
+        
+        if (!xmlText) throw new Error('No content received from RSS feed');
         
         // Parse the XML
         const parser = new DOMParser();
@@ -588,23 +597,47 @@ async function loadRSSFeed(feedElement) {
         }
     }
 }
-
-async function tryFetchMethods(url) {
-    // Try different methods to get the RSS feed
-    const methods = [
-        tryDirectFetch,
-        tryCorsProxy,
-        tryAllOriginsProxy
+async function fetchWithProxy(url) {
+    const proxies = [
+        'https://api.allorigins.win/raw?url=',
+        'https://cors-anywhere.herokuapp.com/',
+        'https://thingproxy.freeboard.io/fetch/'
     ];
     
-    for (const method of methods) {
+    for (const proxy of proxies) {
         try {
-            const result = await method(url);
-            if (result) return result;
+            const proxyUrl = proxy + encodeURIComponent(url);
+            const response = await fetch(proxyUrl);
+            
+            if (!response.ok) continue;
+            
+            // All proxies now return raw text
+            return await response.text();
         } catch (e) {
-            console.log(`Method failed: ${method.name}`, e);
+            console.log(`Proxy ${proxy} failed, trying next`);
+            continue;
         }
     }
+    
+    throw new Error('All proxy attempts failed');
+}
+async function tryFetchMethods(url) {
+    // First try direct fetch
+    try {
+        const result = await tryDirectFetch(url);
+        if (result) return result;
+    } catch (e) {
+        console.log('Direct fetch failed:', e);
+    }
+    
+    // Then try with proxy
+    try {
+        const result = await fetchWithProxy(url);
+        if (result) return result;
+    } catch (e) {
+        console.log('Proxy fetch failed:', e);
+    }
+    
     return null;
 }
 
