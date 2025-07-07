@@ -2285,7 +2285,9 @@ function updateBucketCounts() {
 }
 
 function displaySentence() {
-localStorage.setItem('lastSentencePosition_ja', JSON.stringify(state.currentSentenceIndex));
+    // Save current position to localStorage
+    localStorage.setItem('lastSentencePosition_ja', JSON.stringify(state.currentSentenceIndex));
+    
     if (state.sentences.length === 0) {
         elements.sentenceDisplay.textContent = 'No sentences available.';
         if (elements.translationDisplay) {
@@ -3593,10 +3595,10 @@ localStorage.setItem('bookmarks_ja', JSON.stringify(state.bookmarks));
             await addSentences(sentenceObjects);
 state.hasProcessedText = true;
                     state.sentences = await getAllSentences();
-        const savedPosition = JSON.parse(localStorage.getItem('lastSentencePosition_ja')) || 0;
-        state.currentSentenceIndex = Math.min(savedPosition, state.sentences.length - 1);
+const savedPosition = JSON.parse(localStorage.getItem('lastSentencePosition_ja')) || 0;
+state.currentSentenceIndex = Math.min(savedPosition, state.sentences.length - 1);
             
-            showView('reading-view');
+showView('reading-view');
             displaySentence();
             showToast(`Processed ${sentences.length} sentences!`, 'success');
         } catch (error) {
