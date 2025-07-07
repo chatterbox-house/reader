@@ -176,15 +176,14 @@ Import All
             <span>NHK Easy News</span>
         </a>
         
-        <!-- NHK Easy News RSS Feed (No Furigana) -->
-        <div class="rss-feed" data-url="https://nhkeasier.com/feed/?no-furiganas" data-name="NHK Easy News (No Furigana)">
-            <span>NHK Easy News (No Furigana)</span>
-            <div class="loading-spinner" style="display: none;"></div>
-        </div>
-        
-        <!-- NHK Regular News (Japanese) -->
-        <div class="rss-feed" data-url="https://www3.nhk.or.jp/rss/news/cat0.xml" data-name="NHK News">
+        <!-- NHK News - Now just a direct link -->
+        <a href="https://www3.nhk.or.jp/news/" class="rss-feed" target="_blank" rel="noopener noreferrer">
             <span>NHK News</span>
+        </a>
+        
+        <!-- Google Japan News -->
+        <div class="rss-feed" data-url="https://news.google.com/rss?hl=ja" data-name="Google Japan News">
+            <span>Google Japan News</span>
             <div class="loading-spinner" style="display: none;"></div>
         </div>
         
@@ -206,8 +205,7 @@ Import All
             <div class="loading-spinner" style="display: none;"></div>
         </div>
     </div>
-</div>
-<div class=text-import-container id=rss-results-container style="display:none;border:2px dotted #2196f3">
+</div><div class=text-import-container id=rss-results-container style="display:none;border:2px dotted #2196f3">
 <h2 style=color:#2196f3>News Articles <span id=rss-feed-name></span></h2>
 <div id=rss-results-list style=max-height:400px;overflow-y:auto></div>
 <button class=btn id=close-rss-results style=margin-top:1rem;background-color:#2196f3>
