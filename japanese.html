@@ -590,14 +590,14 @@ async function loadRSSFeed(feedElement) {
             articleDiv.style.padding = '1rem';
             articleDiv.style.marginBottom = '0.5rem';
             
-            // Try to extract date from the item (different RSS feeds have different date formats)
+     // Try to extract date from the item (different RSS feeds have different date formats)
 let pubDate = '';
 if (item.querySelector('pubDate')) {
     pubDate = item.querySelector('pubDate').textContent;
-} else if (item.querySelector('dc:date')) {
-    pubDate = item.querySelector('dc:date').textContent;
 } else if (item.querySelector('date')) {
     pubDate = item.querySelector('date').textContent;
+} else if (item.getElementsByTagNameNS('http://purl.org/dc/elements/1.1/', 'date').length > 0) {
+    pubDate = item.getElementsByTagNameNS('http://purl.org/dc/elements/1.1/', 'date')[0].textContent;
 }
 
 // Format the date if found
