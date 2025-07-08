@@ -1597,13 +1597,11 @@ async function openDatabase() {
             }
             
             if (!db.objectStoreNames.contains(STORE_VOCAB)) {
-  const vocabStore = db.createObjectStore(STORE_VOCAB, { keyPath: 'id' });
-  vocabStore.createIndex('bucket', 'bucket', { unique: false });
-  vocabStore.createIndex('word', 'word', { unique: false }); // Changed to non-unique since words can repeat
-  vocabStore.createIndex('favorite', 'favorite', { unique: false });
-  vocabStore.createIndex('lastReviewed', 'lastReviewed', { unique: false }); // Added for tracking
-  vocabStore.createIndex('createdAt', 'createdAt', { unique: false }); // Added for tracking
-} else {
+                const vocabStore = db.createObjectStore(STORE_VOCAB, { keyPath: 'id' });
+                vocabStore.createIndex('bucket', 'bucket', { unique: false });
+                vocabStore.createIndex('word', 'word', { unique: true });
+                vocabStore.createIndex('favorite', 'favorite', { unique: false });
+            } else {
                 const vocabStore = event.target.transaction.objectStore(STORE_VOCAB);
                 if (!vocabStore.indexNames.contains('word')) {
                     vocabStore.createIndex('word', 'word', { unique: true });
@@ -1919,18 +1917,16 @@ function getVocabByBucket(bucket) {
 }
 
 function updateVocabWord(word) {
-  return new Promise((resolve, reject) => {
-    // Update review timestamps
-    word.lastReviewed = new Date().getTime();
-    word.reviewCount = (word.reviewCount || 0) + 1;
-    
-    const transaction = db.transaction([STORE_VOCAB], 'readwrite');
-    const store = transaction.objectStore(STORE_VOCAB);
-    const request = store.put(word);
-    request.onsuccess = () => resolve();
-    request.onerror = (event) => reject(event.target.error);
-  });
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_VOCAB], 'readwrite');
+        const store = transaction.objectStore(STORE_VOCAB);
+        const request = store.put(word);
+        
+        request.onsuccess = () => resolve();
+        request.onerror = (event) => reject(event.target.error);
+    });
 }
+
 function countVocabByBucket() {
     return new Promise((resolve, reject) => {
         const buckets = ['new', 'easy', 'medium', 'hard'];
@@ -1958,24 +1954,7 @@ function countVocabByBucket() {
         });
     });
 }
-// Add this helper function
-function handleDBError(error, action) {
-  console.error(`Database error during ${action}:`, error);
-  showToast(`Error ${action}. Please refresh the page.`, 'error');
-  // Try to recover by reloading
-  setTimeout(() => window.location.reload(), 2000);
-}
 
-// Then modify your database calls to use this, for example:
-document.getElementById('add-to-vocab').addEventListener('click', async () => {
-  try {
-    // ... existing code ...
-    await addVocabWord(newWord);
-    // ... existing code ...
-  } catch (error) {
-    handleDBError(error, 'adding vocabulary word');
-  }
-});
 // Text processing
 function splitSentences(text) {
     const roughSentences = text.split(/(?<=[。！？\n])/);
@@ -3820,18 +3799,15 @@ document.getElementById('lookup-word').addEventListener('click', async () => {
         }
         
         const newWord = {
-  id: generateUUID(),
-  word: word,
-  translation: translation,
-  sentence_id: state.sentences[state.currentSentenceIndex].id,
-  bucket: 'new',
-  streak: 0,
-  consecutiveMisses: 0,
-  favorite: false,
-  createdAt: new Date().getTime(), // Add creation timestamp
-  lastReviewed: new Date().getTime(), // Add last reviewed timestamp
-  reviewCount: 0 // Track how many times reviewed
-};
+            id: generateUUID(),
+            word: word,
+            translation: translation,
+            sentence_id: state.sentences[state.currentSentenceIndex].id,
+            bucket: 'new',
+            streak: 0,
+            consecutiveMisses: 0,
+            favorite: false
+        };
         
         try {
             await addVocabWord(newWord);
@@ -3984,20 +3960,7 @@ if (state.currentView === 'review-mode-view' && state.reviewMode === 'hard') {
 async function initApp() {
     try {
         db = await openDatabase();
-
-     // Add this in your initApp function after db initialization
-async function loadInitialVocab() {
-  try {
-    state.vocabWords = await getAllVocabWords();
-    updateBucketCounts();
-    updateVocabTabCounter();
-  } catch (error) {
-    console.error('Error loading vocabulary:', error);
-  }
-}
-
-// Call this in your initApp function after db initialization
-await loadInitialVocab();   
+        
         state.sentences = await getAllSentences();
         
 document.querySelector('.nav-btn[data-view="text-import"]').classList.add('active');
