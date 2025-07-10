@@ -891,9 +891,69 @@ async function getFeedWithFallback(url, feedName) {
         throw new Error(`All ${feedName} feed attempts failed`);
     }
 }
+// Enhanced storage check with backup system
+function initializeStorage() {
+    return new Promise(async (resolve) => {
+        try {
+            // First try IndexedDB
+            db = await openDatabase();
+            
+            // Verify we can actually write to it
+            const testKey = 'storage_test_' + Date.now();
+            await new Promise((resolve, reject) => {
+                const tx = db.transaction([STORE_VOCAB], 'readwrite');
+                const store = tx.objectStore(STORE_VOCAB);
+                const req = store.put({id: testKey, word: 'test', translation: 'test', bucket: 'new'});
+                req.onsuccess = () => resolve();
+                req.onerror = () => reject();
+            });
+            
+            // Clean up test data
+            await new Promise((resolve) => {
+                const tx = db.transaction([STORE_VOCAB], 'readwrite');
+                const store = tx.objectStore(STORE_VOCAB);
+                store.delete(testKey);
+                tx.oncomplete = resolve;
+            });
+            
+            // Set up periodic backup to localStorage
+            setInterval(async () => {
+                try {
+                    const words = await getAllVocabWords();
+                    localStorage.setItem('vocab_backup_v2', JSON.stringify(words));
+                    console.log('Vocab backed up to localStorage');
+                } catch (e) {
+                    console.error('Backup failed:', e);
+                }
+            }, 30000); // Backup every 30 seconds
+            
+            resolve(true);
+        } catch (error) {
+            console.error('IndexedDB failed, falling back to localStorage:', error);
+            
+            // Try to restore from localStorage backup
+            const backup = localStorage.getItem('vocab_backup_v2');
+            if (backup) {
+                try {
+                    state.vocabWords = JSON.parse(backup);
+                    console.log('Restored vocab from localStorage backup');
+                    resolve(true);
+                } catch (e) {
+                    console.error('Failed to parse backup:', e);
+                    state.vocabWords = [];
+                    resolve(false);
+                }
+            } else {
+                state.vocabWords = [];
+                resolve(false);
+            }
+        }
+    });
+}
+
 // App state
 const state = {
-hasProcessedText: false,
+    hasProcessedText: false,
     currentView: 'text-import',
     translatedText: '',
     sentences: [],
@@ -918,30 +978,27 @@ hasProcessedText: false,
     uiLanguage: localStorage.getItem('uiLanguage_ja') || 'en',
     newWordsToday: parseInt(localStorage.getItem('newWordsToday_ja')) || 0,
     lastWordAddedDate: localStorage.getItem('lastWordAddedDate_ja') || '',
-languageUsage: JSON.parse(localStorage.getItem('languageUsage')) || {},
-
-
+    languageUsage: JSON.parse(localStorage.getItem('languageUsage')) || {},
     currentFont: localStorage.getItem('font_ja') || 'system',
     currentFontSize: parseInt(localStorage.getItem('fontSize_ja')) || 16,
     currentLineHeight: parseFloat(localStorage.getItem('lineHeight_ja')) || 1.6,
     autoTranslate: localStorage.getItem('autoTranslate_ja') === 'true',
-
-readingStats: JSON.parse(localStorage.getItem('readingStats_ja')) || {
-    streak: 0,
-    lastActiveDate: '',
-    wordsLearned: 0,
-    timeSpent: 0,
-    dailyWords: 0,
-    dailyTime: 0,
-    dailySentences: 0  // <-- Add this line
-},
-currentSessionStart: null,
-selectedCards: [],
-currentTtsUtterance: null,
-wordLookupCache: {},
-bookmarks: JSON.parse(localStorage.getItem('bookmarks_ja')) || [],
-lastSentencePosition: JSON.parse(localStorage.getItem('lastSentencePosition_ja')) || 0,
-    savedUrls: JSON.parse(localStorage.getItem('savedUrls_ja')) || [
+    readingStats: JSON.parse(localStorage.getItem('readingStats_ja')) || {
+        streak: 0,
+        lastActiveDate: '',
+        wordsLearned: 0,
+        timeSpent: 0,
+        dailyWords: 0,
+        dailyTime: 0,
+        dailySentences: 0
+    },
+    currentSessionStart: null,
+    selectedCards: [],
+    currentTtsUtterance: null,
+    wordLookupCache: {},
+    bookmarks: JSON.parse(localStorage.getItem('bookmarks_ja')) || [],
+    lastSentencePosition: JSON.parse(localStorage.getItem('lastSentencePosition_ja')) || 0,
+        savedUrls: JSON.parse(localStorage.getItem('savedUrls_ja')) || [
         {id: '1', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-1.html', title: 'Chapter 1', date: new Date().toISOString()},
         {id: '2', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-2.html', title: 'Chapter 2', date: new Date().toISOString()},
         {id: '3', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-3.html', title: 'Chapter 3', date: new Date().toISOString()},
@@ -962,17 +1019,133 @@ lastSentencePosition: JSON.parse(localStorage.getItem('lastSentencePosition_ja')
         {id: '18', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-18.html', title: 'Chapter 18', date: new Date().toISOString()},
         {id: '19', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-19.html', title: 'Chapter 19', date: new Date().toISOString()},
         {id: '20', url: 'https://aijapanesetext.blogspot.com/2025/06/chapter-20.html', title: 'Chapter 20', date: new Date().toISOString()}
-    ]
+    ],
+
+    // NEW PROPERTIES ADDED:
+    isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
+    storageChecked: false,
+    storageValid: true
 };
+// NEW RECOVERY FUNCTIONS (ADD AFTER STATE OBJECT)
+async function emergencyRecovery() {
+    const backup = localStorage.getItem('vocab_backup_v2');
+    if (backup) {
+        try {
+            const words = JSON.parse(backup);
+            const tx = db.transaction([STORE_VOCAB], 'readwrite');
+            const store = tx.objectStore(STORE_VOCAB);
+            words.forEach(word => store.put(word));
+            console.log("Recovered lost words!");
+            return true;
+        } catch (e) {
+            console.error("Recovery failed:", e);
+        }
+    }
+    return false;
+}
+
+function createBackup() {
+    getAllVocabWords().then(words => {
+        localStorage.setItem('vocab_backup_v2', JSON.stringify(words));
+        state._lastBackup = Date.now();
+    });
+}
+
+// NEW FUNCTION - Add this RIGHT AFTER the state object
+function checkMobileStorage() {
+    if (!state.isMobile) {
+        state.storageValid = true;
+        return true;
+    }
+
+    try {
+        const testKey = 'storage_test_' + Date.now();
+        localStorage.setItem(testKey, 'test');
+        localStorage.removeItem(testKey);
+        
+        return new Promise((resolve) => {
+            const testDB = indexedDB.open('storage_test_db', 1);
+            testDB.onerror = () => {
+                state.storageValid = false;
+                resolve(false);
+            };
+            testDB.onsuccess = () => {
+                indexedDB.deleteDatabase('storage_test_db');
+                state.storageValid = true;
+                resolve(true);
+            };
+            testDB.onupgradeneeded = (e) => {
+                e.target.result.createObjectStore('test');
+            };
+        });
+    } catch (e) {
+        console.error('Storage test failed:', e);
+        state.storageValid = false;
+        return false;
+    }
+}
+
 // Initialize database when page loads
 document.addEventListener('DOMContentLoaded', async () => {
+    // First check storage
+    const storageOK = await checkMobileStorage();
+    if (!storageOK) {
+        alert('Storage not available! Please disable private browsing mode.');
+        return;
+    }
+
     try {
         db = await openDatabase();
-        updateVocabTabCounter(); // Now this will work
+        await initializeStorageBackup(); // From Fix #1
+        updateVocabTabCounter();
+        state.storageChecked = true;
+        
+        // Mobile-specific warning
+        if (state.isMobile) {
+            console.log('Mobile storage initialized successfully');
+        }
     } catch (error) {
         console.error('Failed to initialize database:', error);
+        if (state.isMobile) {
+            alert('Mobile storage error! Please restart the app.');
+        }
     }
 });
+
+async function initializeStorageBackup() {
+    try {
+        // Check if IndexedDB is empty but localStorage backup exists
+        const counts = await countVocabByBucket();
+        const totalWords = (counts.new || 0) + (counts.easy || 0) + 
+                          (counts.medium || 0) + (counts.hard || 0);
+        
+        if (totalWords === 0) {
+            const backup = localStorage.getItem('vocab_backup_v2');
+            if (backup) {
+                const words = JSON.parse(backup);
+                const transaction = db.transaction([STORE_VOCAB], 'readwrite');
+                const store = transaction.objectStore(STORE_VOCAB);
+                
+                await Promise.all(words.map(word => {
+                    return new Promise((resolve) => {
+                        const request = store.put(word);
+                        request.onsuccess = resolve;
+                    });
+                }));
+                
+                console.log('Restored vocab from backup');
+            }
+        }
+        
+        // Set up periodic backup
+        setInterval(async () => {
+            const words = await getAllVocabWords();
+            localStorage.setItem('vocab_backup_v2', JSON.stringify(words));
+        }, 30000); // Backup every 30 seconds
+    } catch (error) {
+        console.error('Storage backup error:', error);
+    }
+}
 // Initialize audio context and sounds
 function initAudio() {
     try {
@@ -1616,55 +1789,79 @@ async function openDatabase() {
                 }
             }
             
-            if (!db.objectStoreNames.contains(STORE_VOCAB)) {
+            // Enhanced vocab store creation with error recovery
+            try {
+                if (!db.objectStoreNames.contains(STORE_VOCAB)) {
+                    const vocabStore = db.createObjectStore(STORE_VOCAB, { keyPath: 'id' });
+                    vocabStore.createIndex('bucket', 'bucket', { unique: false });
+                    vocabStore.createIndex('word', 'word', { unique: true });
+                    vocabStore.createIndex('favorite', 'favorite', { unique: false });
+                } else {
+                    const vocabStore = event.target.transaction.objectStore(STORE_VOCAB);
+                    if (!vocabStore.indexNames.contains('bucket')) {
+                        vocabStore.createIndex('bucket', 'bucket', { unique: false });
+                    }
+                    if (!vocabStore.indexNames.contains('word')) {
+                        vocabStore.createIndex('word', 'word', { unique: true });
+                    }
+                    if (!vocabStore.indexNames.contains('favorite')) {
+                        vocabStore.createIndex('favorite', 'favorite', { unique: false });
+                    }
+                }
+            } catch (e) {
+                console.error('Vocab store creation error:', e);
+                if (db.objectStoreNames.contains(STORE_VOCAB)) {
+                    db.deleteObjectStore(STORE_VOCAB);
+                }
                 const vocabStore = db.createObjectStore(STORE_VOCAB, { keyPath: 'id' });
                 vocabStore.createIndex('bucket', 'bucket', { unique: false });
                 vocabStore.createIndex('word', 'word', { unique: true });
                 vocabStore.createIndex('favorite', 'favorite', { unique: false });
-            } else {
-                const vocabStore = event.target.transaction.objectStore(STORE_VOCAB);
-                if (!vocabStore.indexNames.contains('bucket')) {
-                    vocabStore.createIndex('bucket', 'bucket', { unique: false });
-                }
-                if (!vocabStore.indexNames.contains('word')) {
-                    vocabStore.createIndex('word', 'word', { unique: true });
-                }
-                if (!vocabStore.indexNames.contains('favorite')) {
-                    vocabStore.createIndex('favorite', 'favorite', { unique: false });
-                }
             }
-            
+
+            // Translations store
             if (!db.objectStoreNames.contains(STORE_TRANSLATIONS)) {
                 const translationsStore = db.createObjectStore(STORE_TRANSLATIONS, { keyPath: 'id' });
                 translationsStore.createIndex('text', 'text', { unique: true });
             }
         };
-        
+
+        // Enhanced error handling
+        request.onblocked = () => {
+            console.warn('Database blocked - likely open in another tab');
+            alert('Please close other tabs using this app and refresh');
+            reject(new Error('Database blocked'));
+        };
+
+        request.onerror = (event) => {
+            console.error('Database open error:', event.target.error);
+            // Attempt recovery
+            const deleteRequest = indexedDB.deleteDatabase(DB_NAME);
+            deleteRequest.onerror = () => {
+                reject(event.target.error);
+            };
+            deleteRequest.onsuccess = () => {
+                console.log('Deleted corrupted database, retrying...');
+                setTimeout(() => {
+                    indexedDB.open(DB_NAME, DB_VERSION).onsuccess = (e) => {
+                        resolve(e.target.result);
+                    };
+                }, 1000);
+            };
+        };
+
         request.onsuccess = (event) => {
             const db = event.target.result;
-            
-            // Add error handling for database operations
+            // Add global error handler
+            db.onversionchange = () => {
+                db.close();
+                alert('Database upgrade needed - page will reload');
+                location.reload();
+            };
             db.onerror = (event) => {
                 console.error('Database error:', event.target.error);
             };
-            
             resolve(db);
-        };
-        
-        request.onerror = (event) => {
-            console.error('Failed to open database:', event.target.error);
-            reject(event.target.error);
-        };
-        
-        request.onblocked = (event) => {
-            console.warn('Database access blocked - likely due to version change');
-            // Try to close any existing connections and reopen
-            if (db) {
-                db.close();
-                setTimeout(() => openDatabase().then(resolve).catch(reject), 500);
-            } else {
-                reject(new Error('Database access blocked'));
-            }
         };
     });
 }
@@ -1935,6 +2132,20 @@ function updateSentence(sentence) {
 
 function addVocabWord(word) {
     return new Promise((resolve, reject) => {
+        if (state.usingLocalStorageFallback) {
+            // Fallback to localStorage
+            const existing = state.vocabWords.find(w => w.word === word.word);
+            if (existing) {
+                return reject(new Error('Word already exists in vocabulary'));
+            }
+            
+            state.vocabWords.push(word);
+            localStorage.setItem('vocab_backup_v2', JSON.stringify(state.vocabWords));
+            updateBucketCounts();
+            return resolve();
+        }
+        
+        // Normal IndexedDB operation
         const transaction = db.transaction([STORE_VOCAB], 'readwrite');
         const store = transaction.objectStore(STORE_VOCAB);
         
@@ -4036,13 +4247,14 @@ if (state.currentView === 'review-mode-view' && state.reviewMode === 'hard') {
         elements.offlineWarning.style.display = 'block';
     });
 }
-
 async function initApp() {
     try {
-        // First verify database integrity
-        const dbValid = await verifyDatabaseIntegrity();
-        if (!dbValid) {
-            throw new Error('Database integrity check failed');
+        // Initialize storage with fallback
+        state.storageInitialized = await initializeStorage();
+        
+        if (!state.storageInitialized) {
+            state.usingLocalStorageFallback = true;
+            showToast('Warning: Using limited localStorage mode', 'warning');
         }
         
         // Load initial data
