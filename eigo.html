@@ -1794,14 +1794,19 @@ header {
             <span>🔄 Refresh Feeds</span>
         </button>
         <div class="feed-filter">
-            <select id="feed-source-select" class="settings-select">
-                <option value="all">All Sources</option>
-                <option value="bbc">BBC News</option>
-                <option value="guardian">The Guardian</option>
-                <option value="cnn">CNN</option>
-                <option value="nhk">NHK World</option>
-                <option value="mainichi">Mainichi</option>
-            </select>
+<select id="feed-source-select" class="settings-select">
+    <option value="all">All Sources</option>
+    <option value="bbc">BBC News</option>
+    <option value="guardian">The Guardian</option>
+    <option value="cnn">CNN</option>
+    <option value="nhk">NHK World</option>
+    <option value="mainichi">Mainichi</option>
+    <option value="reuters">Reuters</option>
+    <option value="aljazeera">Al Jazeera</option>
+    <option value="nytimes">New York Times</option>
+    <option value="ap">Associated Press</option>
+    <option value="wsj">Wall Street Journal</option>
+</select>
             <select id="feed-time-select" class="settings-select">
                 <option value="24">Last 24 hours</option>
                 <option value="48">Last 48 hours</option>
@@ -2120,13 +2125,13 @@ selectedCards: [],
 currentTtsUtterance: null,
 wordLookupCache: {},
 bookmarks: JSON.parse(localStorage.getItem('bookmarks')) || [],
-    rssFeeds: {
-        bbc: 'http://feeds.bbci.co.uk/news/world/rss.xml',
-        guardian: 'https://www.theguardian.com/world/rss',
-        cnn: 'http://rss.cnn.com/rss/cnn_world.rss',
-        nhk: 'https://www3.nhk.or.jp/nhkworld/en/news/rss/',
-        mainichi: 'https://mainichi.jp/english/rss/etc/news.rss'
-    },
+rssFeeds: {
+    bbc: 'http://feeds.bbci.co.uk/news/world/rss.xml',
+    guardian: 'https://www.theguardian.com/world/rss',
+    nhk: 'https://www3.nhk.or.jp/nhkworld/en/news/rss/',
+    mainichi: 'https://mainichi.jp/english/rss/etc/news.rss'
+    // Remove problematic feeds
+},
     newsArticles: []
 };
 
@@ -2227,17 +2232,31 @@ function toggleSounds() {
     document.getElementById('sound-toggle').textContent = state.soundsEnabled ? '🔊' : '🔇';
     showToast(`Sounds ${state.soundsEnabled ? 'enabled' : 'disabled'}`);
 }
+const rssCache = {};
 async function fetchRSSFeed(url) {
-    try {
-        // Use a CORS proxy to avoid issues with RSS feeds
-        const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
-        const response = await fetch(proxyUrl);
-        
-        if (!response.ok) throw new Error('Failed to fetch RSS feed');
-        
-        const data = await response.json();
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+// Check cache first
+    if (rssCache[url] && (Date.now() - rssCache[url].timestamp < 30 * 60 * 1000)) {
+        return rssCache[url].articles;
+    }
+    const proxyOptions = [
+        `https://cors-anywhere.herokuapp.com/${encodeURIComponent(url)}`,
+        `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(url)}`,
+        `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
+    ];
+    
+    for (const proxyUrl of proxyOptions) {
+        try {
+            const response = await fetch(proxyUrl, {
+                timeout: 5000 // Add timeout
+            });
+            
+            if (!response.ok) continue; // Try next proxy if this fails
+            
+            const data = await response.json();
+            const contents = data.contents || data; // Handle different proxy formats
+            
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(contents, "text/xml");
         
         const items = xmlDoc.querySelectorAll('item');
         const articles = [];
@@ -2263,25 +2282,54 @@ async function fetchRSSFeed(url) {
             });
         });
         
-        return articles;
-    } catch (error) {
-        console.error('Error fetching RSS feed:', error);
-        return [];
+ // On success:
+    rssCache[url] = {
+        articles: articles,
+        timestamp: Date.now()
+    };
+    
+    return articles;
+            
+        } catch (error) {
+            console.log(`Failed with proxy ${proxyUrl}, trying next...`, error);
+            continue;
+        }
     }
+    
+    throw new Error('All proxy attempts failed');
 }
 
+async function fetchWithRetry(url, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            return await fetchRSSFeed(url);
+        } catch (error) {
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+        }
+    }
+}
 async function loadAllFeeds() {
     const loadingElement = document.getElementById('rss-articles-list');
     loadingElement.innerHTML = '<div class="loading-articles">Loading news articles...</div>';
     
     try {
-        const allArticles = [];
-        const feedPromises = Object.values(state.rssFeeds).map(url => fetchRSSFeed(url));
-        const feedResults = await Promise.all(feedPromises);
+        const workingFeeds = [
+            'bbc', 
+            'guardian',
+            'nhk',
+            'mainichi'
+        ];
         
-        feedResults.forEach(articles => {
-            allArticles.push(...articles);
-        });
+        const feedPromises = workingFeeds.map(source => 
+            fetchRSSFeed(state.rssFeeds[source]).catch(e => {
+                console.error(`Error with ${source}:`, e);
+                return []; // Return empty array on error
+            })
+        );
+        
+        const feedResults = await Promise.all(feedPromises);
+        const allArticles = feedResults.flat();
         
         // Sort by date (newest first)
         allArticles.sort((a, b) => b.pubDate - a.pubDate);
@@ -2290,7 +2338,12 @@ async function loadAllFeeds() {
         renderNewsArticles();
     } catch (error) {
         console.error('Error loading feeds:', error);
-        loadingElement.innerHTML = '<div class="loading-articles">Failed to load news articles. Please try again later.</div>';
+        loadingElement.innerHTML = `
+            <div class="loading-articles">
+                Failed to load news articles. 
+                <button onclick="loadAllFeeds()">Retry</button>
+            </div>
+        `;
     }
 }
 
@@ -2303,13 +2356,18 @@ function renderNewsArticles() {
     let filteredArticles = state.newsArticles;
     
     if (sourceFilter !== 'all') {
-        const sourceMap = {
-            'bbc': 'BBC',
-            'guardian': 'The Guardian',
-            'cnn': 'CNN',
-            'nhk': 'NHK World',
-            'mainichi': 'Mainichi'
-        };
+const sourceMap = {
+    'bbc': 'BBC',
+    'guardian': 'The Guardian',
+    'cnn': 'CNN',
+    'nhk': 'NHK World',
+    'mainichi': 'Mainichi',
+    'reuters': 'Reuters',
+    'aljazeera': 'Al Jazeera',
+    'nytimes': 'New York Times',
+    'ap': 'Associated Press',
+    'wsj': 'Wall Street Journal'
+};
         filteredArticles = filteredArticles.filter(article => article.source === sourceMap[sourceFilter]);
     }
     
