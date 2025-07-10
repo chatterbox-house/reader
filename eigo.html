@@ -1759,17 +1759,25 @@ header {
             
             <section id="reading-view" class="view">
                 <div class="word-selection-box" id="word-selection-box">
-                    <div class="selected-word" id="selected-word"></div>
-                    <input type="text" class="translation-input" id="vocab-translation" placeholder="Enter translation..." aria-label="Word translation input" autofocus>
-                    <button class="btn" id="lookup-word" style="background-color: var(--accent); margin-bottom: 0.5rem;">
-                        Lookup in Dictionary
-                    </button>
-                    <div class="dictionary-results" id="dictionary-results" style="display: none;">
-                        <h3 style="margin-bottom: 0.5rem; color: var(--highlight);">Dictionary Results</h3>
-                        <div class="dictionary-entries" id="dictionary-entries"></div>
-                    </div>
-                    <button class="btn" id="add-to-vocab" aria-label="Add to vocabulary">Add to Vocabulary</button>
-                </div>
+    <div class="selected-word" id="selected-word"></div>
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+        <button class="btn" id="play-word-audio" style="background-color: var(--accent); flex: 1;">
+            🔊 Play Audio
+        </button>
+        <button class="btn" id="lookup-word" style="background-color: var(--accent); flex: 1;">
+            Dictionary Lookup
+        </button>
+        <button class="btn" id="translate-word" style="background-color: var(--accent); flex: 1;">
+            Translate
+        </button>
+    </div>
+    <input type="text" class="translation-input" id="vocab-translation" placeholder="Enter translation..." aria-label="Word translation input" autofocus>
+    <div class="dictionary-results" id="dictionary-results" style="display: none;">
+        <h3 style="margin-bottom: 0.5rem; color: var(--highlight);">Dictionary Results</h3>
+        <div class="dictionary-entries" id="dictionary-entries"></div>
+    </div>
+    <button class="btn" id="add-to-vocab" aria-label="Add to vocabulary">Add to Vocabulary</button>
+</div>
                 
                 <div class="jump-to-sentence">
                     <input type="number" class="jump-input" id="jump-input" placeholder="Jump to sentence..." min="1">
@@ -1988,6 +1996,19 @@ header {
     max-width: 90%;
     max-height: 80vh;
     overflow-y: auto;
+}
+/* Add this to your CSS section */
+.word-selection-box .btn {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    min-height: auto;
+}
+
+@media (max-width: 600px) {
+    .word-selection-box .btn {
+        font-size: 0.8rem;
+        padding: 0.3rem;
+    }
 }
 </style>
 
@@ -3822,6 +3843,39 @@ function toggleTheme() {
 
 
 function setupEventListeners() {
+document.getElementById('play-word-audio').addEventListener('click', () => {
+    const word = document.getElementById('selected-word').textContent;
+    if (word) {
+        speakEnglishText(word);
+    } else {
+        showToast('No word selected', 'error');
+    }
+});
+
+document.getElementById('translate-word').addEventListener('click', async () => {
+    const word = document.getElementById('selected-word').textContent;
+    if (!word) {
+        showToast('No word selected', 'error');
+        return;
+    }
+
+    try {
+        const button = document.getElementById('translate-word');
+        button.innerHTML = '<span>Translating...</span><span class="loading-spinner"></span>';
+        button.disabled = true;
+        
+        const translation = await translateSentence(word);
+        document.getElementById('vocab-translation').value = translation;
+        showToast('Translation complete!', 'success');
+    } catch (error) {
+        console.error('Translation error:', error);
+        showToast('Translation failed', 'error');
+    } finally {
+        const button = document.getElementById('translate-word');
+        button.innerHTML = '<span>Translate</span>';
+        button.disabled = false;
+    }
+});
 // Translate section: 貼り付け button
 document.getElementById('貼り付け-btn-translate').addEventListener('click', async () => {
     try {
