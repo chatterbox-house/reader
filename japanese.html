@@ -2553,6 +2553,7 @@ async function lookupWordInDictionary(word) {
 }
 
 // 2. WIKTIONARY API IMPLEMENTATION
+// 2. WIKTIONARY API IMPLEMENTATION (updated to remove links)
 async function tryWiktionaryAPI(word) {
     try {
         // First try English Wiktionary (has more Japanese entries)
@@ -2591,7 +2592,9 @@ async function tryWiktionaryAPI(word) {
             for (const entry of data.ja) {
                 if (entry.definitions) {
                     for (const def of entry.definitions) {
-                        definitions.push(def.definition);
+                        // Remove any HTML tags (including links) from definitions
+                        const cleanDef = def.definition.replace(/<[^>]*>/g, '');
+                        definitions.push(cleanDef);
                     }
                 }
             }
@@ -2613,7 +2616,9 @@ async function tryWiktionaryAPI(word) {
                 if (entry.definitions) {
                     for (const def of entry.definitions) {
                         if (typeof def === 'string') {
-                            definitions.push(def);
+                            // Remove any HTML tags from English definitions too
+                            const cleanDef = def.replace(/<[^>]*>/g, '');
+                            definitions.push(cleanDef);
                         }
                     }
                 }
@@ -2674,6 +2679,7 @@ document.getElementById('lookup-word').addEventListener('click', async () => {
         document.getElementById('lookup-word').innerHTML = 'Lookup in Dictionary';
     }
 });
+
 
 function translateCurrentSentence() {
     if (state.sentences.length === 0 || !elements.translationDisplay) return;
