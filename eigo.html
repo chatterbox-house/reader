@@ -1543,6 +1543,61 @@ header {
     left: 0;
     animation: pulse 1s infinite;
 }
+.rss-feed-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.feed-filter {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.feed-filter .settings-select {
+    flex: 1;
+}
+
+.rss-article {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.8rem;
+    box-shadow: var(--shadow);
+}
+
+.rss-article-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.rss-article-title {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: var(--highlight);
+}
+
+.rss-article-snippet {
+    font-size: 0.9rem;
+    margin-bottom: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.rss-article-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.loading-articles {
+    text-align: center;
+    padding: 1rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
 </style
 </head>
 <body>
@@ -1733,26 +1788,31 @@ header {
 </div>
                 
 <div class="resources-container">
-    <h3 class="resources-title">📚 Authentic English News</h3>
-    <div class="resources-list">
-        <a href="https://www.bbc.com/news" class="resource-link" target="_blank" rel="noopener" aria-label="BBC News">
-            <span>BBC News (General)</span>
-        </a>
-        <a href="https://www.nhk.or.jp/nhkworld/en/news/" class="resource-link" target="_blank" rel="noopener" aria-label="NHK World News">
-            <span>NHK World News (Japan focus)</span>
-        </a>
-        <a href="https://edition.cnn.com/world" class="resource-link" target="_blank" rel="noopener" aria-label="CNN World News">
-            <span>CNN World News</span>
-        </a>
-        <a href="https://www.theguardian.com/world" class="resource-link" target="_blank" rel="noopener" aria-label="The Guardian">
-            <span>The Guardian World News</span>
-        </a>
-        <a href="https://www.reuters.com/" class="resource-link" target="_blank" rel="noopener" aria-label="Reuters">
-            <span>Reuters (Business focus)</span>
-        </a>
-        <a href="https://www.npr.org/sections/news/" class="resource-link" target="_blank" rel="noopener" aria-label="NPR News">
-            <span>NPR News (US focus)</span>
-        </a>
+    <h3 class="resources-title">📰 Latest News from RSS Feeds</h3>
+    <div class="rss-feed-controls">
+        <button class="btn" id="refresh-feeds-btn" style="background-color: var(--accent); margin-bottom: 1rem;">
+            <span>🔄 Refresh Feeds</span>
+        </button>
+        <div class="feed-filter">
+            <select id="feed-source-select" class="settings-select">
+                <option value="all">All Sources</option>
+                <option value="bbc">BBC News</option>
+                <option value="guardian">The Guardian</option>
+                <option value="cnn">CNN</option>
+                <option value="nhk">NHK World</option>
+                <option value="mainichi">Mainichi</option>
+            </select>
+            <select id="feed-time-select" class="settings-select">
+                <option value="24">Last 24 hours</option>
+                <option value="48">Last 48 hours</option>
+                <option value="72">Last 72 hours</option>
+                <option value="all">All articles</option>
+            </select>
+        </div>
+    </div>
+    <div class="rss-articles-list" id="rss-articles-list">
+        <!-- Articles will be loaded here -->
+        <div class="loading-articles">Loading news articles...</div>
     </div>
 </div>
             </section>
@@ -2059,7 +2119,15 @@ currentSessionStart: null,
 selectedCards: [],
 currentTtsUtterance: null,
 wordLookupCache: {},
-bookmarks: JSON.parse(localStorage.getItem('bookmarks')) || []
+bookmarks: JSON.parse(localStorage.getItem('bookmarks')) || [],
+    rssFeeds: {
+        bbc: 'http://feeds.bbci.co.uk/news/world/rss.xml',
+        guardian: 'https://www.theguardian.com/world/rss',
+        cnn: 'http://rss.cnn.com/rss/cnn_world.rss',
+        nhk: 'https://www3.nhk.or.jp/nhkworld/en/news/rss/',
+        mainichi: 'https://mainichi.jp/english/rss/etc/news.rss'
+    },
+    newsArticles: []
 };
 
 // Initialize audio context and sounds
@@ -2159,6 +2227,159 @@ function toggleSounds() {
     document.getElementById('sound-toggle').textContent = state.soundsEnabled ? '🔊' : '🔇';
     showToast(`Sounds ${state.soundsEnabled ? 'enabled' : 'disabled'}`);
 }
+async function fetchRSSFeed(url) {
+    try {
+        // Use a CORS proxy to avoid issues with RSS feeds
+        const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
+        const response = await fetch(proxyUrl);
+        
+        if (!response.ok) throw new Error('Failed to fetch RSS feed');
+        
+        const data = await response.json();
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+        
+        const items = xmlDoc.querySelectorAll('item');
+        const articles = [];
+        
+        items.forEach(item => {
+            const title = item.querySelector('title')?.textContent || 'No title';
+            const link = item.querySelector('link')?.textContent || '#';
+            const pubDate = item.querySelector('pubDate')?.textContent || '';
+            const description = item.querySelector('description')?.textContent || '';
+            
+            // Clean up description (remove HTML tags)
+            const cleanDescription = description.replace(/<[^>]*>?/gm, '');
+            
+            articles.push({
+                title,
+                link,
+                pubDate: new Date(pubDate),
+                description: cleanDescription,
+                source: url.includes('bbc') ? 'BBC' : 
+                       url.includes('guardian') ? 'The Guardian' :
+                       url.includes('cnn') ? 'CNN' :
+                       url.includes('nhk') ? 'NHK World' : 'Mainichi'
+            });
+        });
+        
+        return articles;
+    } catch (error) {
+        console.error('Error fetching RSS feed:', error);
+        return [];
+    }
+}
+
+async function loadAllFeeds() {
+    const loadingElement = document.getElementById('rss-articles-list');
+    loadingElement.innerHTML = '<div class="loading-articles">Loading news articles...</div>';
+    
+    try {
+        const allArticles = [];
+        const feedPromises = Object.values(state.rssFeeds).map(url => fetchRSSFeed(url));
+        const feedResults = await Promise.all(feedPromises);
+        
+        feedResults.forEach(articles => {
+            allArticles.push(...articles);
+        });
+        
+        // Sort by date (newest first)
+        allArticles.sort((a, b) => b.pubDate - a.pubDate);
+        
+        state.newsArticles = allArticles;
+        renderNewsArticles();
+    } catch (error) {
+        console.error('Error loading feeds:', error);
+        loadingElement.innerHTML = '<div class="loading-articles">Failed to load news articles. Please try again later.</div>';
+    }
+}
+
+function renderNewsArticles() {
+    const container = document.getElementById('rss-articles-list');
+    const sourceFilter = document.getElementById('feed-source-select').value;
+    const timeFilter = parseInt(document.getElementById('feed-time-select').value);
+    
+    // Filter articles
+    let filteredArticles = state.newsArticles;
+    
+    if (sourceFilter !== 'all') {
+        const sourceMap = {
+            'bbc': 'BBC',
+            'guardian': 'The Guardian',
+            'cnn': 'CNN',
+            'nhk': 'NHK World',
+            'mainichi': 'Mainichi'
+        };
+        filteredArticles = filteredArticles.filter(article => article.source === sourceMap[sourceFilter]);
+    }
+    
+    if (timeFilter !== 'all') {
+        const now = new Date();
+        const cutoffTime = new Date(now.getTime() - (timeFilter * 60 * 60 * 1000));
+        filteredArticles = filteredArticles.filter(article => article.pubDate >= cutoffTime);
+    }
+    
+    // Render articles
+    if (filteredArticles.length === 0) {
+        container.innerHTML = '<div class="loading-articles">No articles found matching your criteria.</div>';
+        return;
+    }
+    
+    container.innerHTML = '';
+    
+    filteredArticles.forEach(article => {
+        const articleElement = document.createElement('div');
+        articleElement.className = 'rss-article';
+        
+        const dateString = article.pubDate.toLocaleDateString() + ' ' + article.pubDate.toLocaleTimeString();
+        
+        articleElement.innerHTML = `
+            <div class="rss-article-header">
+                <span>${article.source}</span>
+                <span>${dateString}</span>
+            </div>
+            <div class="rss-article-title">${article.title}</div>
+            <div class="rss-article-snippet">${article.description.substring(0, 150)}...</div>
+            <div class="rss-article-actions">
+                <button class="btn" data-article-link="${article.link}" style="background-color: var(--accent); flex: 1;">
+                    <span>Read Full Article</span>
+                </button>
+                <button class="btn" data-article-title="${article.title}" data-article-content="${article.description}" style="flex: 1;">
+                    <span>Import to Reader</span>
+                </button>
+            </div>
+        `;
+        
+        container.appendChild(articleElement);
+    });
+ // Add event listeners to the new buttons
+    document.querySelectorAll('[data-article-link]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const link = e.target.getAttribute('data-article-link') || 
+                         e.target.closest('[data-article-link]').getAttribute('data-article-link');
+            window.open(link, '_blank');
+        });
+    });
+    
+    document.querySelectorAll('[data-article-content]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const title = e.target.getAttribute('data-article-title') || 
+                          e.target.closest('[data-article-title]').getAttribute('data-article-title');
+            const content = e.target.getAttribute('data-article-content') || 
+                           e.target.closest('[data-article-content]').getAttribute('data-article-content');
+            
+            // Set the text input with the article content
+            document.getElementById('text-input').value = `${title}\n\n${content}`;
+            document.getElementById('char-count').textContent = `${title}\n\n${content}`.length;
+            
+            // Scroll to the text input area
+            document.getElementById('text-input').scrollIntoView({ behavior: 'smooth' });
+            
+            showToast('Article imported to reader!', 'success');
+        });
+    });
+}
+
 function toggleBookmark() {
     if (state.sentences.length === 0) return;
     
@@ -3843,6 +4064,12 @@ function toggleTheme() {
 
 
 function setupEventListeners() {
+document.getElementById('refresh-feeds-btn').addEventListener('click', loadAllFeeds);
+document.getElementById('feed-source-select').addEventListener('change', renderNewsArticles);
+document.getElementById('feed-time-select').addEventListener('change', renderNewsArticles);
+// Call loadAllFeeds when the page loads
+window.addEventListener('DOMContentLoaded', () => {
+
 document.getElementById('play-word-audio').addEventListener('click', () => {
     const word = document.getElementById('selected-word').textContent;
     if (word) {
@@ -3850,6 +4077,8 @@ document.getElementById('play-word-audio').addEventListener('click', () => {
     } else {
         showToast('No word selected', 'error');
     }
+    loadAllFeeds();
+});
 });
 
 document.getElementById('translate-word').addEventListener('click', async () => {
@@ -3995,6 +4224,7 @@ async function startVoiceInput(lang, targetId, buttonElement) {
 }
     // Initialize settings panel
     initSettingsPanel();
+
 // Voice input button
 document.getElementById('voice-input-btn').addEventListener('click', function() {
     startVoiceInput('en-US', 'text-input', this);
